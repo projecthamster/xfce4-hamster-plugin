@@ -1,0 +1,113 @@
+<!DOCTYPE node PUBLIC "-//freedesktop//DTD D-BUS Object Introspection 1.0//EN"
+"http://www.freedesktop.org/standards/dbus/1.0/introspect.dtd">
+<node name="/org/gnome/Hamster">
+  <interface name="org.gnome.Hamster">
+    <method name="GetTags">
+      <arg direction="in"  type="b" name="only_autocomplete" />
+      <arg direction="out" type="a(isb)" />
+    </method>
+    <method name="Quit">
+    </method>
+    <method name="GetCategoryActivities">
+      <arg direction="in"  type="i" name="category_id" />
+      <arg direction="out" type="a(isis)" />
+    </method>
+    <method name="GetTagIds">
+      <arg direction="in"  type="as" name="tags" />
+      <arg direction="out" type="a(isb)" />
+    </method>
+    <method name="AddActivity">
+      <arg direction="in"  type="s" name="name" />
+      <arg direction="in"  type="i" name="category_id" />
+      <arg direction="out" type="i" />
+    </method>
+    <method name="RemoveFact">
+      <arg direction="in"  type="i" name="fact_id" />
+    </method>
+    <method name="GetFact">
+      <arg direction="in"  type="i" name="fact_id" />
+      <arg direction="out" type="(iiissisasii)" />
+    </method>
+    <signal name="FactsChanged">
+    </signal>
+    <method name="UpdateActivity">
+      <arg direction="in"  type="i" name="id" />
+      <arg direction="in"  type="s" name="name" />
+      <arg direction="in"  type="i" name="category_id" />
+    </method>
+    <method name="GetActivityByName">
+      <arg direction="in"  type="s" name="activity" />
+      <arg direction="in"  type="i" name="category_id" />
+      <arg direction="in"  type="b" name="resurrect" />
+      <arg direction="out" type="a{sv}" />
+    </method>
+    <method name="GetFacts">
+      <arg direction="in"  type="u" name="start_date" />
+      <arg direction="in"  type="u" name="end_date" />
+      <arg direction="in"  type="s" name="search_terms" />
+      <arg direction="out" type="a(iiissisasii)" />
+    </method>
+    <method name="UpdateFact">
+      <arg direction="in"  type="i" name="fact_id" />
+      <arg direction="in"  type="s" name="fact" />
+      <arg direction="in"  type="i" name="start_time" />
+      <arg direction="in"  type="i" name="end_time" />
+      <arg direction="in"  type="b" name="temporary" />
+      <arg direction="out" type="i" />
+    </method>
+    <method name="GetCategoryId">
+      <arg direction="in"  type="s" name="category" />
+      <arg direction="out" type="i" />
+    </method>
+    <method name="AddCategory">
+      <arg direction="in"  type="s" name="name" />
+      <arg direction="out" type="i" />
+    </method>
+    <method name="RemoveActivity">
+      <arg direction="in"  type="i" name="id" />
+    </method>
+    <method name="GetTodaysFacts">
+      <arg direction="out" type="a(iiissisasii)" />
+    </method>
+    <method name="RemoveCategory">
+      <arg direction="in"  type="i" name="id" />
+    </method>
+    <method name="SetTagsAutocomplete">
+      <arg direction="in"  type="s" name="tags" />
+    </method>
+    <signal name="ActivitiesChanged">
+    </signal>
+    <method name="GetCategories">
+      <arg direction="out" type="a(is)" />
+    </method>
+    <method name="ChangeCategory">
+      <arg direction="in"  type="i" name="id" />
+      <arg direction="in"  type="i" name="category_id" />
+      <arg direction="out" type="b" />
+    </method>
+    <method name="StopTracking">
+      <arg direction="in"  type="v" name="end_time" />
+    </method>
+    <method name="UpdateCategory">
+      <arg direction="in"  type="i" name="id" />
+      <arg direction="in"  type="s" name="name" />
+    </method>
+    <method name="Toggle">
+    </method>
+    <signal name="ToggleCalled">
+    </signal>
+    <signal name="TagsChanged">
+    </signal>
+    <method name="AddFact">
+      <arg direction="in"  type="s" name="fact" />
+      <arg direction="in"  type="i" name="start_time" />
+      <arg direction="in"  type="i" name="end_time" />
+      <arg direction="in"  type="b" name="temporary" />
+      <arg direction="out" type="i" />
+    </method>
+    <method name="GetActivities">
+      <arg direction="in"  type="s" name="search" />
+      <arg direction="out" type="a(ss)" />
+    </method>
+  </interface>
+</node>

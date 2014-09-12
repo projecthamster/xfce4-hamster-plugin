@@ -1,0 +1,7 @@
+[Xfce Panel]
+Type=X-XFCE-PanelPlugin
+_Name=Hamster
+_Comment=Time bookkeeping plugin
+Icon=hamster-applet
+X-XFCE-Module=hamster
+X-XFCE-Unique=FALSE
