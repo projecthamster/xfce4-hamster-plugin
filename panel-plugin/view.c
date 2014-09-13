@@ -13,13 +13,16 @@ struct _HamsterView
 
     /* view */
     GtkWidget                 *button;
-    GtkWidget                 *menu;
+    GtkWidget                 *popup;
     GtkWidget                 *summary;
 
     /* model */
-    GtkListStore              *store;
+    GtkListStore              *storeFacts;
+    GtkListStore              *storeActivities;
     Hamster                   *hamster;
 };
+
+HamsterView *g_view;
 
 enum
 {
@@ -33,67 +36,103 @@ enum
 
 /* Button */
 static void
-hview_destroy_dialog(HamsterView *view)
+hview_popup_hide(HamsterView *view)
 {
     /* untoggle the button */
     gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(view->button), FALSE);
+    /* hide the dialog for reuse */
+    if (view->popup)
+       gtk_widget_hide (view->popup);
 }
 
 /* Menu callbacks */
 static void
-hview_show_overview(HamsterView *view)
+hview_cb_show_overview(HamsterView *view)
 {
    g_spawn_command_line_sync("hamster-time-tracker overview", NULL, NULL, NULL, NULL);
 }
 
 static void
-hview_stop_tracking(HamsterView *view)
+hview_cb_stop_tracking(HamsterView *view)
 {
    g_spawn_command_line_sync("hamster-cli stop", NULL, NULL, NULL, NULL);
 }
 
 static void
-hview_add_earlier_activity(HamsterView *view)
+hview_cb_add_earlier_activity(HamsterView *view)
 {
    g_spawn_command_line_sync("hamster-time-tracker edit", NULL, NULL, NULL, NULL);
 }
 
 static void
-hview_tracking_settings(HamsterView *view)
+hview_cb_tracking_settings(HamsterView *view)
 {
    g_spawn_command_line_sync("hamster-time-tracker preferences", NULL, NULL, NULL, NULL);
 }
 
-static void
-hview_menu_new(HamsterView *view)
+gboolean
+hview_cb_popup_focus_out (GtkWidget *widget,
+                    GdkEventFocus *event,
+                    HamsterView *view)
 {
-   GtkWidget *gui, *vbx, *lbl, *ovw, *stp, *add, *sep, *cfg;
+   hview_popup_hide(view);
+   return TRUE;
+}
+
+static gboolean
+hview_cb_match_select(GtkEntryCompletion *widget,
+                     GtkTreeModel *model,
+                     GtkTreeIter *iter,
+                     gpointer userdata)
+{
+   gchar *activity, *category;
+   gchar fact[256];
+   gint id = 0;
+   gtk_tree_model_get(model, iter, 0, &activity, 1, &category, -1);
+   sprintf(fact, "%s@%s", activity, category);
+   if(hamster_call_add_fact_sync(g_view->hamster, fact, 0, 0, FALSE, &id, NULL, NULL))
+      printf("Select: %s - %d\n", fact, id);
+   g_free(activity);
+   g_free(category);
+   return FALSE;
+}
+
+static void
+hview_popup_new(HamsterView *view)
+{
+   GtkWidget *gui, *vbx, *lbl, *ovw, *stp, *add, *sep, *cfg, *menu;
    GtkCellRenderer *renderer;
    GtkTreeViewColumn *column;
-   /* Create a new menu */
-   view->menu = gtk_menu_new();
+   GtkEntryCompletion *completion;
 
-   /* make sure the menu popups up in right screen */
-   gtk_menu_attach_to_widget(GTK_MENU(view->menu), view->button, NULL);
-   gtk_menu_set_screen(GTK_MENU(view->menu),
+   /* Create a new popup */
+   view->popup = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+   gtk_window_set_decorated(GTK_WINDOW(view->popup), FALSE);
+   gtk_window_set_position(GTK_WINDOW(view->popup), GTK_WIN_POS_MOUSE);
+   gtk_window_set_screen(GTK_WINDOW(view->popup),
                        gtk_widget_get_screen(view->button));
-   g_signal_connect_swapped(view->menu, "selection-done",
-                            G_CALLBACK(hview_destroy_dialog), view);
-
-
-   gui = gtk_menu_item_new();
+   gtk_window_set_skip_pager_hint(GTK_WINDOW(view->popup), TRUE);
+   gtk_window_set_skip_taskbar_hint(GTK_WINDOW(view->popup), TRUE);
+   gtk_container_set_border_width (GTK_CONTAINER (view->popup), 10);
    vbx = gtk_vbox_new(FALSE, 1);
-   gtk_container_add(GTK_CONTAINER(gui), vbx);
+   gtk_container_add(GTK_CONTAINER(view->popup), vbx);
    lbl = gtk_label_new(_("What are you doing?"));
    gtk_container_add(GTK_CONTAINER(vbx), lbl);
+
+   // entry
    lbl = gtk_entry_new();
+   completion = gtk_entry_completion_new();
+   g_signal_connect_swapped(completion, "match-selected",
+                           G_CALLBACK(hview_cb_match_select), NULL);
+   gtk_entry_completion_set_text_column(completion, 0);
+   gtk_entry_completion_set_model(completion, GTK_TREE_MODEL(view->storeActivities));
    gtk_container_add(GTK_CONTAINER(vbx), lbl);
+   gtk_entry_set_completion(GTK_ENTRY(lbl), completion);
    lbl = gtk_label_new(_("Todays activities"));
    gtk_container_add(GTK_CONTAINER(vbx), lbl);
 
-   view->store = gtk_list_store_new(NUM_COL, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING,
-         G_TYPE_STRING, G_TYPE_STRING);
-   lbl = gtk_tree_view_new_with_model(GTK_TREE_MODEL(view->store));
+   // todays activities
+   lbl = gtk_tree_view_new_with_model(GTK_TREE_MODEL(view->storeFacts));
    gtk_tree_view_set_headers_visible(GTK_TREE_VIEW(lbl), FALSE);
    renderer = gtk_cell_renderer_text_new ();
    column = gtk_tree_view_column_new_with_attributes ("Time",
@@ -124,59 +163,63 @@ hview_menu_new(HamsterView *view)
    gtk_tree_view_append_column (GTK_TREE_VIEW (lbl), column);
    gtk_container_add(GTK_CONTAINER(vbx), lbl);
 
-   view->summary = gtk_label_new("...");
    gtk_misc_set_alignment(GTK_MISC(view->summary), 1.0, 1.0);
    gtk_container_add(GTK_CONTAINER(vbx), view->summary);
 
    ovw = gtk_menu_item_new_with_label(_("Show overview"));
    g_signal_connect_swapped(ovw, "activate",
-                           G_CALLBACK(hview_show_overview), view);
+                           G_CALLBACK(hview_cb_show_overview), view);
    stp = gtk_menu_item_new_with_label(_("Stop tracking"));
    g_signal_connect_swapped(stp, "activate",
-                           G_CALLBACK(hview_stop_tracking), view);
+                           G_CALLBACK(hview_cb_stop_tracking), view);
    add = gtk_menu_item_new_with_label(_("Add earlier activity"));
    g_signal_connect_swapped(add, "activate",
-                           G_CALLBACK(hview_add_earlier_activity), view);
+                           G_CALLBACK(hview_cb_add_earlier_activity), view);
    sep = gtk_separator_menu_item_new();
    cfg = gtk_menu_item_new_with_label(_("Tracking settings"));
    g_signal_connect_swapped(cfg, "activate",
-                           G_CALLBACK(hview_tracking_settings), view);
+                           G_CALLBACK(hview_cb_tracking_settings), view);
 
-   gtk_menu_shell_append(GTK_MENU_SHELL(view->menu), gui);
-   gtk_menu_shell_append(GTK_MENU_SHELL(view->menu), ovw);
-   gtk_menu_shell_append(GTK_MENU_SHELL(view->menu), stp);
-   gtk_menu_shell_append(GTK_MENU_SHELL(view->menu), add);
-   gtk_menu_shell_append(GTK_MENU_SHELL(view->menu), sep);
-   gtk_menu_shell_append(GTK_MENU_SHELL(view->menu), cfg);
-   gtk_widget_show_all(view->menu);
+   /* TODO: menus */
+   menu = gtk_menu_bar_new();
+   gtk_menu_bar_set_pack_direction(GTK_MENU_BAR(menu), GTK_PACK_DIRECTION_TTB);
+   gtk_container_add(GTK_CONTAINER(vbx), menu);
+   gtk_menu_shell_append(GTK_MENU_SHELL(menu), gui);
+   gtk_menu_shell_append(GTK_MENU_SHELL(menu), ovw);
+   gtk_menu_shell_append(GTK_MENU_SHELL(menu), stp);
+   gtk_menu_shell_append(GTK_MENU_SHELL(menu), add);
+   gtk_menu_shell_append(GTK_MENU_SHELL(menu), sep);
+   gtk_menu_shell_append(GTK_MENU_SHELL(menu), cfg);
 
+   gtk_widget_show_all(view->popup);
+
+   gtk_widget_set_events (view->popup, GDK_FOCUS_CHANGE_MASK);
+     g_signal_connect (G_OBJECT (view->popup),
+                       "focus-out-event",
+                       G_CALLBACK (hview_cb_popup_focus_out),
+                       view);
 }
 
 /* Actions */
 static void
-hview_open_menu(HamsterView *view)
+hview_popup_show(HamsterView *view)
 {
-   /* check if menu is needed, or it needs an update */
-   if(view->menu == NULL)
-       hview_menu_new(view);
+   /* check if popup is needed, or it needs an update */
+   if(view->popup == NULL)
+       hview_popup_new(view);
 
    /* toggle the button */
    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(view->button), TRUE);
 
-   /* popup menu */
-   DBG("menu: %x", (guint)view->menu);
-   gtk_menu_popup (GTK_MENU (view->menu), NULL, NULL,
-                   (view->button != NULL) ? xfce_panel_plugin_position_menu : NULL,
-                   view->plugin, 1,
-                   gtk_get_current_event_time ());
-
+   /* popup popup */
+   gtk_window_present_with_time(GTK_WINDOW(view->popup), gtk_get_current_event_time ());
 }
 
 static void
 hview_store_update(HamsterView *view, fact *act, GHashTable *tbl)
 {
 
-   if(NULL == view->store)
+   if(NULL == view->storeFacts)
       return;
    else
    {
@@ -197,9 +240,9 @@ hview_store_update(HamsterView *view, fact *act, GHashTable *tbl)
       }
       sprintf(dur, "%dh %dmin", act->seconds / 3600, (act->seconds / 60) % 60);
 
-      gtk_list_store_append (view->store, &iter);  /* Acquire an iterator */
+      gtk_list_store_append (view->storeFacts, &iter);  /* Acquire an iterator */
 
-      gtk_list_store_set (view->store, &iter,
+      gtk_list_store_set (view->storeFacts, &iter,
                           TIME_SPAN, spn,
                           TITLE, act->name,
                           DURATION, dur,
@@ -239,11 +282,40 @@ hview_summary_update(HamsterView *view, GHashTable *tbl)
 }
 
 static void
+hview_completion_update(HamsterView *view)
+{
+   GVariant *res;
+   if(NULL != view->storeActivities)
+      gtk_list_store_clear(view->storeActivities);
+   if(NULL != view->hamster)
+   {
+      if(hamster_call_get_activities_sync(view->hamster, "", &res, NULL, NULL))
+      {
+         gsize count = 0;
+         if(NULL != res && (count = g_variant_n_children(res)))
+         {
+            int i;
+            for(i=0; i< count; i++)
+            {
+               GtkTreeIter iter;
+               GVariant *dbusAct = g_variant_get_child_value(res, i);
+               gchar *act, *cat;
+               g_variant_get(dbusAct, "(ss)", &act, &cat);
+               gtk_list_store_append(view->storeActivities, &iter);
+               gtk_list_store_set(view->storeActivities, &iter,
+                     0, act, 1, cat, -1);
+            }
+         }
+      }
+   }
+}
+
+static void
 hview_button_update(HamsterView *view)
 {
    GVariant *res;
-   if(NULL != view->store)
-      gtk_list_store_clear(view->store);
+   if(NULL != view->storeFacts)
+      gtk_list_store_clear(view->storeFacts);
    if(NULL != view->hamster)
    {
       if(hamster_call_get_todays_facts_sync(view->hamster, &res, NULL, NULL))
@@ -284,14 +356,14 @@ hview_button_update(HamsterView *view)
 static gboolean
 hview_cb_button_pressed(HamsterView *view, GdkEventButton *evt)
 {
-    /* (it's the way xfdesktop menu does it...) */
+    /* (it's the way xfdesktop popup does it...) */
     if((evt->state & GDK_CONTROL_MASK) && !(evt->state & (GDK_MOD1_MASK|GDK_SHIFT_MASK|GDK_MOD4_MASK)))
         return FALSE;
 
     if(evt->button == 1)
-        hview_open_menu(view);
+        hview_popup_show(view);
     else if(evt->button == 2)
-        hview_show_overview(view);
+        hview_cb_show_overview(view);
     hview_button_update(view);
     return FALSE;
 }
@@ -300,11 +372,12 @@ static gboolean
 hview_cb_hamster_changed(HamsterView *view)
 {
    hview_button_update(view);
+   hview_completion_update(view);
    return FALSE;
 }
 
 static gboolean
-hview_cyclic(HamsterView *view)
+hview_cb_cyclic(HamsterView *view)
 {
    hview_button_update(view);
    return TRUE;
@@ -313,38 +386,36 @@ hview_cyclic(HamsterView *view)
 HamsterView*
 hamster_view_init(XfcePanelPlugin* plugin)
 {
-   HamsterView *view;                   /* internal use in this file */
-
    DBG("initializing");
    g_assert(plugin != NULL);
 
-   view            = g_new0(HamsterView, 1);
-   view->plugin    = plugin;
+   g_view            = g_new0(HamsterView, 1);
+   g_view->plugin    = plugin;
 
    /* init button */
 
    DBG("init GUI");
 
    /* create the button */
-   view->button = g_object_ref(places_button_new(view->plugin));
-   xfce_panel_plugin_add_action_widget(view->plugin, view->button);
-   gtk_container_add(GTK_CONTAINER(view->plugin), view->button);
-   gtk_widget_show(view->button);
+   g_view->button = g_object_ref(places_button_new(g_view->plugin));
+   xfce_panel_plugin_add_action_widget(g_view->plugin, g_view->button);
+   gtk_container_add(GTK_CONTAINER(g_view->plugin), g_view->button);
+   gtk_widget_show(g_view->button);
 
    /* signals for icon theme/screen changes */
-   g_signal_connect_swapped(view->button, "style-set",
-                            G_CALLBACK(hview_destroy_dialog), view);
-   g_signal_connect_swapped(view->button, "screen-changed",
-                            G_CALLBACK(hview_destroy_dialog), view);
+   g_signal_connect_swapped(g_view->button, "style-set",
+                            G_CALLBACK(hview_popup_hide), g_view);
+   g_signal_connect_swapped(g_view->button, "screen-changed",
+                            G_CALLBACK(hview_popup_hide), g_view);
 
    /* button signal */
-   g_signal_connect_swapped(view->button, "button-press-event",
-                            G_CALLBACK(hview_cb_button_pressed), view);
+   g_signal_connect_swapped(g_view->button, "button-press-event",
+                            G_CALLBACK(hview_cb_button_pressed), g_view);
 
-   g_timeout_add_seconds(60, (GSourceFunc)hview_cyclic, view);
+   g_timeout_add_seconds(60, (GSourceFunc)hview_cb_cyclic, g_view);
 
    /* remote control */
-   view->hamster = hamster_proxy_new_for_bus_sync
+   g_view->hamster = hamster_proxy_new_for_bus_sync
          (
                      G_BUS_TYPE_SESSION,
                      G_DBUS_PROXY_FLAGS_NONE,
@@ -353,16 +424,24 @@ hamster_view_init(XfcePanelPlugin* plugin)
                      NULL,                          /* GCancellable* */
                      NULL);
 
-   g_signal_connect_swapped(view->hamster, "facts-changed",
-                            G_CALLBACK(hview_cb_hamster_changed), view);
-   g_signal_connect_swapped(view->hamster, "activities-changed",
-                            G_CALLBACK(hview_cb_hamster_changed), view);
+   g_signal_connect_swapped(g_view->hamster, "facts-changed",
+                            G_CALLBACK(hview_cb_hamster_changed), g_view);
+   g_signal_connect_swapped(g_view->hamster, "activities-changed",
+                            G_CALLBACK(hview_cb_hamster_changed), g_view);
+
+   /* storage */
+   g_view->storeActivities = gtk_list_store_new(2, G_TYPE_STRING, G_TYPE_STRING);
+   g_view->storeFacts = gtk_list_store_new(NUM_COL, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING,
+         G_TYPE_STRING, G_TYPE_STRING);
+   g_view->summary = gtk_label_new("...");
+
    /* liftoff */
-   hview_button_update(view);
+   hview_button_update(g_view);
+   hview_completion_update(g_view);
 
    DBG("done");
 
-   return view;
+   return g_view;
 }
 
 void
