@@ -1,0 +1,6 @@
+panel-plugin/hamster.c
+panel-plugin/util.c
+panel-plugin/plugin.c
+panel-plugin/button.c
+panel-plugin/view.c
+panel-plugin/hamster.desktop.in

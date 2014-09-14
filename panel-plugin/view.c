@@ -1,3 +1,6 @@
+#ifdef HAVE_CONFIG_H
+#  include <config.h>
+#endif
 #include <libxfce4util/libxfce4util.h>
 #include <libxfce4panel/libxfce4panel.h>
 #include "view.h"
@@ -14,6 +17,7 @@ struct _HamsterView
     /* view */
     GtkWidget                 *button;
     GtkWidget                 *popup;
+    GtkWidget                 *entry;
     GtkWidget                 *summary;
 
     /* model */
@@ -22,6 +26,8 @@ struct _HamsterView
     Hamster                   *hamster;
 };
 
+/* this ugly global variable is to bypass a bug in the 'match-select' signal;
+ * user_data is no passed */
 HamsterView *g_view;
 
 enum
@@ -31,6 +37,7 @@ enum
    DURATION,
    BTNEDIT,
    BTNCONT,
+   ID,
    NUM_COL
 };
 
@@ -40,9 +47,18 @@ hview_popup_hide(HamsterView *view)
 {
     /* untoggle the button */
     gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(view->button), FALSE);
+
+    /* empty entry */
+    if(view->entry)
+    {
+       gtk_entry_set_text(GTK_ENTRY(view->entry), "");
+    }
+
     /* hide the dialog for reuse */
     if (view->popup)
+    {
        gtk_widget_hide (view->popup);
+    }
 }
 
 /* Menu callbacks */
@@ -88,13 +104,27 @@ hview_cb_match_select(GtkEntryCompletion *widget,
    gchar *activity, *category;
    gchar fact[256];
    gint id = 0;
+   GtkEntry *entry;
+
    gtk_tree_model_get(model, iter, 0, &activity, 1, &category, -1);
    sprintf(fact, "%s@%s", activity, category);
-   if(hamster_call_add_fact_sync(g_view->hamster, fact, 0, 0, FALSE, &id, NULL, NULL))
-      printf("Select: %s - %d\n", fact, id);
+   hamster_call_add_fact_sync(g_view->hamster, fact, 0, 0, FALSE, &id, NULL, NULL);
    g_free(activity);
    g_free(category);
+   DBG("activated: %s[%d]", fact, id);
+   hview_popup_hide(g_view);
    return FALSE;
+}
+
+void
+hview_cb_entry_activate(GtkEntry *entry,
+                  HamsterView *view)
+{
+   const gchar *fact = gtk_entry_get_text(GTK_ENTRY(g_view->entry));
+   gint id = 0;
+   hamster_call_add_fact_sync(g_view->hamster, fact, 0, 0, FALSE, &id, NULL, NULL);
+   DBG("activated: %s[%d]", fact, id);
+   hview_popup_hide(g_view);
 }
 
 static void
@@ -116,24 +146,31 @@ hview_popup_new(HamsterView *view)
    gtk_container_set_border_width (GTK_CONTAINER (view->popup), 10);
    vbx = gtk_vbox_new(FALSE, 1);
    gtk_container_add(GTK_CONTAINER(view->popup), vbx);
-   lbl = gtk_label_new(_("What are you doing?"));
+
+   // subtitle
+   lbl = gtk_label_new(_("What goes on?"));
    gtk_container_add(GTK_CONTAINER(vbx), lbl);
 
    // entry
-   lbl = gtk_entry_new();
+   view->entry = gtk_entry_new();
    completion = gtk_entry_completion_new();
    g_signal_connect_swapped(completion, "match-selected",
                            G_CALLBACK(hview_cb_match_select), NULL);
+   g_signal_connect_swapped(view->entry, "activate",
+                           G_CALLBACK(hview_cb_entry_activate), view);
    gtk_entry_completion_set_text_column(completion, 0);
    gtk_entry_completion_set_model(completion, GTK_TREE_MODEL(view->storeActivities));
-   gtk_container_add(GTK_CONTAINER(vbx), lbl);
-   gtk_entry_set_completion(GTK_ENTRY(lbl), completion);
+   gtk_container_add(GTK_CONTAINER(vbx), view->entry);
+   gtk_entry_set_completion(GTK_ENTRY(view->entry), completion);
+
+   // label
    lbl = gtk_label_new(_("Todays activities"));
    gtk_container_add(GTK_CONTAINER(vbx), lbl);
 
    // todays activities
    lbl = gtk_tree_view_new_with_model(GTK_TREE_MODEL(view->storeFacts));
    gtk_tree_view_set_headers_visible(GTK_TREE_VIEW(lbl), FALSE);
+   gtk_tree_view_set_hover_selection(GTK_TREE_VIEW(lbl), TRUE);
    renderer = gtk_cell_renderer_text_new ();
    column = gtk_tree_view_column_new_with_attributes ("Time",
                                                       renderer,
@@ -180,7 +217,7 @@ hview_popup_new(HamsterView *view)
    g_signal_connect_swapped(cfg, "activate",
                            G_CALLBACK(hview_cb_tracking_settings), view);
 
-   /* TODO: menus */
+   DBG("TODO: menus have single click");
    menu = gtk_menu_bar_new();
    gtk_menu_bar_set_pack_direction(GTK_MENU_BAR(menu), GTK_PACK_DIRECTION_TTB);
    gtk_container_add(GTK_CONTAINER(vbx), menu);
@@ -193,26 +230,26 @@ hview_popup_new(HamsterView *view)
 
    gtk_widget_show_all(view->popup);
 
-   gtk_widget_set_events (view->popup, GDK_FOCUS_CHANGE_MASK);
-     g_signal_connect (G_OBJECT (view->popup),
-                       "focus-out-event",
-                       G_CALLBACK (hview_cb_popup_focus_out),
-                       view);
+   g_signal_connect (G_OBJECT (view->popup),
+                    "focus-out-event",
+                    G_CALLBACK (hview_cb_popup_focus_out),
+                    view);
 }
 
 /* Actions */
 static void
 hview_popup_show(HamsterView *view)
 {
+   /* toggle the button */
+   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(view->button), TRUE);
+
    /* check if popup is needed, or it needs an update */
    if(view->popup == NULL)
        hview_popup_new(view);
 
-   /* toggle the button */
-   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(view->button), TRUE);
-
    /* popup popup */
    gtk_window_present_with_time(GTK_WINDOW(view->popup), gtk_get_current_event_time ());
+   gtk_widget_add_events (view->popup, GDK_FOCUS_CHANGE_MASK);
 }
 
 static void
@@ -248,6 +285,7 @@ hview_store_update(HamsterView *view, fact *act, GHashTable *tbl)
                           DURATION, dur,
                           BTNEDIT, "gtk-edit",
                           BTNCONT, "gtk-media-play",
+                          /*ID, act->id,*/
                           -1);
 
       val = g_hash_table_lookup(tbl, act->category);
@@ -356,16 +394,26 @@ hview_button_update(HamsterView *view)
 static gboolean
 hview_cb_button_pressed(HamsterView *view, GdkEventButton *evt)
 {
-    /* (it's the way xfdesktop popup does it...) */
-    if((evt->state & GDK_CONTROL_MASK) && !(evt->state & (GDK_MOD1_MASK|GDK_SHIFT_MASK|GDK_MOD4_MASK)))
-        return FALSE;
+   /* (it's the way xfdesktop popup does it...) */
+   if ((evt->state & GDK_CONTROL_MASK)
+         && !(evt->state & (GDK_MOD1_MASK | GDK_SHIFT_MASK | GDK_MOD4_MASK)))
+      return FALSE;
 
-    if(evt->button == 1)
-        hview_popup_show(view);
-    else if(evt->button == 2)
-        hview_cb_show_overview(view);
-    hview_button_update(view);
-    return FALSE;
+   if (evt->button == 1)
+   {
+      gboolean isActive = gtk_toggle_button_get_active(
+            GTK_TOGGLE_BUTTON(view->button));
+      if (isActive)
+         hview_popup_hide(view);
+      else
+         hview_popup_show(view);
+   }
+   else if (evt->button == 2)
+   {
+      hview_cb_show_overview(view);
+   }
+   hview_button_update(view);
+   return TRUE;
 }
 
 static gboolean
@@ -432,8 +480,8 @@ hamster_view_init(XfcePanelPlugin* plugin)
    /* storage */
    g_view->storeActivities = gtk_list_store_new(2, G_TYPE_STRING, G_TYPE_STRING);
    g_view->storeFacts = gtk_list_store_new(NUM_COL, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING,
-         G_TYPE_STRING, G_TYPE_STRING);
-   g_view->summary = gtk_label_new("...");
+         G_TYPE_STRING, G_TYPE_STRING, G_TYPE_INT);
+   g_view->summary = gtk_label_new(_("No activities yet."));
 
    /* liftoff */
    hview_button_update(g_view);

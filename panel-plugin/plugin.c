@@ -50,7 +50,7 @@ hamster_construct(XfcePanelPlugin *plugin)
     DBG("Construct: %s", PLUGIN_NAME);
     view = hamster_view_init(plugin);
     /* Set up i18n */
-    //xfce_textdomain(GETTEXT_PACKAGE, PACKAGE_LOCALE_DIR, "UTF-8");
+    xfce_textdomain(GETTEXT_PACKAGE, LOCALEDIR, "UTF-8");
 
     /* Connect the finalize callback */
     g_signal_connect(plugin, "free-data",
