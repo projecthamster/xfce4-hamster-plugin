@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: xfce4-hamster-plugin 0.0.1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2014-09-13 20:56+0200\n"
-"PO-Revision-Date: 2014-09-13 20:56+0200\n"
+"POT-Creation-Date: 2014-09-15 22:34+0200\n"
+"PO-Revision-Date: 2014-09-15 22:36+0100\n"
 "Last-Translator: Hakan Erduman <hakan@erduman.de>\n"
 "Language-Team: Turkish\n"
 "Language: tr\n"
@@ -16,34 +16,41 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Generator: Poedit 1.5.4\n"
 
-#: ../panel-plugin/view.c:121
+#. subtitle
+#: ../panel-plugin/view.c:151
 msgid "What goes on?"
 msgstr "Ne var, ne yok?"
 
-#: ../panel-plugin/view.c:133
+#. label
+#: ../panel-plugin/view.c:167
 msgid "Todays activities"
 msgstr "Bugünki etkinlikler"
 
-#: ../panel-plugin/view.c:171
+#: ../panel-plugin/view.c:206
 msgid "Show overview"
 msgstr "Genel görünüm"
 
-#: ../panel-plugin/view.c:174
+#: ../panel-plugin/view.c:209
 msgid "Stop tracking"
 msgstr "Takibi durdur"
 
-#: ../panel-plugin/view.c:177
+#: ../panel-plugin/view.c:212
 msgid "Add earlier activity"
 msgstr "Önceki etkinliği ekle"
 
-#: ../panel-plugin/view.c:181
+#: ../panel-plugin/view.c:216
 msgid "Tracking settings"
 msgstr "Takip tercihleri"
 
-#: ../panel-plugin/view.c:355
+#: ../panel-plugin/view.c:391
 msgid "inactive"
 msgstr "durgun"
+
+#: ../panel-plugin/view.c:484
+msgid "No activities yet."
+msgstr "Şimdilik etkinlik yok."
 
 #: ../panel-plugin/hamster.desktop.in.h:1
 msgid "Hamster"
