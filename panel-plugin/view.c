@@ -66,24 +66,28 @@ static void
 hview_cb_show_overview(HamsterView *view)
 {
    g_spawn_command_line_sync("hamster-time-tracker overview", NULL, NULL, NULL, NULL);
+   hview_popup_hide(view);
 }
 
 static void
 hview_cb_stop_tracking(HamsterView *view)
 {
    g_spawn_command_line_sync("hamster-cli stop", NULL, NULL, NULL, NULL);
+   hview_popup_hide(view);
 }
 
 static void
 hview_cb_add_earlier_activity(HamsterView *view)
 {
    g_spawn_command_line_sync("hamster-time-tracker edit", NULL, NULL, NULL, NULL);
+   hview_popup_hide(view);
 }
 
 static void
 hview_cb_tracking_settings(HamsterView *view)
 {
    g_spawn_command_line_sync("hamster-time-tracker preferences", NULL, NULL, NULL, NULL);
+   hview_popup_hide(view);
 }
 
 gboolean
