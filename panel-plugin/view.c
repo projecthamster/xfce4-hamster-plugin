@@ -164,6 +164,8 @@ hview_popup_new(HamsterView *view)
                            G_CALLBACK(hview_cb_entry_activate), view);
    gtk_entry_completion_set_text_column(completion, 0);
    gtk_entry_completion_set_model(completion, GTK_TREE_MODEL(view->storeActivities));
+   gtk_entry_completion_set_inline_completion(completion, TRUE);
+   gtk_entry_completion_set_popup_completion(completion, FALSE);
    gtk_container_add(GTK_CONTAINER(vbx), view->entry);
    gtk_entry_set_completion(GTK_ENTRY(view->entry), completion);
 
