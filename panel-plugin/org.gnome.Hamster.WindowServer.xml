@@ -1,0 +1,17 @@
+<!DOCTYPE node PUBLIC "-//freedesktop//DTD D-BUS Object Introspection 1.0//EN"
+"http://www.freedesktop.org/standards/dbus/1.0/introspect.dtd">
+<node name="/org/gnome/Hamster/WindowServer">
+  <interface name="org.gnome.Hamster.WindowServer">
+    <method name="edit">
+      <arg direction="in"  type="v" name="id" />
+    </method>
+    <method name="overview">
+    </method>
+    <method name="about">
+    </method>
+    <method name="statistics">
+    </method>
+    <method name="preferences">
+    </method>
+  </interface>
+</node>

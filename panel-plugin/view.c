@@ -6,6 +6,7 @@
 #include "view.h"
 #include "button.h"
 #include "hamster.h"
+#include "windowserver.h"
 #include "util.h"
 #include <gdk/gdk.h>
 
@@ -24,6 +25,7 @@ struct _HamsterView
     GtkListStore              *storeFacts;
     GtkListStore              *storeActivities;
     Hamster                   *hamster;
+    WindowServer              *windowserver;
 };
 
 /* this ugly global variable is to bypass a bug in the 'match-select' signal;
@@ -65,28 +67,51 @@ hview_popup_hide(HamsterView *view)
 static void
 hview_cb_show_overview(HamsterView *view)
 {
-   g_spawn_command_line_sync("hamster-time-tracker overview", NULL, NULL, NULL, NULL);
+   window_server_call_overview_sync(view->windowserver, NULL, NULL);
    hview_popup_hide(view);
 }
 
 static void
 hview_cb_stop_tracking(HamsterView *view)
 {
-   g_spawn_command_line_sync("hamster-cli stop", NULL, NULL, NULL, NULL);
+   time_t now = time(NULL);
+   GVariant *stopTime = g_variant_new_int32(now - timezone + (daylight * 3600));
+   GVariant *var = g_variant_new_variant(stopTime);
+   hamster_call_stop_tracking_sync(view->hamster, var, NULL, NULL);
    hview_popup_hide(view);
 }
 
 static void
 hview_cb_add_earlier_activity(HamsterView *view)
 {
-   g_spawn_command_line_sync("hamster-time-tracker edit", NULL, NULL, NULL, NULL);
+   /* pass empty variants?
+   GVariant *dummy = g_variant_new_maybe(G_VARIANT_TYPE_VARIANT, NULL);
+   GVariant *var = g_variant_new_variant(dummy);
+   window_server_call_edit_sync(view->windowserver, var, NULL, NULL);
+   */
+   {
+     GVariant *_ret;
+     _ret = g_dbus_proxy_call_sync (G_DBUS_PROXY (view->windowserver),
+       "edit",
+       g_variant_new ("()"),
+       G_DBUS_CALL_FLAGS_NONE,
+       -1,
+       NULL,
+       NULL);
+     if (_ret == NULL)
+       goto _out;
+     g_variant_get (_ret,
+                    "()");
+     g_variant_unref (_ret);
+   }
+   _out:
    hview_popup_hide(view);
 }
 
 static void
 hview_cb_tracking_settings(HamsterView *view)
 {
-   g_spawn_command_line_sync("hamster-time-tracker preferences", NULL, NULL, NULL, NULL);
+   window_server_call_preferences_sync(view->windowserver, NULL, NULL);
    hview_popup_hide(view);
 }
 
@@ -473,9 +498,9 @@ hamster_view_init(XfcePanelPlugin* plugin)
          (
                      G_BUS_TYPE_SESSION,
                      G_DBUS_PROXY_FLAGS_NONE,
-                     "org.gnome.Hamster",              /* bus name */
-                     "/org/gnome/Hamster", /* object */
-                     NULL,                          /* GCancellable* */
+                     "org.gnome.Hamster",             /* bus name */
+                     "/org/gnome/Hamster",            /* object */
+                     NULL,                            /* GCancellable* */
                      NULL);
 
    g_signal_connect_swapped(g_view->hamster, "facts-changed",
@@ -483,11 +508,23 @@ hamster_view_init(XfcePanelPlugin* plugin)
    g_signal_connect_swapped(g_view->hamster, "activities-changed",
                             G_CALLBACK(hview_cb_hamster_changed), g_view);
 
+   g_view->windowserver = window_server_proxy_new_for_bus_sync
+         (
+               G_BUS_TYPE_SESSION,
+               G_DBUS_PROXY_FLAGS_NONE,
+               "org.gnome.Hamster.WindowServer",      /* bus name */
+               "/org/gnome/Hamster/WindowServer",     /* object */
+               NULL,                                  /* GCancellable* */
+               NULL);
+
    /* storage */
    g_view->storeActivities = gtk_list_store_new(2, G_TYPE_STRING, G_TYPE_STRING);
    g_view->storeFacts = gtk_list_store_new(NUM_COL, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING,
          G_TYPE_STRING, G_TYPE_STRING, G_TYPE_INT);
    g_view->summary = gtk_label_new(_("No activities yet."));
+
+   /* time helpers */
+   tzset();
 
    /* liftoff */
    hview_button_update(g_view);

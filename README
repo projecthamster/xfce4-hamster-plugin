@@ -2,3 +2,4 @@ This is a recreation of the gnome-shell hamster extension as a xfce4 panel plugi
 
 Regenerate hamster DBUS-Glib with:
 gdbus-codegen --generate-c-code hamster --interface-prefix org.gnome. org.gnome.Hamster.xml
+gdbus-codegen --generate-c-code windowserver --interface-prefix org.gnome.Hamster org.gnome.Hamster.WindowServer.xml

@@ -2,8 +2,9 @@ plugindir = $(libdir)/xfce4/panel/plugins
 
 plugin_LTLIBRARIES = libhamster.la
 
-libhamster_la_SOURCES =						\
-	hamster.c hamster.h							\
+libhamster_la_SOURCES =				\
+	hamster.c hamster.h				\
+	windowserver.c windowserver.h	\
 	plugin.c								\
 	button.c								\
 	view.c view.h						\

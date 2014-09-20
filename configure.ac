@@ -60,6 +60,7 @@ AC_CONFIG_FILES([Makefile panel-plugin/Makefile po/Makefile.in])
 # Checks for libraries.
 PKG_CHECK_MODULES([GLIB], [glib-2.0 >= 2.22.0])
 PKG_CHECK_MODULES([GIO], [gio-2.0 >= 2.22.0])
+PKG_CHECK_MODULES([GIO_UNIX], [gio-unix-2.0 >= 2.22.0])
 PKG_CHECK_MODULES([GMODULE], [gmodule-2.0 >= 2.22.0])
 PKG_CHECK_MODULES([GOBJECT], [gobject-2.0 >= 2.22.0])
 PKG_CHECK_MODULES([GTHREAD], [gthread-2.0 >= 2.22.0])
