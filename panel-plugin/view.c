@@ -374,7 +374,7 @@ hview_store_update(HamsterView *view, fact *act, GHashTable *tbl)
                           DURATION, dur,
                           BTNEDIT, "gtk-edit",
                           BTNCONT, isStopped ? "gtk-media-play" : "",
-                          /*ID, act->id,*/
+                          ID, act->id,
                           -1);
 
       val = g_hash_table_lookup(tbl, act->category);
