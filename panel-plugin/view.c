@@ -396,13 +396,16 @@ hview_summary_update(HamsterView *view, GHashTable *tbl)
    gint *sum;
    guint count;
 
-   count = g_hash_table_size(tbl);
-   g_hash_table_iter_init(&iter, tbl);
-   while(g_hash_table_iter_next(&iter, (gpointer)&cat, (gpointer)&sum))
+   if(tbl)
    {
-      count--;
-      g_string_append_printf(string, count ? "%s: %d.%1d, " : "%s: %d.%1d ",
-            cat, *sum / 3600, (10 * (*sum % 3600)) / 3600);
+      count = g_hash_table_size(tbl);
+      g_hash_table_iter_init(&iter, tbl);
+      while(g_hash_table_iter_next(&iter, (gpointer)&cat, (gpointer)&sum))
+      {
+         count--;
+         g_string_append_printf(string, count ? "%s: %d.%1d, " : "%s: %d.%1d ",
+               cat, *sum / 3600, (10 * (*sum % 3600)) / 3600);
+      }
    }
    gtk_label_set_label(GTK_LABEL(view->summary), string->str);
    g_string_free(string, TRUE);
@@ -478,6 +481,7 @@ hview_button_update(HamsterView *view)
       }
    }
    places_button_set_label(PLACES_BUTTON(view->button), _("inactive"));
+   hview_summary_update(view, NULL);
 }
 
 static gboolean
