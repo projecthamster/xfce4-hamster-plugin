@@ -19,6 +19,7 @@ struct _HamsterView
     GtkWidget                 *button;
     GtkWidget                 *popup;
     GtkWidget                 *entry;
+    GtkWidget                 *treeview;
     GtkWidget                 *summary;
 
     /* model */
@@ -196,6 +197,51 @@ hview_cb_tv_button_press(GtkWidget *tv,
 }
 
 static void
+hview_cb_label_allocate( GtkWidget     *label,
+             GtkAllocation *allocation,
+             HamsterView *view )
+{
+   gint border = gtk_container_get_border_width(GTK_CONTAINER(view->popup));
+   gtk_widget_set_size_request( label, (allocation->width * 3) / 4, -1 );
+}
+
+#if 0
+static void
+hview_cb_tv_realize (GtkWidget *widget) {
+  GdkColor color;
+  GtkStyle *style = gtk_widget_get_style (widget);
+
+  if (style != NULL) {
+    color = style->bg[GTK_STATE_NORMAL];
+
+    GList *columns = gtk_tree_view_get_columns(GTK_TREE_VIEW(widget));
+    g_object_set(G_OBJECT(widget), "background-gdk", &color, NULL);
+    if(columns)
+    {
+       GList *column = columns;
+       while(column)
+       {
+          GList *renderers = gtk_tree_view_column_get_cell_renderers(GTK_TREE_VIEW_COLUMN(column->data));
+          g_object_set(G_OBJECT(column->data), "background-gdk", &color, NULL);
+          if(renderers)
+          {
+             GList* renderer = renderers;
+             while(renderer)
+             {
+                g_object_set(G_OBJECT(renderer->data), "background-gdk", &color, NULL);
+                renderer = renderer->next;
+             }
+             g_list_free(renderers);
+          }
+          column = column->next;
+       }
+       g_list_free(columns);
+    }
+  }
+}
+#endif
+
+static void
 hview_popup_new(HamsterView *view)
 {
    GtkWidget *frm, *vbx, *lbl, *ovw, *stp, *add, *sep, *cfg, *align;
@@ -212,7 +258,7 @@ hview_popup_new(HamsterView *view)
                        gtk_widget_get_screen(view->button));
    gtk_window_set_skip_pager_hint(GTK_WINDOW(view->popup), TRUE);
    gtk_window_set_skip_taskbar_hint(GTK_WINDOW(view->popup), TRUE);
-   gtk_container_set_border_width (GTK_CONTAINER (view->popup), 10);
+   gtk_container_set_border_width (GTK_CONTAINER (view->popup), 5);
    frm = gtk_frame_new(NULL);
    gtk_frame_set_shadow_type(GTK_FRAME(frm), GTK_SHADOW_OUT);
    gtk_container_add(GTK_CONTAINER(view->popup), frm);
@@ -244,46 +290,54 @@ hview_popup_new(HamsterView *view)
    lbl = gtk_label_new(_("Todays activities"));
    gtk_container_add(GTK_CONTAINER(vbx), lbl);
 
-   // todays activities
-   lbl = gtk_tree_view_new_with_model(GTK_TREE_MODEL(view->storeFacts));
-   gtk_tree_view_set_headers_visible(GTK_TREE_VIEW(lbl), FALSE);
-   gtk_tree_view_set_hover_selection(GTK_TREE_VIEW(lbl), TRUE);
-   gtk_tree_view_set_grid_lines(GTK_TREE_VIEW(lbl), GTK_TREE_VIEW_GRID_LINES_NONE);
-   g_signal_connect(lbl, "button-press-event",
+   // tree view
+   view->treeview = gtk_tree_view_new_with_model(GTK_TREE_MODEL(view->storeFacts));
+   gtk_tree_view_set_headers_visible(GTK_TREE_VIEW(view->treeview), FALSE);
+   gtk_tree_view_set_hover_selection(GTK_TREE_VIEW(view->treeview), TRUE);
+   gtk_tree_view_set_grid_lines(GTK_TREE_VIEW(view->treeview), GTK_TREE_VIEW_GRID_LINES_NONE);
+   g_signal_connect(view->treeview, "button-press-event",
                            G_CALLBACK(hview_cb_tv_button_press), view);
+#if 0
+   g_signal_connect(view->treeview, "realize",
+                           G_CALLBACK(hview_cb_tv_realize), view);
+#endif
    renderer = gtk_cell_renderer_text_new ();
    column = gtk_tree_view_column_new_with_attributes ("Time",
                                                       renderer,
                                                       "text", TIME_SPAN,
                                                       NULL);
-   gtk_tree_view_append_column (GTK_TREE_VIEW (lbl), column);
+   gtk_tree_view_append_column (GTK_TREE_VIEW (view->treeview), column);
    column = gtk_tree_view_column_new_with_attributes ("Name",
                                                       renderer,
                                                       "text", TITLE,
                                                       NULL);
-   gtk_tree_view_append_column (GTK_TREE_VIEW (lbl), column);
+   gtk_tree_view_append_column (GTK_TREE_VIEW (view->treeview), column);
    column = gtk_tree_view_column_new_with_attributes ("Duration",
                                                       renderer,
                                                       "text", DURATION,
                                                       NULL);
-   gtk_tree_view_append_column (GTK_TREE_VIEW (lbl), column);
+   gtk_tree_view_append_column (GTK_TREE_VIEW (view->treeview), column);
    renderer = gtk_cell_renderer_pixbuf_new();
    column = gtk_tree_view_column_new_with_attributes ("ed",
                                                       renderer,
                                                       "stock-id", BTNEDIT,
                                                       NULL);
-   gtk_tree_view_append_column (GTK_TREE_VIEW (lbl), column);
+   gtk_tree_view_append_column (GTK_TREE_VIEW (view->treeview), column);
    column = gtk_tree_view_column_new_with_attributes ("ct",
                                                       renderer,
                                                       "stock-id", BTNCONT,
                                                       NULL);
-   gtk_tree_view_append_column (GTK_TREE_VIEW (lbl), column);
-   gtk_container_add(GTK_CONTAINER(vbx), lbl);
+   gtk_tree_view_append_column (GTK_TREE_VIEW (view->treeview), column);
+   gtk_container_add(GTK_CONTAINER(vbx), view->treeview);
 
+   // summary
+   gtk_label_set_line_wrap(GTK_LABEL(view->summary), TRUE);
    gtk_misc_set_alignment(GTK_MISC(view->summary), 1.0, 1.0);
-   gtk_container_add(GTK_CONTAINER(vbx), view->summary);
+   gtk_box_pack_start(GTK_BOX(vbx), view->summary, FALSE, FALSE, 0);
+   g_signal_connect( G_OBJECT( view->summary ), "size-allocate",
+                         G_CALLBACK( hview_cb_label_allocate ), view);
 
-
+   // menuish buttons
    ovw = gtk_button_new_with_label(_("Show overview"));
    gtk_button_set_relief(GTK_BUTTON(ovw), GTK_RELIEF_NONE);
    gtk_button_set_focus_on_click(GTK_BUTTON(ovw), FALSE);
@@ -429,11 +483,13 @@ hview_completion_update(HamsterView *view)
             {
                GtkTreeIter iter;
                GVariant *dbusAct = g_variant_get_child_value(res, i);
-               gchar *act, *cat;
+               gchar *act, *cat, *actlow;
                g_variant_get(dbusAct, "(ss)", &act, &cat);
+               actlow = g_utf8_casefold(act, -1);
                gtk_list_store_append(view->storeActivities, &iter);
                gtk_list_store_set(view->storeActivities, &iter,
-                     0, act, 1, cat, -1);
+                     0, actlow, 1, cat, -1);
+               g_free(actlow);
             }
          }
       }
@@ -444,17 +500,18 @@ static void
 hview_button_update(HamsterView *view)
 {
    GVariant *res;
+   gsize count = 0;
    if(NULL != view->storeFacts)
       gtk_list_store_clear(view->storeFacts);
    if(NULL != view->hamster)
    {
       if(hamster_call_get_todays_facts_sync(view->hamster, &res, NULL, NULL))
       {
-         gsize count = 0;
          if(NULL != res && (count = g_variant_n_children(res)))
          {
             int i;
             GHashTable *tbl = g_hash_table_new(g_str_hash, g_str_equal);
+            gtk_widget_set_sensitive(view->treeview, TRUE);
             for(i = 0; i < count; i++)
             {
                GVariant *dbusFact = g_variant_get_child_value(res, i);
@@ -481,7 +538,9 @@ hview_button_update(HamsterView *view)
       }
    }
    places_button_set_label(PLACES_BUTTON(view->button), _("inactive"));
-   hview_summary_update(view, NULL);
+   if (!count)
+      hview_summary_update(view, NULL);
+   gtk_widget_set_sensitive(view->treeview, count > 0);
 }
 
 static gboolean
@@ -587,6 +646,7 @@ hamster_view_init(XfcePanelPlugin* plugin)
    view->storeFacts = gtk_list_store_new(NUM_COL, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING,
          G_TYPE_STRING, G_TYPE_STRING, G_TYPE_INT);
    view->summary = gtk_label_new(_("No activities yet."));
+   view->treeview = gtk_tree_view_new();
 
    /* time helpers */
    tzset();
