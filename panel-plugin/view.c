@@ -461,6 +461,10 @@ hview_summary_update(HamsterView *view, GHashTable *tbl)
                cat, *sum / 3600, (10 * (*sum % 3600)) / 3600);
       }
    }
+   else
+   {
+      g_string_append(string, _("No activities yet."));
+   }
    gtk_label_set_label(GTK_LABEL(view->summary), string->str);
    g_string_free(string, TRUE);
 }
@@ -645,7 +649,7 @@ hamster_view_init(XfcePanelPlugin* plugin)
    view->storeActivities = gtk_list_store_new(2, G_TYPE_STRING, G_TYPE_STRING);
    view->storeFacts = gtk_list_store_new(NUM_COL, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING,
          G_TYPE_STRING, G_TYPE_STRING, G_TYPE_INT);
-   view->summary = gtk_label_new(_("No activities yet."));
+   view->summary = gtk_label_new(NULL);
    view->treeview = gtk_tree_view_new();
 
    /* time helpers */
