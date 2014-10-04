@@ -609,12 +609,6 @@ hamster_view_init(XfcePanelPlugin* plugin)
    gtk_container_add(GTK_CONTAINER(view->plugin), view->button);
    gtk_widget_show(view->button);
 
-   /* signals for icon theme/screen changes */
-   g_signal_connect(view->button, "style-set",
-                            G_CALLBACK(hview_popup_hide), view);
-   g_signal_connect(view->button, "screen-changed",
-                            G_CALLBACK(hview_popup_hide), view);
-
    /* button signal */
    g_signal_connect(view->button, "button-press-event",
                             G_CALLBACK(hview_cb_button_pressed), view);

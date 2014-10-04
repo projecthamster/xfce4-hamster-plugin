@@ -138,16 +138,6 @@ places_button_set_property(GObject      *object,
     }
 }
 
-places_button_image_pixbuf_factory*
-places_button_get_pixbuf_factory(PlacesButton *self)
-{
-    g_assert(PLACES_IS_BUTTON(self));
-
-    DBG("returning %p", self->pixbuf_factory);
-    return self->pixbuf_factory;
-}
-
-
 const gchar*
 places_button_get_label(PlacesButton *self)
 {
@@ -208,7 +198,6 @@ places_button_init(PlacesButton *self)
     self->plugin = NULL;
     self->box = NULL;
     self->label = NULL;
-    self->image = NULL;
     self->plugin_size = -1;
 }
 
@@ -294,45 +283,6 @@ places_button_dispose(GObject *object)
 }
 
 static void
-places_button_destroy_image(PlacesButton *self)
-{
-    if (self->image != NULL) {
-        gtk_widget_destroy(self->image);
-        g_object_unref(self->image);
-        self->image = NULL;
-    }
-}
-static void
-places_button_resize_image(PlacesButton *self, gint new_size)
-{
-    GdkPixbuf *icon;
-
-    if (self->pixbuf_factory == NULL) {
-        places_button_destroy_image(self);
-        return;
-    }
-
-    icon = self->pixbuf_factory(new_size);
-
-    if (G_UNLIKELY(icon == NULL)) {
-        DBG("Could not load icon for button");
-        places_button_destroy_image(self);
-        return;
-    }
-
-    if (self->image == NULL) {
-            self->image = g_object_ref(gtk_image_new_from_pixbuf(icon));
-            gtk_box_pack_start(GTK_BOX(self->box), self->image, FALSE, FALSE, 0);
-    }
-    else
-            gtk_image_set_from_pixbuf(GTK_IMAGE(self->image), icon);
-
-    gtk_misc_set_alignment (GTK_MISC (self->image), 0.5, 0.5);
-    gtk_widget_show(self->image);
-    g_object_unref(G_OBJECT(icon));
-}
-
-static void
 places_button_destroy_label(PlacesButton *self)
 {
     if (self->label != NULL) {
@@ -393,8 +343,8 @@ places_button_resize_label(PlacesButton *self,
 static void
 places_button_resize(PlacesButton *self)
 {
-    gboolean show_image, show_label;
-    gint new_size, image_size;
+    gboolean show_label;
+    gint new_size;
     gint border_thickness;
     GtkStyle *style;
     gboolean vertical = FALSE;
@@ -408,7 +358,6 @@ places_button_resize(PlacesButton *self)
     self->plugin_size = new_size;
     DBG("Panel size: %d", new_size);
 
-    show_image = self->pixbuf_factory != NULL;
     show_label = self->label_text != NULL;
 
 #ifdef HAS_PANEL_49
@@ -421,9 +370,6 @@ places_button_resize(PlacesButton *self)
   if (xfce_panel_plugin_get_orientation(self->plugin) == GTK_ORIENTATION_VERTICAL)
     vertical = TRUE;
 #endif
-
-    if (show_image && deskbar && nrows == 1)
-      show_label = FALSE;
 
     new_size /= nrows;
 
@@ -441,12 +387,6 @@ places_button_resize(PlacesButton *self)
 #endif
         gtk_alignment_set (GTK_ALIGNMENT (self->alignment), 0.5, 0.5, 1.0, 1.0);
     }
-
-    /* image */
-    style = gtk_widget_get_style (GTK_WIDGET (self));
-    border_thickness = 2 * MAX (style->xthickness, style->ythickness) + 2;
-    image_size = new_size - border_thickness;
-    places_button_resize_image(self, image_size);
 
     /* label */
     places_button_resize_label(self, show_label);
