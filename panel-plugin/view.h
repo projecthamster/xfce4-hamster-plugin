@@ -13,5 +13,13 @@ hamster_view_init(XfcePanelPlugin*);
 void
 hamster_view_finalize(HamsterView*);
 
+/* about.c */
+void
+about_show(XfcePanelPlugin *plugin, HamsterView *view);
+
+/* config.c */
+void
+config_show(XfcePanelPlugin *plugin, HamsterView *view);
+
 /* vim: set ai et tabstop=4: */
 

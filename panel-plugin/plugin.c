@@ -56,6 +56,8 @@ hamster_construct(XfcePanelPlugin *plugin)
     g_signal_connect(plugin, "free-data",
                      G_CALLBACK(hamster_finalize), view);
 
+    /* settings */
+    xfconf_init(NULL);
     DBG("done");
 }
 

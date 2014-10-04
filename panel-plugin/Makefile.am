@@ -8,7 +8,8 @@ libhamster_la_SOURCES =				\
 	plugin.c								\
 	button.c								\
 	view.c view.h						\
-	util.c util.h
+	util.c util.h						\
+	config.c
 
 
 
@@ -24,6 +25,7 @@ libhamster_la_CFLAGS =							\
 	$(LIBXFCE4UTIL_CFLAGS)						\
 	$(LIBXFCE4UI_CFLAGS)						\
 	$(LIBXFCE4PANEL_CFLAGS)						\
+	$(LIBXFCONF_CFLAGS)						\
 	$(PLATFORM_CFLAGS)
 
 libhamster_la_LIBADD =							\
@@ -37,6 +39,7 @@ libhamster_la_LIBADD =							\
 	$(LIBXFCE4UTIL_LIBS)						\
 	$(LIBXFCE4UI_LIBS)						\
 	$(LIBXFCE4PANEL_LIBS)						\
+	$(LIBXFCONF_LIBS)						\
 	$(LIBX11_LIBS)							
 
 libhamster_la_LDFLAGS = \
