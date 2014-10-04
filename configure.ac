@@ -68,6 +68,8 @@ PKG_CHECK_MODULES([GTK], [gtk+-2.0 >= 2.14.0])
 PKG_CHECK_MODULES([LIBXFCE4UTIL], [libxfce4util-1.0 >= 4.8.0])
 PKG_CHECK_MODULES([LIBXFCE4UI], [libxfce4ui-1 >= 4.8.0])
 PKG_CHECK_MODULES([LIBXFCE4PANEL], [libxfce4panel-1.0 >= 4.8.0])
+PKG_CHECK_MODULES([LIBXFCONF], [libxfconf-0 >= 4.8.0])
+
 
 # Checks for header files.
 

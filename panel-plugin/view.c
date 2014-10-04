@@ -27,6 +27,10 @@ struct _HamsterView
     GtkListStore              *storeActivities;
     Hamster                   *hamster;
     WindowServer              *windowserver;
+
+    /* config */
+    gboolean                  donthide;
+    gboolean                  dropdown;
 };
 
 enum
@@ -645,6 +649,11 @@ hamster_view_init(XfcePanelPlugin* plugin)
          G_TYPE_STRING, G_TYPE_STRING, G_TYPE_INT);
    view->summary = gtk_label_new(NULL);
    view->treeview = gtk_tree_view_new();
+
+   /* config */
+   xfce_panel_plugin_menu_show_configure(view->plugin);
+   g_signal_connect(view->plugin, "configure-plugin",
+                        G_CALLBACK(config_show), view);
 
    /* time helpers */
    tzset();
