@@ -9,7 +9,7 @@ libhamster_la_SOURCES =				\
 	button.c								\
 	view.c view.h						\
 	util.c util.h						\
-	config.c
+	settings.c settings.h
 
 
 

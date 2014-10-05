@@ -1,11 +1,13 @@
 #ifdef HAVE_CONFIG_H
 #  include <config.h>
 #endif
-#include "view.h"
 #include <libxfcegui4/libxfcegui4.h>
+#include <libxfce4panel/libxfce4panel.h>
 #include <xfconf/xfconf.h>
+#include "settings.h"
+
 void
-config_show(XfcePanelPlugin *plugin, HamsterView *view)
+config_show(XfcePanelPlugin *plugin, XfconfChannel *channel)
 {
    /*
     <property name="title" translatable="yes">SqueezeBox</property>
@@ -13,7 +15,6 @@ config_show(XfcePanelPlugin *plugin, HamsterView *view)
     <property name="type_hint">normal</property>
     <property name="subtitle" translatable="yes">media player remote</property>
     * */
-   XfconfChannel *channel = xfce_panel_plugin_xfconf_channel_new(plugin);
    GtkWidget *dlg = xfce_titled_dialog_new();
    GtkWidget *cnt, *lbl, *chk, *btn;
    g_object_set(G_OBJECT(dlg),
@@ -34,16 +35,15 @@ config_show(XfcePanelPlugin *plugin, HamsterView *view)
    gtk_container_add(GTK_CONTAINER(cnt), lbl);
 
    chk = gtk_check_button_new_with_label(_("Keep popup floating"));
-   xfconf_g_property_bind(channel, "/donthide", G_TYPE_BOOLEAN, G_OBJECT(chk), "active");
+   xfconf_g_property_bind(channel, XFPROP_DONTHIDE, G_TYPE_BOOLEAN, G_OBJECT(chk), "active");
    gtk_container_add(GTK_CONTAINER(cnt), chk);
 
    chk = gtk_check_button_new_with_label(_("Entry completion as dropdown"));
-   xfconf_g_property_bind(channel, "/dropdown", G_TYPE_BOOLEAN, G_OBJECT(chk), "active");
+   xfconf_g_property_bind(channel, XFPROP_DROPDOWN, G_TYPE_BOOLEAN, G_OBJECT(chk), "active");
    gtk_container_add(GTK_CONTAINER(cnt), chk);
 
    gtk_dialog_add_button(GTK_DIALOG(dlg), GTK_STOCK_CLOSE, 0);
 
    gtk_widget_show_all(dlg);
    gtk_dialog_run(GTK_DIALOG(dlg));
-   g_object_unref(channel);
 }

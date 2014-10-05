@@ -1,14 +1,17 @@
 #ifdef HAVE_CONFIG_H
 #  include <config.h>
 #endif
+#include <gdk/gdk.h>
+#include <gdk/gdkkeysyms.h>
 #include <libxfce4util/libxfce4util.h>
 #include <libxfce4panel/libxfce4panel.h>
+#include <xfconf/xfconf.h>
 #include "view.h"
 #include "button.h"
 #include "hamster.h"
 #include "windowserver.h"
 #include "util.h"
-#include <gdk/gdk.h>
+#include "settings.h"
 
 struct _HamsterView
 {
@@ -29,8 +32,8 @@ struct _HamsterView
     WindowServer              *windowserver;
 
     /* config */
+    XfconfChannel             *channel;
     gboolean                  donthide;
-    gboolean                  dropdown;
 };
 
 enum
@@ -122,6 +125,8 @@ hview_cb_popup_focus_out (GtkWidget *widget,
                     GdkEventFocus *event,
                     HamsterView *view)
 {
+   if(view->donthide)
+      return FALSE;
    hview_popup_hide(view);
    return TRUE;
 }
@@ -201,7 +206,7 @@ hview_cb_tv_button_press(GtkWidget *tv,
 }
 
 static void
-hview_cb_label_allocate( GtkWidget     *label,
+hview_cb_label_allocate( GtkWidget *label,
              GtkAllocation *allocation,
              HamsterView *view )
 {
@@ -209,41 +214,18 @@ hview_cb_label_allocate( GtkWidget     *label,
    gtk_widget_set_size_request( label, (allocation->width * 3) / 4, -1 );
 }
 
-#if 0
-static void
-hview_cb_tv_realize (GtkWidget *widget) {
-  GdkColor color;
-  GtkStyle *style = gtk_widget_get_style (widget);
-
-  if (style != NULL) {
-    color = style->bg[GTK_STATE_NORMAL];
-
-    GList *columns = gtk_tree_view_get_columns(GTK_TREE_VIEW(widget));
-    g_object_set(G_OBJECT(widget), "background-gdk", &color, NULL);
-    if(columns)
-    {
-       GList *column = columns;
-       while(column)
-       {
-          GList *renderers = gtk_tree_view_column_get_cell_renderers(GTK_TREE_VIEW_COLUMN(column->data));
-          g_object_set(G_OBJECT(column->data), "background-gdk", &color, NULL);
-          if(renderers)
-          {
-             GList* renderer = renderers;
-             while(renderer)
-             {
-                g_object_set(G_OBJECT(renderer->data), "background-gdk", &color, NULL);
-                renderer = renderer->next;
-             }
-             g_list_free(renderers);
-          }
-          column = column->next;
-       }
-       g_list_free(columns);
-    }
-  }
+static gboolean
+hview_cb_key_pressed(GtkWidget *widget,
+      GdkEventKey  *evt,
+      HamsterView *view)
+{
+   //DBG("%d", evt->keyval);
+   if(evt->keyval == GDK_KEY_Escape)
+   {
+      hview_popup_hide(view);
+   }
+   return FALSE;
 }
-#endif
 
 static void
 hview_popup_new(HamsterView *view)
@@ -271,6 +253,11 @@ hview_popup_new(HamsterView *view)
    vbx = gtk_vbox_new(FALSE, 1);
    gtk_container_set_border_width(GTK_CONTAINER(vbx), border);
    gtk_container_add(GTK_CONTAINER(frm), vbx);
+   /* handle ESC */
+   g_signal_connect(view->popup, "key-press-event",
+                            G_CALLBACK(hview_cb_key_pressed), view);
+
+
 
    // subtitle
    lbl = gtk_label_new(_("What goes on?"));
@@ -285,8 +272,6 @@ hview_popup_new(HamsterView *view)
                            G_CALLBACK(hview_cb_entry_activate), view);
    gtk_entry_completion_set_text_column(completion, 0);
    gtk_entry_completion_set_model(completion, GTK_TREE_MODEL(view->storeActivities));
-   gtk_entry_completion_set_inline_completion(completion, TRUE);
-   gtk_entry_completion_set_popup_completion(completion, FALSE);
    gtk_container_add(GTK_CONTAINER(vbx), view->entry);
    gtk_entry_set_completion(GTK_ENTRY(view->entry), completion);
 
@@ -301,10 +286,6 @@ hview_popup_new(HamsterView *view)
    gtk_tree_view_set_grid_lines(GTK_TREE_VIEW(view->treeview), GTK_TREE_VIEW_GRID_LINES_NONE);
    g_signal_connect(view->treeview, "button-press-event",
                            G_CALLBACK(hview_cb_tv_button_press), view);
-#if 0
-   g_signal_connect(view->treeview, "realize",
-                           G_CALLBACK(hview_cb_tv_realize), view);
-#endif
    renderer = gtk_cell_renderer_text_new ();
    column = gtk_tree_view_column_new_with_attributes ("Time",
                                                       renderer,
@@ -382,6 +363,27 @@ hview_popup_new(HamsterView *view)
                     view);
 }
 
+static void
+hview_completion_mode_update(HamsterView *view)
+{
+   if(view->entry && gtk_widget_get_realized(view->entry))
+   {
+      gboolean dropdown = xfconf_channel_get_bool(view->channel, XFPROP_DROPDOWN,
+            FALSE);
+      GtkEntryCompletion *completion = gtk_entry_get_completion(
+            GTK_ENTRY(view->entry));
+      gtk_entry_completion_set_inline_completion(completion, !dropdown);
+      gtk_entry_completion_set_popup_completion(completion, dropdown);
+   }
+}
+
+static void
+hview_autohide_mode_update(HamsterView *view)
+{
+   view->donthide = xfconf_channel_get_bool(view->channel, XFPROP_DONTHIDE,
+         FALSE);
+}
+
 /* Actions */
 static void
 hview_popup_show(HamsterView *view)
@@ -390,12 +392,16 @@ hview_popup_show(HamsterView *view)
    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(view->button), TRUE);
 
    /* check if popup is needed, or it needs an update */
-   if(view->popup == NULL)
-       hview_popup_new(view);
+   if (view->popup == NULL)
+      hview_popup_new(view);
+
+   /* honor settings */
+   hview_completion_mode_update(view);
 
    /* popup popup */
-   gtk_window_present_with_time(GTK_WINDOW(view->popup), gtk_get_current_event_time ());
-   gtk_widget_add_events (view->popup, GDK_FOCUS_CHANGE_MASK);
+   gtk_window_present_with_time(GTK_WINDOW(view->popup),
+         gtk_get_current_event_time());
+   gtk_widget_add_events(view->popup, GDK_FOCUS_CHANGE_MASK|GDK_KEY_PRESS_MASK);
 }
 
 static void
@@ -592,6 +598,19 @@ hview_cb_cyclic(HamsterView *view)
    return TRUE;
 }
 
+static void
+hview_cb_channel(XfconfChannel *channel,
+                 gchar         *property,
+                 GValue        *value,
+                 HamsterView   *view)
+{
+   DBG("%s=%d", property, g_value_get_boolean(value));
+   if(!strcmp(property, XFPROP_DROPDOWN))
+      hview_completion_mode_update(view);
+   else if(!strcmp(property, XFPROP_DONTHIDE))
+      hview_autohide_mode_update(view);
+}
+
 HamsterView*
 hamster_view_init(XfcePanelPlugin* plugin)
 {
@@ -651,9 +670,12 @@ hamster_view_init(XfcePanelPlugin* plugin)
    view->treeview = gtk_tree_view_new();
 
    /* config */
-   xfce_panel_plugin_menu_show_configure(view->plugin);
+   view->channel = xfce_panel_plugin_xfconf_channel_new(view->plugin);
+   g_signal_connect(view->channel, "property-changed",
+                        G_CALLBACK(hview_cb_channel), view);
    g_signal_connect(view->plugin, "configure-plugin",
-                        G_CALLBACK(config_show), view);
+                        G_CALLBACK(config_show), view->channel);
+   xfce_panel_plugin_menu_show_configure(view->plugin);
 
    /* time helpers */
    tzset();

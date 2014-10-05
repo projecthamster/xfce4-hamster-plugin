@@ -47,6 +47,9 @@ static void
 hamster_construct(XfcePanelPlugin *plugin)
 {
     HamsterView *view;
+    /* settings */
+    xfconf_init(NULL);
+
     DBG("Construct: %s", PLUGIN_NAME);
     view = hamster_view_init(plugin);
     /* Set up i18n */
@@ -56,8 +59,6 @@ hamster_construct(XfcePanelPlugin *plugin)
     g_signal_connect(plugin, "free-data",
                      G_CALLBACK(hamster_finalize), view);
 
-    /* settings */
-    xfconf_init(NULL);
     DBG("done");
 }
 
