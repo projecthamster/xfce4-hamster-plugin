@@ -210,8 +210,9 @@ hview_cb_label_allocate( GtkWidget *label,
              GtkAllocation *allocation,
              HamsterView *view )
 {
-   gint border = gtk_container_get_border_width(GTK_CONTAINER(view->popup));
-   gtk_widget_set_size_request( label, (allocation->width * 3) / 4, -1 );
+   GtkRequisition req;
+   gtk_widget_size_request(view->treeview, &req);
+   gtk_widget_set_size_request( label, req.width, -1 );
 }
 
 static gboolean
@@ -256,8 +257,6 @@ hview_popup_new(HamsterView *view)
    /* handle ESC */
    g_signal_connect(view->popup, "key-press-event",
                             G_CALLBACK(hview_cb_key_pressed), view);
-
-
 
    // subtitle
    lbl = gtk_label_new(_("What goes on?"));
@@ -316,9 +315,10 @@ hview_popup_new(HamsterView *view)
    gtk_container_add(GTK_CONTAINER(vbx), view->treeview);
 
    // summary
+   gtk_misc_set_alignment(GTK_MISC(view->summary), 1.0, 0.0);
    gtk_label_set_line_wrap(GTK_LABEL(view->summary), TRUE);
-   gtk_misc_set_alignment(GTK_MISC(view->summary), 1.0, 1.0);
-   gtk_box_pack_start(GTK_BOX(vbx), view->summary, FALSE, FALSE, 0);
+   gtk_label_set_justify(GTK_LABEL(view->summary), GTK_JUSTIFY_RIGHT);
+   gtk_container_add(GTK_CONTAINER(vbx), view->summary);
    g_signal_connect( G_OBJECT( view->summary ), "size-allocate",
                          G_CALLBACK( hview_cb_label_allocate ), view);
 
