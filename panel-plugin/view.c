@@ -34,6 +34,7 @@ struct _HamsterView
     /* config */
     XfconfChannel             *channel;
     gboolean                  donthide;
+    gboolean                  tooltips;
 };
 
 enum
@@ -164,6 +165,32 @@ hview_cb_entry_activate(GtkEntry *entry,
 }
 
 static gboolean
+hview_cb_tv_query_tooltip(GtkWidget  *widget,
+               gint        x,
+               gint        y,
+               gboolean    keyboard_mode,
+               GtkTooltip *tooltip,
+               HamsterView *view)
+{
+   if(view->tooltips)
+   {
+      GtkTreePath *path;
+      GtkTreeViewColumn *column;
+      if (gtk_tree_view_get_path_at_pos(GTK_TREE_VIEW(widget), x, y, &path,
+            &column, NULL, NULL))
+      {
+         gchar *text = g_object_get_data(G_OBJECT(column), "tip");
+         if (text)
+         {
+            gtk_tooltip_set_text(tooltip, text);
+            return TRUE;
+         }
+      }
+   }
+   return FALSE;
+}
+
+static gboolean
 hview_cb_tv_button_press(GtkWidget *tv,
                   GdkEventButton* evt,
                   HamsterView *view)
@@ -210,8 +237,9 @@ hview_cb_label_allocate( GtkWidget *label,
              GtkAllocation *allocation,
              HamsterView *view )
 {
-   gint border = gtk_container_get_border_width(GTK_CONTAINER(view->popup));
-   gtk_widget_set_size_request( label, (allocation->width * 3) / 4, -1 );
+   GtkRequisition req;
+   gtk_widget_size_request(view->treeview, &req);
+   gtk_widget_set_size_request( label, req.width, -1 );
 }
 
 static gboolean
@@ -257,8 +285,6 @@ hview_popup_new(HamsterView *view)
    g_signal_connect(view->popup, "key-press-event",
                             G_CALLBACK(hview_cb_key_pressed), view);
 
-
-
    // subtitle
    lbl = gtk_label_new(_("What goes on?"));
    gtk_container_add(GTK_CONTAINER(vbx), lbl);
@@ -281,9 +307,12 @@ hview_popup_new(HamsterView *view)
 
    // tree view
    view->treeview = gtk_tree_view_new_with_model(GTK_TREE_MODEL(view->storeFacts));
+   gtk_widget_set_has_tooltip(view->treeview, TRUE);
    gtk_tree_view_set_headers_visible(GTK_TREE_VIEW(view->treeview), FALSE);
    gtk_tree_view_set_hover_selection(GTK_TREE_VIEW(view->treeview), TRUE);
    gtk_tree_view_set_grid_lines(GTK_TREE_VIEW(view->treeview), GTK_TREE_VIEW_GRID_LINES_NONE);
+   g_signal_connect(view->treeview, "query-tooltip",
+                           G_CALLBACK(hview_cb_tv_query_tooltip), view);
    g_signal_connect(view->treeview, "button-press-event",
                            G_CALLBACK(hview_cb_tv_button_press), view);
    renderer = gtk_cell_renderer_text_new ();
@@ -307,18 +336,21 @@ hview_popup_new(HamsterView *view)
                                                       renderer,
                                                       "stock-id", BTNEDIT,
                                                       NULL);
+   g_object_set_data(G_OBJECT(column), "tip", _("Edit activity"));
    gtk_tree_view_append_column (GTK_TREE_VIEW (view->treeview), column);
    column = gtk_tree_view_column_new_with_attributes ("ct",
                                                       renderer,
                                                       "stock-id", BTNCONT,
                                                       NULL);
+   g_object_set_data(G_OBJECT(column), "tip", _("Resume activity"));
    gtk_tree_view_append_column (GTK_TREE_VIEW (view->treeview), column);
    gtk_container_add(GTK_CONTAINER(vbx), view->treeview);
 
    // summary
+   gtk_misc_set_alignment(GTK_MISC(view->summary), 1.0, 0.0);
    gtk_label_set_line_wrap(GTK_LABEL(view->summary), TRUE);
-   gtk_misc_set_alignment(GTK_MISC(view->summary), 1.0, 1.0);
-   gtk_box_pack_start(GTK_BOX(vbx), view->summary, FALSE, FALSE, 0);
+   gtk_label_set_justify(GTK_LABEL(view->summary), GTK_JUSTIFY_RIGHT);
+   gtk_container_add(GTK_CONTAINER(vbx), view->summary);
    g_signal_connect( G_OBJECT( view->summary ), "size-allocate",
                          G_CALLBACK( hview_cb_label_allocate ), view);
 
@@ -384,6 +416,13 @@ hview_autohide_mode_update(HamsterView *view)
          FALSE);
 }
 
+static void
+hview_tooltips_mode_update(HamsterView *view)
+{
+   view->tooltips = xfconf_channel_get_bool(view->channel, XFPROP_TOOLTIPS,
+         TRUE);
+}
+
 /* Actions */
 static void
 hview_popup_show(HamsterView *view)
@@ -397,6 +436,7 @@ hview_popup_show(HamsterView *view)
 
    /* honor settings */
    hview_completion_mode_update(view);
+   hview_tooltips_mode_update(view);
 
    /* popup popup */
    gtk_window_present_with_time(GTK_WINDOW(view->popup),
@@ -609,6 +649,8 @@ hview_cb_channel(XfconfChannel *channel,
       hview_completion_mode_update(view);
    else if(!strcmp(property, XFPROP_DONTHIDE))
       hview_autohide_mode_update(view);
+   else if(!strcmp(property, XFPROP_TOOLTIPS))
+      hview_tooltips_mode_update(view);
 }
 
 HamsterView*

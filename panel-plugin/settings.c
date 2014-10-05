@@ -42,6 +42,10 @@ config_show(XfcePanelPlugin *plugin, XfconfChannel *channel)
    xfconf_g_property_bind(channel, XFPROP_DROPDOWN, G_TYPE_BOOLEAN, G_OBJECT(chk), "active");
    gtk_container_add(GTK_CONTAINER(cnt), chk);
 
+   chk = gtk_check_button_new_with_label(_("Show tooltips on buttons"));
+   xfconf_g_property_bind(channel, XFPROP_TOOLTIPS, G_TYPE_BOOLEAN, G_OBJECT(chk), "active");
+   gtk_container_add(GTK_CONTAINER(cnt), chk);
+
    gtk_dialog_add_button(GTK_DIALOG(dlg), GTK_STOCK_CLOSE, 0);
 
    gtk_widget_show_all(dlg);
