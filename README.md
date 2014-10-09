@@ -6,6 +6,8 @@ Dependencies: `xfce4-panel xfconf hamster-applet`
 
 Build dependencies[debian, ubuntu]: `libxfce4ui-1-dev xfce4-panel-dev libxfconf-0-dev libxfce4util-dev`
 
+Common: `build-essential autoconf automake intltool libtool`
+
 Tested on ubuntu 14.04 and Arch with xfce 4.10; however 4.8 should also work.
 
 ##Translators
