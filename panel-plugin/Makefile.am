@@ -5,10 +5,10 @@ plugin_LTLIBRARIES = libhamster.la
 libhamster_la_SOURCES =				\
 	hamster.c hamster.h				\
 	windowserver.c windowserver.h	\
-	plugin.c								\
-	button.c								\
-	view.c view.h						\
-	util.c util.h						\
+	plugin.c						\
+	button.c button.h				\
+	view.c view.h					\
+	util.c util.h					\
 	settings.c settings.h
 
 
@@ -56,5 +56,13 @@ desktopdir = $(datadir)/xfce4/panel/plugins
 desktop_in_files = hamster.desktop.in
 desktop_DATA = $(desktop_in_files:.desktop.in=.desktop)
 @INTLTOOL_DESKTOP_RULE@
+
+install-data-hook:
+	sed -i 's:@ICON_NAME@:$(with_icon_name):g' $(datadir)/xfce4/panel/plugins/hamster.desktop
+
+EXTRA_DIST = hamster.desktop.in
+
+distclean-local:
+	rm -f hamster.desktop
 
 # vi:set ts=8 sw=8 noet ai nocindent syntax=automake:
