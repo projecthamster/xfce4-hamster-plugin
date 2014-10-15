@@ -424,7 +424,7 @@ hview_tooltips_mode_update(HamsterView *view)
 }
 
 /* Actions */
-static void
+void
 hview_popup_show(HamsterView *view)
 {
    /* toggle the button */

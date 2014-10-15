@@ -28,6 +28,19 @@
 #include <libxfce4panel/libxfce4panel.h>
 #include "view.h"
 
+/**
+ * popups remotely.
+ */
+gboolean
+hamster_popup_remote(XfcePanelPlugin *plugin, gchar *name,
+      GValue *value, HamsterView *view)
+{
+   gboolean atPointer;
+   DBG("Popup remote: %s", name);
+   atPointer = g_value_get_boolean(value);
+   hview_popup_show(view);
+   return TRUE;
+}
 
 /**
  * Cleans up resources.
@@ -57,6 +70,10 @@ hamster_construct(XfcePanelPlugin *plugin)
     /* Connect the finalize callback */
     g_signal_connect(plugin, "free-data",
                      G_CALLBACK(hamster_finalize), view);
+
+    /* Connect the remote-event callback */
+    g_signal_connect(plugin, "remote-event",
+                     G_CALLBACK(hamster_popup_remote), view);
 
     DBG("done");
 }

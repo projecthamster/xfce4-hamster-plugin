@@ -50,6 +50,16 @@ libhamster_la_LDFLAGS = \
 	-export-symbols-regex '^xfce_panel_module_(preinit|init|construct)'
 
 #
+# xfce4-popup-hamsterymenu script
+#
+bin_SCRIPTS = \
+	xfce4-popup-hamstermenu
+
+xfce4-popup-hamstermenu: xfce4-popup-hamstermenu.sh Makefile
+	$(AM_V_GEN) $(SED) -e "s,\@bindir\@,$(bindir),g" \
+	-e "s,\@localedir\@,$(localedir),g" $< >$@
+
+#
 # Desktop file
 #
 desktopdir = $(datadir)/xfce4/panel/plugins
