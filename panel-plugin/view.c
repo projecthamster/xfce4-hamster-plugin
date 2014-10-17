@@ -239,7 +239,8 @@ hview_cb_label_allocate( GtkWidget *label,
 {
    GtkRequisition req;
    gtk_widget_size_request(view->treeview, &req);
-   gtk_widget_set_size_request( label, req.width, -1 );
+   if(req.width > 0)
+      gtk_widget_set_size_request( label, req.width, -1 );
 }
 
 static gboolean
@@ -258,7 +259,7 @@ hview_cb_key_pressed(GtkWidget *widget,
 static void
 hview_popup_new(HamsterView *view)
 {
-   GtkWidget *frm, *vbx, *lbl, *ovw, *stp, *add, *sep, *cfg, *align;
+   GtkWidget *frm, *vbx, *lbl, *ovw, *stp, *add, *cfg, *align;
    GtkCellRenderer *renderer;
    GtkTreeViewColumn *column;
    GtkEntryCompletion *completion;
@@ -373,7 +374,6 @@ hview_popup_new(HamsterView *view)
    gtk_button_set_alignment(GTK_BUTTON(add), 0.0, 0.5);
    g_signal_connect(add, "clicked",
                            G_CALLBACK(hview_cb_add_earlier_activity), view);
-   sep = gtk_hseparator_new();
    cfg = gtk_button_new_with_label(_("Tracking settings"));
    gtk_button_set_relief(GTK_BUTTON(cfg), GTK_RELIEF_NONE);
    gtk_button_set_focus_on_click(GTK_BUTTON(cfg), FALSE);
@@ -381,10 +381,11 @@ hview_popup_new(HamsterView *view)
    g_signal_connect(cfg, "clicked",
                            G_CALLBACK(hview_cb_tracking_settings), view);
 
+   gtk_box_pack_start(GTK_BOX(vbx), gtk_hseparator_new(), FALSE, TRUE, 0);
    gtk_box_pack_start(GTK_BOX(vbx), ovw, FALSE, FALSE, 0);
    gtk_box_pack_start(GTK_BOX(vbx), stp, FALSE, FALSE, 0);
    gtk_box_pack_start(GTK_BOX(vbx), add, FALSE, FALSE, 0);
-   gtk_box_pack_start(GTK_BOX(vbx), sep, FALSE, TRUE, 0);
+   gtk_box_pack_start(GTK_BOX(vbx), gtk_hseparator_new(), FALSE, TRUE, 0);
    gtk_box_pack_start(GTK_BOX(vbx), cfg, FALSE, FALSE, 0);
 
    gtk_widget_show_all(view->popup);
@@ -425,20 +426,52 @@ hview_tooltips_mode_update(HamsterView *view)
 
 /* Actions */
 void
-hview_popup_show(HamsterView *view)
+hview_popup_show(HamsterView *view, gboolean atPointer)
 {
+   gint x = 0, y = 0;
+
    /* toggle the button */
    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(view->button), TRUE);
 
    /* check if popup is needed, or it needs an update */
    if (view->popup == NULL)
+   {
       hview_popup_new(view);
+      gtk_widget_realize(view->popup);
+   }
+   else if(gtk_widget_get_mapped(view->popup))
+      return; /* avoid double invocation */
 
    /* honor settings */
    hview_completion_mode_update(view);
    hview_tooltips_mode_update(view);
 
    /* popup popup */
+   GdkWindow* popup = gtk_widget_get_window(view->popup);
+   if(atPointer)
+   {
+      GdkScreen* screen = NULL;
+      GdkDisplay* display = gdk_display_get_default();
+      gdk_display_get_pointer(display, &screen, &x, &y, NULL);
+   }
+   else
+   {
+      GdkWindow* button = gtk_widget_get_window(view->button);
+      gdk_window_get_origin(button, &x, &y);
+      switch(xfce_panel_plugin_get_orientation(view->plugin))
+      {
+         case GTK_ORIENTATION_HORIZONTAL:
+         x += gdk_window_get_width(button) / 2;
+         x -= gdk_window_get_width(popup) / 2;
+         break;
+
+         case GTK_ORIENTATION_VERTICAL:
+         y += gdk_window_get_height(button) / 2;
+         y -= gdk_window_get_height(popup) / 2;
+         break;
+      }
+   }
+   gtk_window_move(GTK_WINDOW(view->popup), x, y);
    gtk_window_present_with_time(GTK_WINDOW(view->popup),
          gtk_get_current_event_time());
    gtk_widget_add_events(view->popup, GDK_FOCUS_CHANGE_MASK|GDK_KEY_PRESS_MASK);
@@ -612,7 +645,7 @@ hview_cb_button_pressed(GtkWidget *widget, GdkEventButton *evt, HamsterView *vie
       if (isActive)
          hview_popup_hide(view);
       else
-         hview_popup_show(view);
+         hview_popup_show(view, FALSE);
    }
    else if (evt->button == 2)
    {

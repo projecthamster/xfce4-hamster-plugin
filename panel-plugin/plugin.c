@@ -38,7 +38,7 @@ hamster_popup_remote(XfcePanelPlugin *plugin, gchar *name,
    gboolean atPointer;
    DBG("Popup remote: %s", name);
    atPointer = g_value_get_boolean(value);
-   hview_popup_show(view);
+   hview_popup_show(view, atPointer);
    return TRUE;
 }
 
@@ -62,7 +62,7 @@ hamster_construct(XfcePanelPlugin *plugin)
     /* settings */
     xfconf_init(NULL);
 
-    DBG("Construct: %s", PLUGIN_NAME);
+    DBG("Construct: %s(%d)", PLUGIN_NAME, xfce_panel_plugin_get_unique_id(plugin));
     view = hamster_view_init(plugin);
     /* Set up i18n */
     xfce_textdomain(GETTEXT_PACKAGE, LOCALEDIR, "UTF-8");

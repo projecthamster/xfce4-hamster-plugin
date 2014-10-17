@@ -23,7 +23,7 @@ config_show(XfcePanelPlugin *plugin, HamsterView *view);
 
 /* plugin.c */
 void
-hview_popup_show(HamsterView *view);
+hview_popup_show(HamsterView *view, gboolean atPointer);
 
 
 /* vim: set ai et tabstop=4: */
