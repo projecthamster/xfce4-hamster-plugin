@@ -345,8 +345,6 @@ places_button_resize(PlacesButton *self)
 {
     gboolean show_label;
     gint new_size;
-    gint border_thickness;
-    GtkStyle *style;
     gboolean vertical = FALSE;
     gboolean deskbar = FALSE;
     gint nrows = 1;

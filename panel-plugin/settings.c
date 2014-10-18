@@ -9,18 +9,12 @@
 void
 config_show(XfcePanelPlugin *plugin, XfconfChannel *channel)
 {
-   /*
-    <property name="title" translatable="yes">SqueezeBox</property>
-    <property name="icon_name">applications-multimedia</property>
-    <property name="type_hint">normal</property>
-    <property name="subtitle" translatable="yes">media player remote</property>
-    * */
    GtkWidget *dlg = xfce_titled_dialog_new();
-   GtkWidget *cnt, *lbl, *chk, *btn;
+   GtkWidget *cnt, *lbl, *chk;
    g_object_set(G_OBJECT(dlg),
          "title", _("Hamster"),
-         "icon_name", "hamster-applet",
-         "subtitle", "Time bookkeeping plugin",
+         "icon_name", ICON_NAME,
+         "subtitle", _("Time bookkeeping plugin"),
          NULL);
    g_signal_connect_swapped (dlg,
                              "response",
@@ -50,4 +44,5 @@ config_show(XfcePanelPlugin *plugin, XfconfChannel *channel)
 
    gtk_widget_show_all(dlg);
    gtk_dialog_run(GTK_DIALOG(dlg));
+   gtk_widget_destroy(dlg);
 }

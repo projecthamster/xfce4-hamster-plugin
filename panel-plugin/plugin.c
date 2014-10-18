@@ -26,6 +26,7 @@
 
 #include <libxfce4util/libxfce4util.h>
 #include <libxfce4panel/libxfce4panel.h>
+#include <xfconf/xfconf.h>
 #include "view.h"
 
 /**
@@ -60,7 +61,11 @@ hamster_construct(XfcePanelPlugin *plugin)
 {
     HamsterView *view;
     /* settings */
-    xfconf_init(NULL);
+    if(xfconf_init(NULL))
+    {
+       DBG("no xfconf - can't continue");
+       return;
+    }
 
     DBG("Construct: %s(%d)", PLUGIN_NAME, xfce_panel_plugin_get_unique_id(plugin));
     view = hamster_view_init(plugin);

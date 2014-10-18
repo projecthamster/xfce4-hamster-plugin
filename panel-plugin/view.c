@@ -1,6 +1,8 @@
 #ifdef HAVE_CONFIG_H
 #  include <config.h>
 #endif
+#include <string.h>
+#include <time.h>
 #include <gdk/gdk.h>
 #include <gdk/gdkkeysyms.h>
 #include <libxfce4util/libxfce4util.h>
@@ -141,10 +143,9 @@ hview_cb_match_select(GtkEntryCompletion *widget,
    gchar *activity, *category;
    gchar fact[256];
    gint id = 0;
-   GtkEntry *entry;
 
    gtk_tree_model_get(model, iter, 0, &activity, 1, &category, -1);
-   sprintf(fact, "%s@%s", activity, category);
+   snprintf(fact, sizeof(fact), "%s@%s", activity, category);
    hamster_call_add_fact_sync(view->hamster, fact, 0, 0, FALSE, &id, NULL, NULL);
    g_free(activity);
    g_free(category);
@@ -199,8 +200,8 @@ hview_cb_tv_button_press(GtkWidget *tv,
    {
       GtkTreePath *path;
       GtkTreeViewColumn *column;
-      if (gtk_tree_view_get_path_at_pos(GTK_TREE_VIEW(tv), evt->x,
-            evt->y, &path, &column, NULL, NULL))
+      if (gtk_tree_view_get_path_at_pos(GTK_TREE_VIEW(tv), (int)evt->x,
+            (int)evt->y, &path, &column, NULL, NULL))
       {
          GtkTreeSelection *selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(tv));
          GtkTreeModel *model = NULL;
@@ -259,11 +260,11 @@ hview_cb_key_pressed(GtkWidget *widget,
 static void
 hview_popup_new(HamsterView *view)
 {
-   GtkWidget *frm, *vbx, *lbl, *ovw, *stp, *add, *cfg, *align;
+   GtkWidget *frm, *vbx, *lbl, *ovw, *stp, *add, *cfg;
    GtkCellRenderer *renderer;
    GtkTreeViewColumn *column;
    GtkEntryCompletion *completion;
-   gint border;
+   guint border;
 
    /* Create a new popup */
    view->popup = gtk_window_new(GTK_WINDOW_TOPLEVEL);
@@ -447,7 +448,6 @@ hview_popup_show(HamsterView *view, gboolean atPointer)
    hview_tooltips_mode_update(view);
 
    /* popup popup */
-   GdkWindow* popup = gtk_widget_get_window(view->popup);
    if(atPointer)
    {
       GdkScreen* screen = NULL;
@@ -456,6 +456,7 @@ hview_popup_show(HamsterView *view, gboolean atPointer)
    }
    else
    {
+      GdkWindow* popup = gtk_widget_get_window(view->popup);
       GdkWindow* button = gtk_widget_get_window(view->button);
       gdk_window_get_origin(button, &x, &y);
       switch(xfce_panel_plugin_get_orientation(view->plugin))
@@ -502,7 +503,8 @@ hview_store_update(HamsterView *view, fact *act, GHashTable *tbl)
          strftime(ptr, 20, "%H:%M", tma);
          isStopped = TRUE;
       }
-      sprintf(dur, "%dh %dmin", act->seconds / 3600, (act->seconds / 60) % 60);
+      snprintf(dur, sizeof(dur),
+            "%dh %dmin", act->seconds / 3600, (act->seconds / 60) % 60);
 
       gtk_list_store_append (view->storeFacts, &iter);  /* Acquire an iterator */
       gtk_list_store_set (view->storeFacts, &iter,
@@ -565,7 +567,7 @@ hview_completion_update(HamsterView *view)
          gsize count = 0;
          if(NULL != res && (count = g_variant_n_children(res)))
          {
-            int i;
+            gsize i;
             for(i=0; i< count; i++)
             {
                GtkTreeIter iter;
@@ -596,7 +598,7 @@ hview_button_update(HamsterView *view)
       {
          if(NULL != res && (count = g_variant_n_children(res)))
          {
-            int i;
+            gsize i;
             GHashTable *tbl = g_hash_table_new(g_str_hash, g_str_equal);
             gtk_widget_set_sensitive(view->treeview, TRUE);
             for(i = 0; i < count; i++)
@@ -611,7 +613,10 @@ hview_button_update(HamsterView *view)
                   if(0 == last->endTime)
                   {
                      gchar label[128];
-                     sprintf(label, "%s %d:%02d", last->name, last->seconds / 3600, (last->seconds/60) % 60);
+                     snprintf(label, sizeof(label), "%s %d:%02d",
+                           last->name,
+                           last->seconds / 3600,
+                           (last->seconds/60) % 60);
                      places_button_set_label(PLACES_BUTTON(view->button), label);
                      fact_free(last);
                      g_hash_table_unref(tbl);

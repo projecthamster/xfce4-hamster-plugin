@@ -2,18 +2,24 @@ plugindir = $(libdir)/xfce4/panel/plugins
 
 plugin_LTLIBRARIES = libhamster.la
 
-libhamster_la_SOURCES =				\
+GENERATED_CODE = \
 	hamster.c hamster.h				\
-	windowserver.c windowserver.h	\
+	windowserver.c windowserver.h
+
+THIRD_PARTY_CODE = \
+	button.c button.h
+
+OWN_CODE = \
 	plugin.c						\
-	button.c button.h				\
 	view.c view.h					\
 	util.c util.h					\
 	settings.c settings.h
 
+libhamster_la_SOURCES = $(GENERATED_CODE) $(THIRD_PARTY_CODE) $(OWN_CODE)
 
 
-libhamster_la_CFLAGS =							\
+
+libhamster_la_CFLAGS =	-Wall			\
 	-I$(top_builddir)						\
 	-I$(top_srcdir)							\
 	$(GIO_CFLAGS)							\
@@ -74,5 +80,11 @@ EXTRA_DIST = hamster.desktop.in
 
 distclean-local:
 	rm -f hamster.desktop
+
+splint:
+	splint -weak -stats -badflag \
+	$(OWN_CODE) ../config.h \
+	$(libhamster_la_CFLAGS)
+
 
 # vi:set ts=8 sw=8 noet ai nocindent syntax=automake:
