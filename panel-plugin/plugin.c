@@ -61,7 +61,7 @@ hamster_construct(XfcePanelPlugin *plugin)
 {
     HamsterView *view;
     /* settings */
-    if(xfconf_init(NULL))
+    if(!xfconf_init(NULL))
     {
        DBG("no xfconf - can't continue");
        return;
