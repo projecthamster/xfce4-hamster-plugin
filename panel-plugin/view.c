@@ -26,6 +26,8 @@ struct _HamsterView
     GtkWidget                 *entry;
     GtkWidget                 *treeview;
     GtkWidget                 *summary;
+    gboolean                  alive;
+    guint                     sourceTimeout;
 
     /* model */
     GtkListStore              *storeFacts;
@@ -69,6 +71,7 @@ hview_popup_hide(HamsterView *view)
     {
        gtk_widget_hide (view->popup);
     }
+    view->alive = FALSE;
 }
 
 /* Button callbacks */
@@ -123,6 +126,14 @@ hview_cb_tracking_settings(GtkWidget *widget, HamsterView *view)
    hview_popup_hide(view);
 }
 
+static gboolean
+hview_cb_timeout(HamsterView *view)
+{
+   hview_popup_hide(view);
+   view->sourceTimeout = 0;
+   return FALSE;
+}
+
 gboolean
 hview_cb_popup_focus_out (GtkWidget *widget,
                     GdkEventFocus *event,
@@ -130,7 +141,11 @@ hview_cb_popup_focus_out (GtkWidget *widget,
 {
    if(view->donthide)
       return FALSE;
-   hview_popup_hide(view);
+   if(!view->sourceTimeout)
+   {
+      view->sourceTimeout = g_timeout_add(50, (GSourceFunc)hview_cb_timeout, view);
+      return FALSE;
+   }
    return TRUE;
 }
 
@@ -432,17 +447,28 @@ hview_popup_show(HamsterView *view, gboolean atPointer)
 {
    gint x = 0, y = 0;
 
-   /* toggle the button */
-   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(view->button), TRUE);
-
    /* check if popup is needed, or it needs an update */
    if (view->popup == NULL)
    {
       hview_popup_new(view);
       gtk_widget_realize(view->popup);
    }
-   else if(gtk_widget_get_mapped(view->popup))
+   else if(view->alive)
+   {
+      if(view->donthide)
+         gdk_window_raise(gtk_widget_get_window(view->popup));
+      if(view->sourceTimeout)
+      {
+         g_source_remove(view->sourceTimeout);
+         view->sourceTimeout = 0;
+         gdk_window_raise(gtk_widget_get_window(view->popup));
+      }
       return; /* avoid double invocation */
+   }
+   view->alive = TRUE;
+
+   /* toggle the button */
+   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(view->button), TRUE);
 
    /* honor settings */
    hview_completion_mode_update(view);
@@ -477,6 +503,7 @@ hview_popup_show(HamsterView *view, gboolean atPointer)
    gtk_window_present_with_time(GTK_WINDOW(view->popup),
          gtk_get_current_event_time());
    gtk_widget_add_events(view->popup, GDK_FOCUS_CHANGE_MASK|GDK_KEY_PRESS_MASK);
+   xfce_panel_plugin_take_window(view->plugin, GTK_WINDOW(view->popup));
 }
 
 static void
