@@ -312,6 +312,7 @@ hview_popup_new(HamsterView *view)
    gtk_widget_set_has_tooltip(view->treeview, TRUE);
    gtk_tree_view_set_headers_visible(GTK_TREE_VIEW(view->treeview), FALSE);
    gtk_tree_view_set_hover_selection(GTK_TREE_VIEW(view->treeview), TRUE);
+   gtk_widget_set_can_focus(view->treeview, FALSE);
    gtk_tree_view_set_grid_lines(GTK_TREE_VIEW(view->treeview), GTK_TREE_VIEW_GRID_LINES_NONE);
    g_signal_connect(view->treeview, "query-tooltip",
                            G_CALLBACK(hview_cb_tv_query_tooltip), view);
