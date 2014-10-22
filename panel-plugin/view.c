@@ -279,7 +279,7 @@ hview_popup_new(HamsterView *view)
    GtkCellRenderer *renderer;
    GtkTreeViewColumn *column;
    GtkEntryCompletion *completion;
-   guint border;
+   guint border = 5;
 
    /* Create a new popup */
    view->popup = gtk_window_new(GTK_WINDOW_TOPLEVEL);
@@ -289,11 +289,11 @@ hview_popup_new(HamsterView *view)
                        gtk_widget_get_screen(view->button));
    gtk_window_set_skip_pager_hint(GTK_WINDOW(view->popup), TRUE);
    gtk_window_set_skip_taskbar_hint(GTK_WINDOW(view->popup), TRUE);
-   gtk_container_set_border_width (GTK_CONTAINER (view->popup), 5);
+   gtk_container_set_border_width (GTK_CONTAINER (view->popup), border);
    frm = gtk_frame_new(NULL);
    gtk_frame_set_shadow_type(GTK_FRAME(frm), GTK_SHADOW_OUT);
    gtk_container_add(GTK_CONTAINER(view->popup), frm);
-   border = gtk_container_get_border_width(GTK_CONTAINER(view->popup));
+   //border = gtk_container_get_border_width(GTK_CONTAINER(view->popup));
    gtk_container_set_border_width(GTK_CONTAINER(view->popup), 0);
    vbx = gtk_vbox_new(FALSE, 1);
    gtk_container_set_border_width(GTK_CONTAINER(vbx), border);
@@ -452,6 +452,11 @@ hview_popup_show(HamsterView *view, gboolean atPointer)
    {
       hview_popup_new(view);
       gtk_widget_realize(view->popup);
+
+      /* init properties from xfconf */
+      hview_autohide_mode_update(view);
+      hview_tooltips_mode_update(view);
+      hview_completion_mode_update(view);
    }
    else if(view->alive)
    {
