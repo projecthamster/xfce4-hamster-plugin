@@ -23,6 +23,7 @@ struct _HamsterView
     /* view */
     GtkWidget                 *button;
     GtkWidget                 *popup;
+    GtkWidget                 *vbx;
     GtkWidget                 *entry;
     GtkWidget                 *treeview;
     GtkWidget                 *summary;
@@ -272,14 +273,25 @@ hview_cb_key_pressed(GtkWidget *widget,
    return FALSE;
 }
 
+void
+hview_cb_style_set(GtkWidget *widget, GtkStyle *previous, HamsterView *view)
+{
+   guint border = 5;
+   GtkStyle* style = gtk_widget_get_style(view->button);
+   if(style)
+      border = (2 * MAX(style->xthickness, style->ythickness)) + 2;
+
+   DBG("style-set %d", border);
+   gtk_container_set_border_width(GTK_CONTAINER(view->vbx), border);
+}
+
 static void
 hview_popup_new(HamsterView *view)
 {
-   GtkWidget *frm, *vbx, *lbl, *ovw, *stp, *add, *cfg;
+   GtkWidget *frm, *lbl, *ovw, *stp, *add, *cfg;
    GtkCellRenderer *renderer;
    GtkTreeViewColumn *column;
    GtkEntryCompletion *completion;
-   guint border = 5;
 
    /* Create a new popup */
    view->popup = gtk_window_new(GTK_WINDOW_TOPLEVEL);
@@ -289,22 +301,19 @@ hview_popup_new(HamsterView *view)
                        gtk_widget_get_screen(view->button));
    gtk_window_set_skip_pager_hint(GTK_WINDOW(view->popup), TRUE);
    gtk_window_set_skip_taskbar_hint(GTK_WINDOW(view->popup), TRUE);
-   gtk_container_set_border_width (GTK_CONTAINER (view->popup), border);
    frm = gtk_frame_new(NULL);
    gtk_frame_set_shadow_type(GTK_FRAME(frm), GTK_SHADOW_OUT);
    gtk_container_add(GTK_CONTAINER(view->popup), frm);
-   //border = gtk_container_get_border_width(GTK_CONTAINER(view->popup));
    gtk_container_set_border_width(GTK_CONTAINER(view->popup), 0);
-   vbx = gtk_vbox_new(FALSE, 1);
-   gtk_container_set_border_width(GTK_CONTAINER(vbx), border);
-   gtk_container_add(GTK_CONTAINER(frm), vbx);
+   view->vbx = gtk_vbox_new(FALSE, 1);
+   gtk_container_add(GTK_CONTAINER(frm), view->vbx);
    /* handle ESC */
    g_signal_connect(view->popup, "key-press-event",
                             G_CALLBACK(hview_cb_key_pressed), view);
 
    // subtitle
    lbl = gtk_label_new(_("What goes on?"));
-   gtk_container_add(GTK_CONTAINER(vbx), lbl);
+   gtk_container_add(GTK_CONTAINER(view->vbx), lbl);
 
    // entry
    view->entry = gtk_entry_new();
@@ -315,12 +324,12 @@ hview_popup_new(HamsterView *view)
                            G_CALLBACK(hview_cb_entry_activate), view);
    gtk_entry_completion_set_text_column(completion, 0);
    gtk_entry_completion_set_model(completion, GTK_TREE_MODEL(view->storeActivities));
-   gtk_container_add(GTK_CONTAINER(vbx), view->entry);
+   gtk_container_add(GTK_CONTAINER(view->vbx), view->entry);
    gtk_entry_set_completion(GTK_ENTRY(view->entry), completion);
 
    // label
    lbl = gtk_label_new(_("Todays activities"));
-   gtk_container_add(GTK_CONTAINER(vbx), lbl);
+   gtk_container_add(GTK_CONTAINER(view->vbx), lbl);
 
    // tree view
    view->treeview = gtk_tree_view_new_with_model(GTK_TREE_MODEL(view->storeFacts));
@@ -362,13 +371,13 @@ hview_popup_new(HamsterView *view)
                                                       NULL);
    g_object_set_data(G_OBJECT(column), "tip", _("Resume activity"));
    gtk_tree_view_append_column (GTK_TREE_VIEW (view->treeview), column);
-   gtk_container_add(GTK_CONTAINER(vbx), view->treeview);
+   gtk_container_add(GTK_CONTAINER(view->vbx), view->treeview);
 
    // summary
    gtk_misc_set_alignment(GTK_MISC(view->summary), 1.0, 0.0);
    gtk_label_set_line_wrap(GTK_LABEL(view->summary), TRUE);
    gtk_label_set_justify(GTK_LABEL(view->summary), GTK_JUSTIFY_RIGHT);
-   gtk_container_add(GTK_CONTAINER(vbx), view->summary);
+   gtk_container_add(GTK_CONTAINER(view->vbx), view->summary);
    g_signal_connect( G_OBJECT( view->summary ), "size-allocate",
                          G_CALLBACK( hview_cb_label_allocate ), view);
 
@@ -398,12 +407,12 @@ hview_popup_new(HamsterView *view)
    g_signal_connect(cfg, "clicked",
                            G_CALLBACK(hview_cb_tracking_settings), view);
 
-   gtk_box_pack_start(GTK_BOX(vbx), gtk_hseparator_new(), FALSE, TRUE, 0);
-   gtk_box_pack_start(GTK_BOX(vbx), ovw, FALSE, FALSE, 0);
-   gtk_box_pack_start(GTK_BOX(vbx), stp, FALSE, FALSE, 0);
-   gtk_box_pack_start(GTK_BOX(vbx), add, FALSE, FALSE, 0);
-   gtk_box_pack_start(GTK_BOX(vbx), gtk_hseparator_new(), FALSE, TRUE, 0);
-   gtk_box_pack_start(GTK_BOX(vbx), cfg, FALSE, FALSE, 0);
+   gtk_box_pack_start(GTK_BOX(view->vbx), gtk_hseparator_new(), FALSE, TRUE, 0);
+   gtk_box_pack_start(GTK_BOX(view->vbx), ovw, FALSE, FALSE, 0);
+   gtk_box_pack_start(GTK_BOX(view->vbx), stp, FALSE, FALSE, 0);
+   gtk_box_pack_start(GTK_BOX(view->vbx), add, FALSE, FALSE, 0);
+   gtk_box_pack_start(GTK_BOX(view->vbx), gtk_hseparator_new(), FALSE, TRUE, 0);
+   gtk_box_pack_start(GTK_BOX(view->vbx), cfg, FALSE, FALSE, 0);
 
    gtk_widget_show_all(view->popup);
 
@@ -411,6 +420,11 @@ hview_popup_new(HamsterView *view)
                     "focus-out-event",
                     G_CALLBACK (hview_cb_popup_focus_out),
                     view);
+
+   g_signal_connect(G_OBJECT(view->button), "style-set",
+                       G_CALLBACK(hview_cb_style_set), view);
+
+   hview_cb_style_set(view->button, NULL, view);
 }
 
 static void
