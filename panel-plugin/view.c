@@ -163,10 +163,11 @@ hview_cb_match_select(GtkEntryCompletion *widget,
    gtk_tree_model_get(model, iter, 0, &activity, 1, &category, -1);
    snprintf(fact, sizeof(fact), "%s@%s", activity, category);
    hamster_call_add_fact_sync(view->hamster, fact, 0, 0, FALSE, &id, NULL, NULL);
+   DBG("activated: %s[%d]", fact, id);
+   if(!view->donthide)
+      hview_popup_hide(view);
    g_free(activity);
    g_free(category);
-   DBG("activated: %s[%d]", fact, id);
-   hview_popup_hide(view);
    return FALSE;
 }
 
@@ -178,7 +179,8 @@ hview_cb_entry_activate(GtkEntry *entry,
    gint id = 0;
    hamster_call_add_fact_sync(view->hamster, fact, 0, 0, FALSE, &id, NULL, NULL);
    DBG("activated: %s[%d]", fact, id);
-   hview_popup_hide(view);
+   if(!view->donthide)
+      hview_popup_hide(view);
 }
 
 static gboolean
@@ -319,7 +321,7 @@ hview_popup_new(HamsterView *view)
    view->entry = gtk_entry_new();
    completion = gtk_entry_completion_new();
    g_signal_connect(completion, "match-selected",
-                           G_CALLBACK(hview_cb_match_select), NULL);
+                           G_CALLBACK(hview_cb_match_select), view);
    g_signal_connect(view->entry, "activate",
                            G_CALLBACK(hview_cb_entry_activate), view);
    gtk_entry_completion_set_text_column(completion, 0);
