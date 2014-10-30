@@ -87,7 +87,11 @@ static void
 hview_cb_stop_tracking(GtkWidget *widget, HamsterView *view)
 {
    time_t now = time(NULL);
-   GVariant *stopTime = g_variant_new_int32(now - timezone + (daylight * 3600));
+   struct tm *tmlt = localtime(&now);
+   now -= timezone;
+   if(tmlt->tm_isdst)
+      now += (daylight * 3600);
+   GVariant *stopTime = g_variant_new_int32(now);
    GVariant *var = g_variant_new_variant(stopTime);
    hamster_call_stop_tracking_sync(view->hamster, var, NULL, NULL);
    hview_popup_hide(view);
