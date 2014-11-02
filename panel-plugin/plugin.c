@@ -1,7 +1,5 @@
 /*  xfce4-hamster-plugin
  *
- *  This is the main plugin file. It starts the init and finalize processes.
- *
  *  Copyright (c) 2014 Hakan Erduman <smultimeter@gmail.com>
  *
  *  This program is free software; you can redistribute it and/or modify
