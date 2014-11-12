@@ -98,7 +98,8 @@ static void
 hview_cb_show_overview(GtkWidget *widget, HamsterView *view)
 {
    window_server_call_overview_sync(view->windowserver, NULL, NULL);
-   hview_popup_hide(view);
+   if(!view->donthide)
+      hview_popup_hide(view);
 }
 
 static void
@@ -112,7 +113,8 @@ hview_cb_stop_tracking(GtkWidget *widget, HamsterView *view)
    GVariant *stopTime = g_variant_new_int32(now);
    GVariant *var = g_variant_new_variant(stopTime);
    hamster_call_stop_tracking_sync(view->hamster, var, NULL, NULL);
-   hview_popup_hide(view);
+   if(!view->donthide)
+      hview_popup_hide(view);
 }
 
 static void
@@ -139,14 +141,16 @@ hview_cb_add_earlier_activity(GtkWidget *widget, HamsterView *view)
      g_variant_unref (_ret);
    }
    _out:
-   hview_popup_hide(view);
+   if(!view->donthide)
+      hview_popup_hide(view);
 }
 
 static void
 hview_cb_tracking_settings(GtkWidget *widget, HamsterView *view)
 {
    window_server_call_preferences_sync(view->windowserver, NULL, NULL);
-   hview_popup_hide(view);
+   if(!view->donthide)
+      hview_popup_hide(view);
 }
 
 static gboolean
@@ -278,10 +282,17 @@ hview_cb_label_allocate( GtkWidget *label,
              GtkAllocation *allocation,
              HamsterView *view )
 {
-   GtkRequisition req;
-   gtk_widget_size_request(view->treeview, &req);
-   if(req.width > 0)
-      gtk_widget_set_size_request( label, req.width, -1 );
+   if(gtk_widget_get_sensitive(view->treeview))
+   {
+      GtkRequisition req;
+      gtk_widget_size_request(view->treeview, &req);
+      if(req.width > 0)
+         gtk_widget_set_size_request( label, req.width, -1);
+   }
+   else
+   {
+      gtk_widget_set_size_request( label, -1, -1 );
+   }
 }
 
 static gboolean
@@ -699,6 +710,7 @@ hview_button_update(HamsterView *view)
             g_hash_table_unref(tbl);
          }
       }
+      gtk_window_resize(GTK_WINDOW(view->popup), 1, 1);
    }
    places_button_set_label(PLACES_BUTTON(view->button), _("inactive"));
    if (!count)
