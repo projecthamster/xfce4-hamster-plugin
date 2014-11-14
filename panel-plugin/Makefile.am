@@ -30,7 +30,6 @@ libhamster_la_CFLAGS =	-Wall			\
 	$(LIBX11_CFLAGS)						\
 	$(LIBXFCE4UTIL_CFLAGS)						\
 	$(LIBXFCE4UI_CFLAGS)						\
-	$(LIBXFCE4GUI_CFLAGS)						\
 	$(LIBXFCE4PANEL_CFLAGS)						\
 	$(LIBXFCONF_CFLAGS)						\
 	$(PLATFORM_CFLAGS)
@@ -45,7 +44,6 @@ libhamster_la_LIBADD =							\
 	$(LIBX11_LIBS)							\
 	$(LIBXFCE4UTIL_LIBS)						\
 	$(LIBXFCE4UI_LIBS)						\
-	$(LIBXFCE4GUI_LIBS)						\
 	$(LIBXFCE4PANEL_LIBS)						\
 	$(LIBXFCONF_LIBS)						\
 	$(LIBX11_LIBS)							

@@ -19,7 +19,7 @@
 #ifdef HAVE_CONFIG_H
 #  include <config.h>
 #endif
-#include <libxfcegui4/libxfcegui4.h>
+#include <libxfce4ui/libxfce4ui.h>
 #include <libxfce4panel/libxfce4panel.h>
 #include <xfconf/xfconf.h>
 #include "settings.h"
