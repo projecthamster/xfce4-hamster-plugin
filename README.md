@@ -1,6 +1,6 @@
 ##About
 This is a recreation of the gnome-shell hamster extension as a xfce4 panel plugin.
-See also the hamster project: <https://github.com/projecthamster>
+See also the hamster project: <https://github.com/projecthamster/hamster>
 
 Dependencies: `xfce4-panel xfconf hamster-applet|hamster-time-tracker`
 
