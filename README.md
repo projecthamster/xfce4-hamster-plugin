@@ -42,7 +42,7 @@ gdbus-codegen --generate-c-code windowserver --interface-prefix org.gnome.Hamste
 
 ## Contributing
 
-1. [Fork](http://help.github.com/forking/) Hamster
+1. [Fork](https://github.com/projecthamster/xfce4-hamster-plugin/fork) this project
 2. Create a topic branch - `git checkout -b my_branch`
 3. Push to your branch - `git push origin my_branch`
 4. Submit a [Pull Request](https://github.com/projecthamster/xfce4-hamster-plugin/pulls) with your branch
