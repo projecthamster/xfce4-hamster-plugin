@@ -1,4 +1,4 @@
-##About
+## About
 This is a recreation of the gnome-shell hamster extension as a xfce4 panel plugin.
 See also the hamster project: <https://github.com/projecthamster/hamster>
 
@@ -10,13 +10,13 @@ Common: `build-essential autoconf automake intltool libtool`
 
 Tested on ubuntu 14.04 and Arch with xfce 4.10; however 4.8 should also work.
 
-##Translators
+## Translators
 It is my wish that the string 'What goes on?' is to be translated with the following bias:
 > I'm looking for a question that is half way between "too formal" and "too casual", 
 > like something a coworker would ask, but not a boss or a kid; something that exceeds the simple "What are you doing?".
 > Feel free to employ any appropriate figure of speech unique to your language.
 
-##Packagers
+## Packagers
 This plug-in is useless without an activatable D-Bus implementation of 
 `org.gnome.Hamster` and `org.gnome.Hamster.WindowServer`. Hence the 
 providers of these interfaces should be a hard dependency, even if
@@ -33,9 +33,17 @@ by using e.g. `./configure --with-icon_name=hamster-time-tracker`.
 The generated .lo files are best purged since no linkage or development 
 packages are provided.
 
-##Hacking
+## Hacking
 Regenerate hamster DBUS-Glib with:
 ```
 gdbus-codegen --generate-c-code hamster --interface-prefix org.gnome. org.gnome.Hamster.xml
 gdbus-codegen --generate-c-code windowserver --interface-prefix org.gnome.Hamster org.gnome.Hamster.WindowServer.xml
 ```
+
+## Contributing
+
+1. [Fork](http://help.github.com/forking/) Hamster
+2. Create a topic branch - `git checkout -b my_branch`
+3. Push to your branch - `git push origin my_branch`
+4. Submit a [Pull Request](https://github.com/projecthamster/xfce4-hamster-plugin/pulls) with your branch
+5. That's it!
