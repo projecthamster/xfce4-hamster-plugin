@@ -17,7 +17,11 @@ OWN_CODE = \
 
 libhamster_la_SOURCES = $(GENERATED_CODE) $(THIRD_PARTY_CODE) $(OWN_CODE)
 
+hamster.c:
+	gdbus-codegen --generate-c-code hamster --interface-prefix org.gnome. org.gnome.Hamster.xml
 
+windowserver.c:
+	gdbus-codegen --generate-c-code windowserver --interface-prefix org.gnome.Hamster org.gnome.Hamster.WindowServer.xml
 
 libhamster_la_CFLAGS =	-Wall			\
 	-I$(top_builddir)						\
@@ -78,7 +82,7 @@ distclean-local:
 	rm -f hamster.desktop
 
 clean-local:
-	rm -f hamster.desktop
+	rm -f hamster.desktop $(GENERATED_CODE) 
 
 splint:
 	splint -weak -stats -badflag \
