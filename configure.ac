@@ -9,7 +9,7 @@ LT_INIT([disable-static])
 
 AC_CONFIG_MACRO_DIR([m4])
 
-AC_CONFIG_SRCDIR([panel-plugin/hamster.c])
+AC_CONFIG_SRCDIR([panel-plugin/plugin.c])
 AC_CONFIG_HEADERS([config.h])
 
 GETTEXT_PACKAGE=xfce4-hamster-plugin

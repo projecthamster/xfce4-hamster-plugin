@@ -2,7 +2,7 @@ plugindir = $(libdir)/xfce4/panel/plugins
 
 plugin_LTLIBRARIES = libhamster.la
 
-GENERATED_CODE = \
+BUILT_SOURCES = \
 	hamster.c hamster.h				\
 	windowserver.c windowserver.h
 
@@ -15,13 +15,15 @@ OWN_CODE = \
 	util.c util.h					\
 	settings.c settings.h
 
-libhamster_la_SOURCES = $(GENERATED_CODE) $(THIRD_PARTY_CODE) $(OWN_CODE)
+nodist_libhamster_la_SOURCES = $(BUILT_SOURCES)
 
-hamster.c:
+hamster.c hamster.h: org.gnome.Hamster.xml
 	gdbus-codegen --generate-c-code hamster --interface-prefix org.gnome. org.gnome.Hamster.xml
 
-windowserver.c:
+windowserver.c windowserver.h: org.gnome.Hamster.WindowServer.xml
 	gdbus-codegen --generate-c-code windowserver --interface-prefix org.gnome.Hamster org.gnome.Hamster.WindowServer.xml
+
+libhamster_la_SOURCES = $(THIRD_PARTY_CODE) $(OWN_CODE)
 
 libhamster_la_CFLAGS =	-Wall			\
 	-I$(top_builddir)						\
@@ -82,7 +84,7 @@ distclean-local:
 	rm -f hamster.desktop
 
 clean-local:
-	rm -f hamster.desktop $(GENERATED_CODE) 
+	rm -f hamster.desktop $(BUILT_SOURCES) 
 
 splint:
 	splint -weak -stats -badflag \

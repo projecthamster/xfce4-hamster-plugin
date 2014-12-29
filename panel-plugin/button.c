@@ -345,7 +345,9 @@ places_button_resize(PlacesButton *self)
     gboolean show_label;
     gint new_size;
     gboolean vertical = FALSE;
+#ifdef HAS_PANEL_49
     gboolean deskbar = FALSE;
+#endif
     gint nrows = 1;
 
     if (self->plugin == NULL)
