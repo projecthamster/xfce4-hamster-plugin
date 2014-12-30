@@ -8,7 +8,7 @@ Build dependencies[debian, ubuntu]: `libxfce4ui-1-dev xfce4-panel-dev libxfconf-
 
 Common: `build-essential autoconf automake intltool libtool`
 
-Tested on ubuntu 14.04 and Arch with xfce 4.10; however 4.8 should also work.
+Tested on ubuntu 14.04 and Arch with xfce 4.10 and Debian Wheezy with xfce 4.8.
 
 ## Translators
 It is my wish that the string 'What goes on?' is to be translated with the following bias:
