@@ -17,11 +17,11 @@ OWN_CODE = \
 
 nodist_libhamster_la_SOURCES = $(BUILT_SOURCES)
 
-hamster.c hamster.h: org.gnome.Hamster.xml
-	gdbus-codegen --generate-c-code hamster --interface-prefix org.gnome. org.gnome.Hamster.xml
+hamster.c hamster.h: 
+	gdbus-codegen --generate-c-code hamster --interface-prefix org.gnome. $(srcdir)/org.gnome.Hamster.xml
 
-windowserver.c windowserver.h: org.gnome.Hamster.WindowServer.xml
-	gdbus-codegen --generate-c-code windowserver --interface-prefix org.gnome.Hamster org.gnome.Hamster.WindowServer.xml
+windowserver.c windowserver.h: 
+	gdbus-codegen --generate-c-code windowserver --interface-prefix org.gnome.Hamster $(srcdir)/org.gnome.Hamster.WindowServer.xml
 
 libhamster_la_SOURCES = $(THIRD_PARTY_CODE) $(OWN_CODE)
 
@@ -78,10 +78,10 @@ desktop_DATA = $(desktop_in_files:.desktop.in=.desktop)
 @INTLTOOL_DESKTOP_RULE@
 	sed -i 's:@ICON_NAME@:$(with_icon_name):g' hamster.desktop
 
-EXTRA_DIST = hamster.desktop.in
+EXTRA_DIST = hamster.desktop.in xfce4-popup-hamstermenu.sh org.gnome.Hamster.xml org.gnome.Hamster.WindowServer.xml
 
 distclean-local:
-	rm -f hamster.desktop
+	rm -f hamster.desktop xfce4-popup-hamstermenu
 
 clean-local:
 	rm -f hamster.desktop $(BUILT_SOURCES) 

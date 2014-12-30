@@ -1,4 +1,3 @@
-panel-plugin/hamster.c
 panel-plugin/util.c
 panel-plugin/plugin.c
 panel-plugin/button.c

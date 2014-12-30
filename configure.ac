@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.69])
-AC_INIT([xfce4-hamster-plugin], [0.0.1], [hakan@erduman.de])
+AC_INIT([xfce4-hamster-plugin], [1.7.0], [smultimeter@gmail.com])
 AM_INIT_AUTOMAKE([silent-rules])
 LT_PREREQ([2.2.6])
 LT_INIT([disable-static])
