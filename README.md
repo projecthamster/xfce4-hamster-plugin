@@ -33,13 +33,6 @@ by using e.g. `./configure --with-icon_name=hamster-time-tracker`.
 The generated .lo files are best purged since no linkage or development 
 packages are provided.
 
-## Hacking
-Regenerate hamster DBUS-Glib with:
-```
-gdbus-codegen --generate-c-code hamster --interface-prefix org.gnome. org.gnome.Hamster.xml
-gdbus-codegen --generate-c-code windowserver --interface-prefix org.gnome.Hamster org.gnome.Hamster.WindowServer.xml
-```
-
 ## Contributing
 
 1. [Fork](https://github.com/projecthamster/xfce4-hamster-plugin/fork) this project
