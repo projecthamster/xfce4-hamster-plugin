@@ -83,6 +83,5 @@ msgid "Show tooltips on buttons"
 msgstr "Mostrar ayuda en los botones"
 
 #: ../panel-plugin/hamster.desktop.in.h:2
-#, fuzzy
 msgid "Time bookkeeping plugin"
-msgstr "Complemento de contaduría de tiempo"
+msgstr "Complemento de registro de tiempo"
