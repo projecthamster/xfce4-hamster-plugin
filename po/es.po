@@ -59,7 +59,6 @@ msgstr "Sin actividad aun."
 
 # Is the person inactive or the tracking?
 #: ../panel-plugin/view.c:594
-#, fuzzy
 msgid "inactive"
 msgstr "inactivo"
 
@@ -72,9 +71,8 @@ msgid "<b>Settings</b>"
 msgstr "<b>Preferencias</b>"
 
 #: ../panel-plugin/settings.c:37
-#, fuzzy
 msgid "Keep popup floating"
-msgstr "Mantener flotando el diálogo"
+msgstr "Mantener abierta la ventana"
 
 #: ../panel-plugin/settings.c:41
 msgid "Entry completion as dropdown"
