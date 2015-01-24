@@ -60,7 +60,7 @@ msgstr "Sin actividad aun."
 # Is the person inactive or the tracking?
 #: ../panel-plugin/view.c:594
 msgid "inactive"
-msgstr "inactivo"
+msgstr "sin actividad"
 
 #: ../panel-plugin/settings.c:21 ../panel-plugin/hamster.desktop.in.h:1
 msgid "Hamster"
