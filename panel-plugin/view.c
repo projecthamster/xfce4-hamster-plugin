@@ -672,10 +672,15 @@ hview_button_update(HamsterView *view)
 {
    GVariant *res;
    gsize count = 0;
+   gboolean ellipsize;
+
    if(NULL != view->storeFacts)
       gtk_list_store_clear(view->storeFacts);
    if(NULL != view->hamster)
    {
+      ellipsize = xfconf_channel_get_bool(view->channel, XFPROP_SANITIZE, FALSE);
+      places_button_set_ellipsize(PLACES_BUTTON(view->button), ellipsize);
+
       if(hamster_call_get_todays_facts_sync(view->hamster, &res, NULL, NULL))
       {
          if(NULL != res && (count = g_variant_n_children(res)))
@@ -772,6 +777,9 @@ hview_cb_channel(XfconfChannel *channel,
       hview_autohide_mode_update(view);
    else if(!strcmp(property, XFPROP_TOOLTIPS))
       hview_tooltips_mode_update(view);
+   else if(!strcmp(property, XFPROP_SANITIZE))
+      hview_button_update(view);
+
 }
 
 HamsterView*

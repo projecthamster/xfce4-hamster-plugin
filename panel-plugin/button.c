@@ -115,6 +115,15 @@ places_button_set_label(PlacesButton *self, const gchar *label)
     places_button_resize(self);
 }
 
+void
+places_button_set_ellipsize(PlacesButton *self, gboolean ellipsize)
+{
+   g_assert(PLACES_IS_BUTTON(self));
+   self->ellipsize = ellipsize;
+
+   places_button_resize(self);
+}
+
 static void
 places_button_set_property(GObject      *object,
                            guint         property_id,
@@ -144,6 +153,15 @@ places_button_get_label(PlacesButton *self)
 
     DBG("returning %s", self->label_text);
     return self->label_text;
+}
+
+gboolean
+places_button_get_ellipsize(PlacesButton *self)
+{
+    g_assert(PLACES_IS_BUTTON(self));
+
+    DBG("returning %s", self->ellipsize);
+    return self->ellipsize;
 }
 
 static void
@@ -198,6 +216,7 @@ places_button_init(PlacesButton *self)
     self->box = NULL;
     self->label = NULL;
     self->plugin_size = -1;
+    self->ellipsize = FALSE;
 }
 
 static void
@@ -320,7 +339,7 @@ places_button_resize_label(PlacesButton *self,
     else
         gtk_label_set_text(GTK_LABEL(self->label), self->label_text);
 
-    if (deskbar)
+    if (deskbar || self->ellipsize)
       gtk_label_set_ellipsize (GTK_LABEL (self->label), PANGO_ELLIPSIZE_END);
     else
       gtk_label_set_ellipsize (GTK_LABEL (self->label), PANGO_ELLIPSIZE_NONE);
@@ -335,6 +354,11 @@ places_button_resize_label(PlacesButton *self,
         gtk_label_set_angle (GTK_LABEL (self->label), 0);
         gtk_misc_set_alignment (GTK_MISC (self->label), 0.0, 0.5);
       }
+    if(self->ellipsize)
+       gtk_label_set_max_width_chars (GTK_LABEL (self->label), 25);
+    else
+       gtk_label_set_max_width_chars (GTK_LABEL (self->label), 255);
+
     gtk_widget_show(self->label);
 }
 

@@ -51,6 +51,7 @@ struct _PlacesButton
     gint plugin_size;
     gulong style_set_id;
     gulong screen_changed_id;
+    gboolean ellipsize;
 };
 
 struct _PlacesButtonClass
@@ -67,8 +68,14 @@ places_button_new();
 void
 places_button_set_label(PlacesButton*, const gchar *label);
 
+void
+places_button_set_ellipsize(PlacesButton *self, gboolean ellipsize);
+
 const gchar*
 places_button_get_label(PlacesButton*);
+
+gboolean
+places_button_get_ellipsize(PlacesButton *self);
 
 #endif
 /* vim: set ai et tabstop=4: */
