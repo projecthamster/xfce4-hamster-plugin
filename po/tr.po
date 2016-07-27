@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: xfce4-hamster-plugin 0.0.1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2014-10-05 22:18+0200\n"
-"PO-Revision-Date: 2014-10-05 22:22+0100\n"
+"POT-Creation-Date: 2016-07-27 16:18+0200\n"
+"PO-Revision-Date: 2016-07-27 16:24+0100\n"
 "Last-Translator: Hakan Erduman <hakan@erduman.de>\n"
 "Language-Team: Turkish\n"
 "Language: tr\n"
@@ -19,68 +19,72 @@ msgstr ""
 "X-Generator: Poedit 1.5.4\n"
 
 #. subtitle
-#: ../panel-plugin/view.c:289
+#: ../panel-plugin/view.c:350
 msgid "What goes on?"
 msgstr "Ne var, ne yok?"
 
 #. label
-#: ../panel-plugin/view.c:305
+#: ../panel-plugin/view.c:366
 msgid "Todays activities"
 msgstr "Bugünki etkinlikler"
 
-#: ../panel-plugin/view.c:339
+#: ../panel-plugin/view.c:401
 msgid "Edit activity"
 msgstr "Etkinliği düzenle"
 
-#: ../panel-plugin/view.c:345
+#: ../panel-plugin/view.c:407
 msgid "Resume activity"
 msgstr "Etkinliğe devam et"
 
 #. menuish buttons
-#: ../panel-plugin/view.c:358
+#: ../panel-plugin/view.c:420
 msgid "Show overview"
 msgstr "Genel görünüm"
 
-#: ../panel-plugin/view.c:364
+#: ../panel-plugin/view.c:426
 msgid "Stop tracking"
 msgstr "Takibi durdur"
 
-#: ../panel-plugin/view.c:370
+#: ../panel-plugin/view.c:432
 msgid "Add earlier activity"
 msgstr "Önceki etkinliği ekle"
 
-#: ../panel-plugin/view.c:377
+#: ../panel-plugin/view.c:438
 msgid "Tracking settings"
 msgstr "Takip tercihleri"
 
-#: ../panel-plugin/view.c:516
+#: ../panel-plugin/view.c:633
 msgid "No activities yet."
 msgstr "Şimdilik etkinlik yok."
 
-#: ../panel-plugin/view.c:594
+#: ../panel-plugin/view.c:720
 msgid "inactive"
 msgstr "durgun"
 
-#: ../panel-plugin/settings.c:21 ../panel-plugin/hamster.desktop.in.h:1
+#: ../panel-plugin/settings.c:33 ../panel-plugin/hamster.desktop.in.h:1
 msgid "Hamster"
 msgstr "Hamster"
 
-#: ../panel-plugin/settings.c:32
+#: ../panel-plugin/settings.c:35 ../panel-plugin/hamster.desktop.in.h:2
+msgid "Time bookkeeping plugin"
+msgstr "Zaman takipçisi"
+
+#: ../panel-plugin/settings.c:44
 msgid "<b>Settings</b>"
 msgstr "<b>Seçenekler</b>"
 
-#: ../panel-plugin/settings.c:37
+#: ../panel-plugin/settings.c:49
 msgid "Keep popup floating"
 msgstr "İletişimi açık tut"
 
-#: ../panel-plugin/settings.c:41
+#: ../panel-plugin/settings.c:53
 msgid "Entry completion as dropdown"
 msgstr "Açılır gibi giriş tamamlama"
 
-#: ../panel-plugin/settings.c:45
+#: ../panel-plugin/settings.c:57
 msgid "Show tooltips on buttons"
 msgstr "Düğmelerde araç ipuçlarını göster"
 
-#: ../panel-plugin/hamster.desktop.in.h:2
-msgid "Time bookkeeping plugin"
-msgstr "Zaman takipçisi"
+#: ../panel-plugin/settings.c:61
+msgid "Sanitize label width"
+msgstr "Panel düğmesindeki etkinliği kısa kes"
