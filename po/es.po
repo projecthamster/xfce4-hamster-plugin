@@ -7,81 +7,86 @@ msgid ""
 msgstr ""
 "Project-Id-Version: xfce4-hamster-plugin 0.0.1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2014-10-05 22:18+0200\n"
-"PO-Revision-Date: 2015-01-21 14:12-0300\n"
-"Last-Translator: Nicolás Reynolds <fauno@endefensadelsl.org>\n"
+"POT-Creation-Date: 2016-07-27 16:18+0200\n"
+"PO-Revision-Date: 2016-08-04 11:36+0200\n"
+"Last-Translator: Hakan Erduman <hakan@erduman.de>\n"
 "Language-Team: Spanish\n"
 "Language: es\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Poedit 1.7.3\n"
+"X-Generator: Poedit 1.8.7.1\n"
 
 #. subtitle
-#: ../panel-plugin/view.c:289
+#: ../panel-plugin/view.c:350
 msgid "What goes on?"
 msgstr "¿Qué está pasando?"
 
 #. label
-#: ../panel-plugin/view.c:305
+#: ../panel-plugin/view.c:366
 msgid "Todays activities"
 msgstr "Actividades del día"
 
-#: ../panel-plugin/view.c:339
+#: ../panel-plugin/view.c:401
 msgid "Edit activity"
 msgstr "Editar actividad"
 
-#: ../panel-plugin/view.c:345
+#: ../panel-plugin/view.c:407
 msgid "Resume activity"
 msgstr "Retomar actividad"
 
 #. menuish buttons
-#: ../panel-plugin/view.c:358
+#: ../panel-plugin/view.c:420
 msgid "Show overview"
 msgstr "Mostrar resumen"
 
-#: ../panel-plugin/view.c:364
+#: ../panel-plugin/view.c:426
 msgid "Stop tracking"
 msgstr "Detener el registro"
 
-#: ../panel-plugin/view.c:370
+#: ../panel-plugin/view.c:432
 msgid "Add earlier activity"
 msgstr "Agregar actividad anterior"
 
-#: ../panel-plugin/view.c:377
+#: ../panel-plugin/view.c:438
 msgid "Tracking settings"
 msgstr "Preferencias de registro"
 
-#: ../panel-plugin/view.c:516
+#: ../panel-plugin/view.c:633
 msgid "No activities yet."
 msgstr "Sin actividad aun."
 
 # Is the person inactive or the tracking?
-#: ../panel-plugin/view.c:594
+#: ../panel-plugin/view.c:720
 msgid "inactive"
 msgstr "sin actividad"
 
-#: ../panel-plugin/settings.c:21 ../panel-plugin/hamster.desktop.in.h:1
+#: ../panel-plugin/settings.c:33 ../panel-plugin/hamster.desktop.in.h:1
 msgid "Hamster"
 msgstr "Hamster"
 
-#: ../panel-plugin/settings.c:32
+#: ../panel-plugin/settings.c:35 ../panel-plugin/hamster.desktop.in.h:2
+msgid "Time bookkeeping plugin"
+msgstr "Complemento de registro de tiempo"
+
+#: ../panel-plugin/settings.c:44
 msgid "<b>Settings</b>"
 msgstr "<b>Preferencias</b>"
 
-#: ../panel-plugin/settings.c:37
+#: ../panel-plugin/settings.c:49
 msgid "Keep popup floating"
 msgstr "Mantener abierta la ventana"
 
-#: ../panel-plugin/settings.c:41
+#: ../panel-plugin/settings.c:53
 msgid "Entry completion as dropdown"
 msgstr "Autocompletado desplegable"
 
-#: ../panel-plugin/settings.c:45
+#: ../panel-plugin/settings.c:57
 msgid "Show tooltips on buttons"
 msgstr "Mostrar ayuda en los botones"
 
-#: ../panel-plugin/hamster.desktop.in.h:2
-msgid "Time bookkeeping plugin"
-msgstr "Complemento de registro de tiempo"
+# Google translated for now
+#: ../panel-plugin/settings.c:61
+msgid "Sanitize label width"
+msgstr "Limitar ancho de la etiqueta"
