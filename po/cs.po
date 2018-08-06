@@ -1,0 +1,90 @@
+# Czech translations for xfce4-hamster-plugin package.
+# Copyright (C) 2014 THE xfce4-hamster-plugin'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the xfce4-hamster-plugin package.
+# Pavel Borecki <pavel.borecki@gmail.com>, 2018.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: xfce4-hamster-plugin 0.0.1\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2016-07-27 16:18+0200\n"
+"PO-Revision-Date: 2018-08-06 16:43+0200\n"
+"Last-Translator: Pavel Borecki <pavel.borecki@gmail.com>\n"
+"Language-Team: Czech\n"
+"Language: cs_CZ\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=3; plural=(n==1) ? 0 : (n>=2 && n<=4) ? 1 : 2;\n"
+"X-Generator: Poedit 2.0.4\n"
+
+#. subtitle
+#: ../panel-plugin/view.c:350
+msgid "What goes on?"
+msgstr "Čím se právě zabýváte?"
+
+#. label
+#: ../panel-plugin/view.c:366
+msgid "Todays activities"
+msgstr "Dnešní aktivity"
+
+#: ../panel-plugin/view.c:401
+msgid "Edit activity"
+msgstr "Upravit aktivitu"
+
+#: ../panel-plugin/view.c:407
+msgid "Resume activity"
+msgstr "Pokračovat v aktivitě"
+
+#. menuish buttons
+#: ../panel-plugin/view.c:420
+msgid "Show overview"
+msgstr "Zobrazit přehled"
+
+#: ../panel-plugin/view.c:426
+msgid "Stop tracking"
+msgstr "Zastavit sledování"
+
+#: ../panel-plugin/view.c:432
+msgid "Add earlier activity"
+msgstr "Přidat dřívější aktivitu"
+
+#: ../panel-plugin/view.c:438
+msgid "Tracking settings"
+msgstr "Nastavení sledování"
+
+#: ../panel-plugin/view.c:633
+msgid "No activities yet."
+msgstr "Doposud žádné aktivity."
+
+#: ../panel-plugin/view.c:720
+msgid "inactive"
+msgstr "neaktivní"
+
+#: ../panel-plugin/settings.c:33 ../panel-plugin/hamster.desktop.in.h:1
+msgid "Hamster"
+msgstr "Hamster"
+
+#: ../panel-plugin/settings.c:35 ../panel-plugin/hamster.desktop.in.h:2
+msgid "Time bookkeeping plugin"
+msgstr "Zásuvný modul pro evidenci času"
+
+#: ../panel-plugin/settings.c:44
+msgid "<b>Settings</b>"
+msgstr "<b>Nastavení</b>"
+
+#: ../panel-plugin/settings.c:49
+msgid "Keep popup floating"
+msgstr "Ponechat vyskakovací okno otevřené"
+
+#: ../panel-plugin/settings.c:53
+msgid "Entry completion as dropdown"
+msgstr "Dokončení položky jako rozbalovací nabídka"
+
+#: ../panel-plugin/settings.c:57
+msgid "Show tooltips on buttons"
+msgstr "Zobrazovat popisky tlačítek"
+
+#: ../panel-plugin/settings.c:61
+msgid "Sanitize label width"
+msgstr "Přizpůsobit šířku štítku"
