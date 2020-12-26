@@ -32,4 +32,5 @@ jobs:
           cd $GITHUB_WORKSPACE
           ./autogen.sh
           ./configure --prefix=/usr
-          make install
+          make
+          sudo make install
