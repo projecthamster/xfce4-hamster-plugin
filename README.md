@@ -16,6 +16,11 @@ It is my wish that the string 'What goes on?' is to be translated with the follo
 > like something a coworker would ask, but not a boss or a kid; something that exceeds the simple "What are you doing?".
 > Feel free to employ any appropriate figure of speech unique to your language.
 
+## Compile
+After checkout, cd to the directory and issue `./autgen.sh`. If this fails, install missing dependencies.
+Then, issue `./configure --prefix=/usr`. If this fails, install missing development packages.
+Finally, issue `make && sudo make install`.
+
 ## Packagers
 This plug-in is useless without an activatable D-Bus implementation of 
 `org.gnome.Hamster` and `org.gnome.Hamster.WindowServer`. Hence the 
