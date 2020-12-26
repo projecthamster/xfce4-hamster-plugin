@@ -63,17 +63,17 @@ AM_GLIB_GNU_GETTEXT
 AC_CONFIG_FILES([Makefile panel-plugin/Makefile po/Makefile.in])
 
 # Checks for libraries.
-PKG_CHECK_MODULES([GLIB], [glib-2.0 >= 2.22.0])
-PKG_CHECK_MODULES([GIO], [gio-2.0 >= 2.22.0])
-PKG_CHECK_MODULES([GIO_UNIX], [gio-unix-2.0 >= 2.22.0])
-PKG_CHECK_MODULES([GMODULE], [gmodule-2.0 >= 2.22.0])
-PKG_CHECK_MODULES([GOBJECT], [gobject-2.0 >= 2.22.0])
-PKG_CHECK_MODULES([GTHREAD], [gthread-2.0 >= 2.22.0])
-PKG_CHECK_MODULES([GTK], [gtk+-2.0 >= 2.14.0])
-PKG_CHECK_MODULES([LIBXFCE4UTIL], [libxfce4util-1.0 >= 4.8.0])
-PKG_CHECK_MODULES([LIBXFCE4UI], [libxfce4ui-1 >= 4.8.0])
-PKG_CHECK_MODULES([LIBXFCE4PANEL], [libxfce4panel-1.0 >= 4.8.0])
-PKG_CHECK_MODULES([LIBXFCONF], [libxfconf-0 >= 4.8.0])
+PKG_CHECK_MODULES([GLIB], [glib-2.0])
+PKG_CHECK_MODULES([GIO], [gio-2.0])
+PKG_CHECK_MODULES([GIO_UNIX], [gio-unix-2.0])
+PKG_CHECK_MODULES([GMODULE], [gmodule-2.0])
+PKG_CHECK_MODULES([GOBJECT], [gobject-2.0])
+PKG_CHECK_MODULES([GTHREAD], [gthread-2.0])
+PKG_CHECK_MODULES([GTK], [gtk+-3.0])
+PKG_CHECK_MODULES([LIBXFCE4UTIL], [libxfce4util-1.0])
+PKG_CHECK_MODULES([LIBXFCE4UI], [libxfce4ui-2])
+PKG_CHECK_MODULES([LIBXFCE4PANEL], [libxfce4panel-2.0])
+PKG_CHECK_MODULES([LIBXFCONF], [libxfconf-0])
 
 
 # Checks for header files.

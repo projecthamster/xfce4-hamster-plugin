@@ -256,14 +256,14 @@ hview_cb_tv_button_press(GtkWidget *tv,
             gchar *icon;
             gchar *fact;
             gtk_tree_model_get(model, &iter, ID, &id, BTNCONT, &icon, TITLE, &fact, -1);
-            DBG("%s:%d:%s", column->title, id, icon);
-            if(!strcmp(column->title, "ed"))
+            //DBG("%s:%d:%s", column->title, id, icon);
+            if(!strcmp(gtk_tree_view_column_get_title (column), "ed"))
             {
                GVariant *dummy = g_variant_new_int32(id);
                GVariant *var = g_variant_new_variant(dummy);
                   window_server_call_edit_sync(view->windowserver, var, NULL, NULL);
             }
-            else if(!strcmp(column->title, "ct") && !strcmp(icon, "gtk-media-play"))
+            else if(!strcmp(gtk_tree_view_column_get_title(column), "ct") && !strcmp(icon, "gtk-media-play"))
             {
                DBG("Resume %s", fact);
                hamster_call_add_fact_sync(view->hamster, fact, 0, 0, FALSE, &id, NULL, NULL);
@@ -284,8 +284,8 @@ hview_cb_label_allocate( GtkWidget *label,
 {
    if(gtk_widget_get_sensitive(view->treeview))
    {
-      GtkRequisition req;
-      gtk_widget_size_request(view->treeview, &req);
+      GtkRequisition req, unused;
+      gtk_widget_get_preferred_size(view->treeview, &req, &unused);
       if(req.width > 0)
          gtk_widget_set_size_request( label, req.width, -1);
    }
@@ -312,10 +312,11 @@ void
 hview_cb_style_set(GtkWidget *widget, GtkStyle *previous, HamsterView *view)
 {
    guint border = 5;
-   GtkStyle* style = gtk_widget_get_style(view->button);
+   /*
+   GtkStyleContext* style = gtk_widget_get_style_context(view->button);
    if(style)
       border = (2 * MAX(style->xthickness, style->ythickness)) + 2;
-
+	*/
    DBG("style-set %d", border);
    gtk_container_set_border_width(GTK_CONTAINER(view->vbx), border);
 }

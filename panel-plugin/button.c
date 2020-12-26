@@ -230,7 +230,7 @@ places_button_construct(PlacesButton *self, XfcePanelPlugin *plugin)
     self->plugin = plugin;
 
     /* from libxfce4panel */
-    GTK_WIDGET_UNSET_FLAGS(self, GTK_CAN_DEFAULT|GTK_CAN_FOCUS);
+    //GTK_WIDGET_UNSET_FLAGS(self, GTK_CAN_DEFAULT|GTK_CAN_FOCUS);
     gtk_button_set_relief(GTK_BUTTON(self), GTK_RELIEF_NONE);
     gtk_button_set_focus_on_click(GTK_BUTTON(self), FALSE);
 
@@ -239,7 +239,7 @@ places_button_construct(PlacesButton *self, XfcePanelPlugin *plugin)
     gtk_widget_show(self->alignment);
 
     orientation = xfce_panel_plugin_get_orientation(self->plugin);
-    self->box = xfce_hvbox_new(orientation, FALSE, BOX_SPACING);
+    self->box = gtk_box_new(orientation, 1);
     gtk_container_set_border_width(GTK_CONTAINER(self->box), 0);
     gtk_container_add(GTK_CONTAINER(self->alignment), self->box);
     gtk_widget_show(self->box);
@@ -420,7 +420,7 @@ static void
 places_button_mode_changed(XfcePanelPlugin *plugin, XfcePanelPluginMode mode, PlacesButton *self)
 {
     DBG("orientation changed");
-    xfce_hvbox_set_orientation(XFCE_HVBOX(self->box),
+    gtk_orientable_set_orientation(GTK_ORIENTABLE(self->box),
                                (mode == XFCE_PANEL_PLUGIN_MODE_VERTICAL) ?
                                GTK_ORIENTATION_VERTICAL : GTK_ORIENTATION_HORIZONTAL);
     places_button_resize(self);
@@ -431,7 +431,7 @@ static void
 places_button_orientation_changed(XfcePanelPlugin *plugin, GtkOrientation orientation, PlacesButton *self)
 {
     DBG("orientation changed");
-    xfce_hvbox_set_orientation(XFCE_HVBOX(self->box), orientation);
+    gtk_orientable_set_orientation(GTK_ORIENTABLE(self->box), orientation);
     places_button_resize(self);
 }
 #endif
