@@ -18,7 +18,7 @@ AC_DEFINE_UNQUOTED(GETTEXT_PACKAGE, "$GETTEXT_PACKAGE", [Define to the Gettext p
 AC_DEFINE_UNQUOTED(PLUGIN_NAME, "$PACKAGE", [Define plugin name])
 
 
-AC_ARG_WITH(icon_name,[  --with-icon_name     icon name (default: hamster-applet)],[with_icon_name=$withval],[with_icon_name=hamster-applet])
+AC_ARG_WITH(icon_name,[  --with-icon_name     icon name (default: org.gnome.Hamster.GUI)],[with_icon_name=$withval],[with_icon_name=org.gnome.Hamster.GUI])
 AC_DEFINE_UNQUOTED(ICON_NAME, "$with_icon_name", [Hamster Icon name])
 AC_SUBST(with_icon_name)
 

@@ -341,7 +341,7 @@ hview_popup_new(HamsterView *view)
    gtk_frame_set_shadow_type(GTK_FRAME(frm), GTK_SHADOW_OUT);
    gtk_container_add(GTK_CONTAINER(view->popup), frm);
    gtk_container_set_border_width(GTK_CONTAINER(view->popup), 0);
-   view->vbx = gtk_vbox_new(FALSE, 1);
+   view->vbx = gtk_box_new(GTK_ORIENTATION_VERTICAL, 1);
    gtk_container_add(GTK_CONTAINER(frm), view->vbx);
    /* handle ESC */
    g_signal_connect(view->popup, "key-press-event",
@@ -410,7 +410,8 @@ hview_popup_new(HamsterView *view)
    gtk_container_add(GTK_CONTAINER(view->vbx), view->treeview);
 
    // summary
-   gtk_misc_set_alignment(GTK_MISC(view->summary), 1.0, 0.0);
+   gtk_widget_set_halign(view->summary, GTK_ALIGN_END);
+   gtk_widget_set_valign(view->summary, GTK_ALIGN_START);
    gtk_label_set_line_wrap(GTK_LABEL(view->summary), TRUE);
    gtk_label_set_justify(GTK_LABEL(view->summary), GTK_JUSTIFY_RIGHT);
    gtk_container_add(GTK_CONTAINER(view->vbx), view->summary);
@@ -420,34 +421,38 @@ hview_popup_new(HamsterView *view)
    // menuish buttons
    ovw = gtk_button_new_with_label(_("Show overview"));
    gtk_button_set_relief(GTK_BUTTON(ovw), GTK_RELIEF_NONE);
-   gtk_button_set_focus_on_click(GTK_BUTTON(ovw), FALSE);
-   gtk_button_set_alignment(GTK_BUTTON(ovw), 0.0, 0.5);
+   gtk_widget_set_focus_on_click(ovw, FALSE);
+   gtk_widget_set_halign(ovw, GTK_ALIGN_START);
+   gtk_widget_set_valign(ovw, GTK_ALIGN_CENTER);
    g_signal_connect(ovw, "clicked",
                            G_CALLBACK(hview_cb_show_overview), view);
    stp = gtk_button_new_with_label(_("Stop tracking"));
    gtk_button_set_relief(GTK_BUTTON(stp), GTK_RELIEF_NONE);
-   gtk_button_set_focus_on_click(GTK_BUTTON(stp), FALSE);
-   gtk_button_set_alignment(GTK_BUTTON(stp), 0.0, 0.5);
+   gtk_widget_set_focus_on_click(stp, FALSE);
+   gtk_widget_set_halign(stp, GTK_ALIGN_START);
+   gtk_widget_set_valign(stp, GTK_ALIGN_CENTER);
    g_signal_connect(stp, "clicked",
                            G_CALLBACK(hview_cb_stop_tracking), view);
    add = gtk_button_new_with_label(_("Add earlier activity"));
    gtk_button_set_relief(GTK_BUTTON(add), GTK_RELIEF_NONE);
-   gtk_button_set_focus_on_click(GTK_BUTTON(add), FALSE);
-   gtk_button_set_alignment(GTK_BUTTON(add), 0.0, 0.5);
+   gtk_widget_set_focus_on_click(add, FALSE);
+   gtk_widget_set_halign(add, GTK_ALIGN_START);
+   gtk_widget_set_valign(add, GTK_ALIGN_CENTER);
    g_signal_connect(add, "clicked",
                            G_CALLBACK(hview_cb_add_earlier_activity), view);
    cfg = gtk_button_new_with_label(_("Tracking settings"));
    gtk_button_set_relief(GTK_BUTTON(cfg), GTK_RELIEF_NONE);
-   gtk_button_set_focus_on_click(GTK_BUTTON(cfg), FALSE);
-   gtk_button_set_alignment(GTK_BUTTON(cfg), 0.0, 0.5);
+   gtk_widget_set_focus_on_click(cfg, FALSE);
+   gtk_widget_set_halign(cfg, GTK_ALIGN_START);
+   gtk_widget_set_valign(cfg, GTK_ALIGN_CENTER);
    g_signal_connect(cfg, "clicked",
                            G_CALLBACK(hview_cb_tracking_settings), view);
 
-   gtk_box_pack_start(GTK_BOX(view->vbx), gtk_hseparator_new(), FALSE, TRUE, 0);
+   gtk_box_pack_start(GTK_BOX(view->vbx), gtk_separator_new(GTK_ORIENTATION_HORIZONTAL), FALSE, TRUE, 0);
    gtk_box_pack_start(GTK_BOX(view->vbx), ovw, FALSE, FALSE, 0);
    gtk_box_pack_start(GTK_BOX(view->vbx), stp, FALSE, FALSE, 0);
    gtk_box_pack_start(GTK_BOX(view->vbx), add, FALSE, FALSE, 0);
-   gtk_box_pack_start(GTK_BOX(view->vbx), gtk_hseparator_new(), FALSE, TRUE, 0);
+   gtk_box_pack_start(GTK_BOX(view->vbx), gtk_separator_new(GTK_ORIENTATION_HORIZONTAL), FALSE, TRUE, 0);
    gtk_box_pack_start(GTK_BOX(view->vbx), cfg, FALSE, FALSE, 0);
 
    gtk_widget_show_all(view->popup);
@@ -532,9 +537,11 @@ hview_popup_show(HamsterView *view, gboolean atPointer)
    /* popup popup */
    if(atPointer)
    {
-      GdkScreen* screen = NULL;
-      GdkDisplay* display = gdk_display_get_default();
-      gdk_display_get_pointer(display, &screen, &x, &y, NULL);
+		GdkDisplay* display = gdk_display_get_default();
+		GdkSeat* seat = gdk_display_get_default_seat(display);
+		GdkDevice* pointer = gdk_seat_get_pointer(seat);
+
+		gdk_device_get_position (pointer, NULL, &x, &y);
    }
    else
    {

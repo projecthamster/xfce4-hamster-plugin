@@ -43,7 +43,6 @@ config_show(XfcePanelPlugin *plugin, XfconfChannel *channel)
 
    lbl = gtk_label_new(_("<b>Settings</b>"));
    gtk_label_set_use_markup(GTK_LABEL(lbl), TRUE);
-   gtk_misc_set_alignment(GTK_MISC(lbl), 0.1, 0.5);
    gtk_container_add(GTK_CONTAINER(cnt), lbl);
 
    chk = gtk_check_button_new_with_label(_("Keep popup floating"));
@@ -62,7 +61,7 @@ config_show(XfcePanelPlugin *plugin, XfconfChannel *channel)
    xfconf_g_property_bind(channel, XFPROP_SANITIZE, G_TYPE_BOOLEAN, G_OBJECT(chk), "active");
    gtk_container_add(GTK_CONTAINER(cnt), chk);
 
-   gtk_dialog_add_button(GTK_DIALOG(dlg), GTK_STOCK_CLOSE, 0);
+   gtk_dialog_add_button(GTK_DIALOG(dlg), "_Close", 0);
 
    gtk_widget_show_all(dlg);
    gtk_dialog_run(GTK_DIALOG(dlg));

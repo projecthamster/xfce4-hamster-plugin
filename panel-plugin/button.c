@@ -57,12 +57,6 @@
 
 #define BOX_SPACING 2
 
-#ifdef LIBXFCE4PANEL_CHECK_VERSION
-#if LIBXFCE4PANEL_CHECK_VERSION (4,9,0)
-#define HAS_PANEL_49
-#endif
-#endif
-
 enum
 {
     PROP_0,
@@ -75,14 +69,8 @@ places_button_dispose(GObject*);
 static void
 places_button_resize(PlacesButton*);
 
-#ifdef HAS_PANEL_49
 static void
 places_button_mode_changed(XfcePanelPlugin*, XfcePanelPluginMode, PlacesButton*);
-
-#else
-static void
-places_button_orientation_changed(XfcePanelPlugin*, GtkOrientation, PlacesButton*);
-#endif
 
 static gboolean
 places_button_size_changed(XfcePanelPlugin*, gint size, PlacesButton*);
@@ -229,30 +217,21 @@ places_button_construct(PlacesButton *self, XfcePanelPlugin *plugin)
     g_object_ref(plugin);
     self->plugin = plugin;
 
-    /* from libxfce4panel */
-    //GTK_WIDGET_UNSET_FLAGS(self, GTK_CAN_DEFAULT|GTK_CAN_FOCUS);
     gtk_button_set_relief(GTK_BUTTON(self), GTK_RELIEF_NONE);
-    gtk_button_set_focus_on_click(GTK_BUTTON(self), FALSE);
-
-    self->alignment = gtk_alignment_new (0.0, 0.5, 1.0, 1.0);
-    gtk_container_add(GTK_CONTAINER(self), self->alignment);
-    gtk_widget_show(self->alignment);
+    gtk_widget_set_focus_on_click(GTK_WIDGET(self), FALSE);
 
     orientation = xfce_panel_plugin_get_orientation(self->plugin);
     self->box = gtk_box_new(orientation, 1);
     gtk_container_set_border_width(GTK_CONTAINER(self->box), 0);
-    gtk_container_add(GTK_CONTAINER(self->alignment), self->box);
+    gtk_widget_set_halign(self->box, GTK_ALIGN_CENTER);
+    gtk_container_add(GTK_CONTAINER(self), self->box);
     gtk_widget_show(self->box);
 
     places_button_resize(self);
 
-#ifdef HAS_PANEL_49
     g_signal_connect(G_OBJECT(plugin), "mode-changed",
                      G_CALLBACK(places_button_mode_changed), self);
-#else
-    g_signal_connect(G_OBJECT(plugin), "orientation-changed",
-                     G_CALLBACK(places_button_orientation_changed), self);
-#endif
+
     g_signal_connect(G_OBJECT(plugin), "size-changed",
                      G_CALLBACK(places_button_size_changed), self);
 
@@ -317,16 +296,12 @@ places_button_resize_label(PlacesButton *self,
   gboolean vertical = FALSE;
   gboolean deskbar = FALSE;
 
-#ifdef HAS_PANEL_49
-  if (xfce_panel_plugin_get_mode(self->plugin) == XFCE_PANEL_PLUGIN_MODE_DESKBAR)
+  if (xfce_panel_plugin_get_mode(self->plugin) == XFCE_PANEL_PLUGIN_MODE_DESKBAR) {
     deskbar = TRUE;
-  else if (xfce_panel_plugin_get_mode(self->plugin) == XFCE_PANEL_PLUGIN_MODE_VERTICAL)
+  }
+  else if (xfce_panel_plugin_get_mode(self->plugin) == XFCE_PANEL_PLUGIN_MODE_VERTICAL) {
     vertical = TRUE;
-#else
-  if (xfce_panel_plugin_get_orientation(self->plugin) == GTK_ORIENTATION_VERTICAL)
-    vertical = TRUE;
-#endif
-
+  }
     if (self->label_text == NULL) {
         places_button_destroy_label(self);
         return;
@@ -347,12 +322,14 @@ places_button_resize_label(PlacesButton *self,
     if (vertical)
       {
         gtk_label_set_angle (GTK_LABEL (self->label), -90);
-        gtk_misc_set_alignment (GTK_MISC (self->label), 0.5, 0.0);
+        gtk_widget_set_halign(self->label, GTK_ALIGN_CENTER);
+        gtk_widget_set_valign(self->label, GTK_ALIGN_START);
       }
     else
       {
         gtk_label_set_angle (GTK_LABEL (self->label), 0);
-        gtk_misc_set_alignment (GTK_MISC (self->label), 0.0, 0.5);
+        gtk_widget_set_halign(self->label, GTK_ALIGN_START);
+        gtk_widget_set_valign(self->label, GTK_ALIGN_CENTER);
       }
     if(self->ellipsize)
        gtk_label_set_max_width_chars (GTK_LABEL (self->label), 25);
@@ -369,9 +346,7 @@ places_button_resize(PlacesButton *self)
     gboolean show_label;
     gint new_size;
     gboolean vertical = FALSE;
-#ifdef HAS_PANEL_49
     gboolean deskbar = FALSE;
-#endif
     gint nrows = 1;
 
     if (self->plugin == NULL)
@@ -383,39 +358,34 @@ places_button_resize(PlacesButton *self)
 
     show_label = self->label_text != NULL;
 
-#ifdef HAS_PANEL_49
   if (xfce_panel_plugin_get_mode(self->plugin) == XFCE_PANEL_PLUGIN_MODE_DESKBAR)
     deskbar = TRUE;
   else if (xfce_panel_plugin_get_mode(self->plugin) == XFCE_PANEL_PLUGIN_MODE_VERTICAL)
     vertical = TRUE;
   nrows = xfce_panel_plugin_get_nrows(self->plugin);
-#else
-  if (xfce_panel_plugin_get_orientation(self->plugin) == GTK_ORIENTATION_VERTICAL)
-    vertical = TRUE;
-#endif
 
     new_size /= nrows;
 
     if (show_label) {
-#ifdef HAS_PANEL_49
         xfce_panel_plugin_set_small (self->plugin, deskbar ? FALSE : TRUE);
-#endif
-        if (vertical)
-          gtk_alignment_set (GTK_ALIGNMENT (self->alignment), 0.5, 0.0, 0.0, 1.0);
-        else
-          gtk_alignment_set (GTK_ALIGNMENT (self->alignment), 0.0, 0.5, 1.0, 0.0);
+        if (vertical) {
+    	  gtk_widget_set_halign(self->box, GTK_ALIGN_CENTER);
+          gtk_widget_set_valign(self->box, GTK_ALIGN_START);
+	    }
+        else {
+    	  gtk_widget_set_halign(self->box, GTK_ALIGN_START);
+          gtk_widget_set_valign(self->box, GTK_ALIGN_CENTER);
+	    }
     } else {
-#ifdef HAS_PANEL_49
         xfce_panel_plugin_set_small(self->plugin, TRUE);
-#endif
-        gtk_alignment_set (GTK_ALIGNMENT (self->alignment), 0.5, 0.5, 1.0, 1.0);
+    	  gtk_widget_set_halign(self->box, GTK_ALIGN_CENTER);
+          gtk_widget_set_valign(self->box, GTK_ALIGN_CENTER);
     }
 
     /* label */
     places_button_resize_label(self, show_label);
 }
 
-#ifdef HAS_PANEL_49
 static void
 places_button_mode_changed(XfcePanelPlugin *plugin, XfcePanelPluginMode mode, PlacesButton *self)
 {
@@ -425,16 +395,6 @@ places_button_mode_changed(XfcePanelPlugin *plugin, XfcePanelPluginMode mode, Pl
                                GTK_ORIENTATION_VERTICAL : GTK_ORIENTATION_HORIZONTAL);
     places_button_resize(self);
 }
-
-#else
-static void
-places_button_orientation_changed(XfcePanelPlugin *plugin, GtkOrientation orientation, PlacesButton *self)
-{
-    DBG("orientation changed");
-    gtk_orientable_set_orientation(GTK_ORIENTABLE(self->box), orientation);
-    places_button_resize(self);
-}
-#endif
 
 static gboolean
 places_button_size_changed(XfcePanelPlugin *plugin, gint size, PlacesButton *self)

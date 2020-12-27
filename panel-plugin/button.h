@@ -44,7 +44,6 @@ struct _PlacesButton
 
     /* private */
     XfcePanelPlugin *plugin;
-    GtkWidget *alignment;
     GtkWidget *box;
     GtkWidget *label;
     gchar *label_text;
