@@ -17,7 +17,7 @@
  */
 
 #ifdef HAVE_CONFIG_H
-#  include <config.h>
+#  include "config.h"
 #endif
 #include <string.h>
 #include <time.h>
@@ -420,39 +420,36 @@ hview_popup_new(HamsterView *view)
 
    // menuish buttons
    ovw = gtk_button_new_with_label(_("Show overview"));
+   gtk_widget_set_halign(gtk_bin_get_child(GTK_BIN(ovw)), GTK_ALIGN_START);
    gtk_button_set_relief(GTK_BUTTON(ovw), GTK_RELIEF_NONE);
    gtk_widget_set_focus_on_click(ovw, FALSE);
-   gtk_widget_set_halign(ovw, GTK_ALIGN_START);
-   gtk_widget_set_valign(ovw, GTK_ALIGN_CENTER);
    g_signal_connect(ovw, "clicked",
                            G_CALLBACK(hview_cb_show_overview), view);
+   
    stp = gtk_button_new_with_label(_("Stop tracking"));
+   gtk_widget_set_halign(gtk_bin_get_child(GTK_BIN(stp)), GTK_ALIGN_START);
    gtk_button_set_relief(GTK_BUTTON(stp), GTK_RELIEF_NONE);
    gtk_widget_set_focus_on_click(stp, FALSE);
-   gtk_widget_set_halign(stp, GTK_ALIGN_START);
-   gtk_widget_set_valign(stp, GTK_ALIGN_CENTER);
    g_signal_connect(stp, "clicked",
                            G_CALLBACK(hview_cb_stop_tracking), view);
+   
    add = gtk_button_new_with_label(_("Add earlier activity"));
+   gtk_widget_set_halign(gtk_bin_get_child(GTK_BIN(add)), GTK_ALIGN_START);
    gtk_button_set_relief(GTK_BUTTON(add), GTK_RELIEF_NONE);
    gtk_widget_set_focus_on_click(add, FALSE);
-   gtk_widget_set_halign(add, GTK_ALIGN_START);
-   gtk_widget_set_valign(add, GTK_ALIGN_CENTER);
    g_signal_connect(add, "clicked",
                            G_CALLBACK(hview_cb_add_earlier_activity), view);
+   
    cfg = gtk_button_new_with_label(_("Tracking settings"));
+   gtk_widget_set_halign(gtk_bin_get_child(GTK_BIN(cfg)), GTK_ALIGN_START);
    gtk_button_set_relief(GTK_BUTTON(cfg), GTK_RELIEF_NONE);
    gtk_widget_set_focus_on_click(cfg, FALSE);
-   gtk_widget_set_halign(cfg, GTK_ALIGN_START);
-   gtk_widget_set_valign(cfg, GTK_ALIGN_CENTER);
    g_signal_connect(cfg, "clicked",
                            G_CALLBACK(hview_cb_tracking_settings), view);
 
-   gtk_box_pack_start(GTK_BOX(view->vbx), gtk_separator_new(GTK_ORIENTATION_HORIZONTAL), FALSE, TRUE, 0);
    gtk_box_pack_start(GTK_BOX(view->vbx), ovw, FALSE, FALSE, 0);
    gtk_box_pack_start(GTK_BOX(view->vbx), stp, FALSE, FALSE, 0);
    gtk_box_pack_start(GTK_BOX(view->vbx), add, FALSE, FALSE, 0);
-   gtk_box_pack_start(GTK_BOX(view->vbx), gtk_separator_new(GTK_ORIENTATION_HORIZONTAL), FALSE, TRUE, 0);
    gtk_box_pack_start(GTK_BOX(view->vbx), cfg, FALSE, FALSE, 0);
 
    gtk_widget_show_all(view->popup);

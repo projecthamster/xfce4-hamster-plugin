@@ -18,15 +18,15 @@ AC_DEFINE_UNQUOTED(GETTEXT_PACKAGE, "$GETTEXT_PACKAGE", [Define to the Gettext p
 AC_DEFINE_UNQUOTED(PLUGIN_NAME, "$PACKAGE", [Define plugin name])
 
 
-AC_ARG_WITH(icon_name,[  --with-icon_name     icon name (default: org.gnome.Hamster.GUI)],[with_icon_name=$withval],[with_icon_name=org.gnome.Hamster.GUI])
+AC_ARG_WITH(icon_name,[  --with-icon-name        icon name (default: org.gnome.Hamster.GUI)],[with_icon_name=$withval],[with_icon_name=org.gnome.Hamster.GUI])
 AC_DEFINE_UNQUOTED(ICON_NAME, "$with_icon_name", [Hamster Icon name])
 AC_SUBST(with_icon_name)
 
-AC_ARG_ENABLE(debug,[  --enable-debug     disable debug support (default: disable)],[enable_debug=$enableval],[enable_debug=no])
+AC_ARG_ENABLE(debug,[  --enable-debug          disable debug support (default: disable)],[enable_debug=$enableval],[enable_debug=no])
 if test x$enable_debug = xyes; then
     AC_DEFINE([DEBUG], [1], [Set this to 1 to enable debug output.])
 fi
-AC_ARG_ENABLE(debug_trace,[  --enable-debug_trace     disable trace support (default: disable)],[enable_debug_trace=$enableval],[enable_debug_trace=no])
+AC_ARG_ENABLE(debug_trace,[  --enable-debug-trace    disable trace support (default: disable)],[enable_debug_trace=$enableval],[enable_debug_trace=no])
 if test x$enable_debug_trace = xyes; then
     AC_DEFINE([DEBUG_TRACE], [1], [Set this to 1 to enable full trace debugging.])
 fi
