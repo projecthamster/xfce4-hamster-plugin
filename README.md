@@ -47,6 +47,8 @@ by using e.g. `./configure --with-icon_name=hamster-time-tracker`.
 The generated .lo files are best purged since no linkage or development 
 packages are provided.
 
+[![Packaging status](https://repology.org/badge/vertical-allrepos/xfce4-hamster-plugin.svg)](https://repology.org/project/xfce4-hamster-plugin/versions)
+
 ## Contributing
 
 1. [Fork](https://github.com/projecthamster/xfce4-hamster-plugin/fork) this project
