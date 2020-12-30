@@ -331,12 +331,17 @@ hview_popup_new(HamsterView *view)
 
    /* Create a new popup */
    view->popup = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+   gtk_window_set_type_hint(GTK_WINDOW(view->popup), GDK_WINDOW_TYPE_HINT_UTILITY);
    gtk_window_set_decorated(GTK_WINDOW(view->popup), FALSE);
+   gtk_window_set_resizable(GTK_WINDOW(view->popup), FALSE);
    gtk_window_set_position(GTK_WINDOW(view->popup), GTK_WIN_POS_MOUSE);
    gtk_window_set_screen(GTK_WINDOW(view->popup),
                        gtk_widget_get_screen(view->button));
    gtk_window_set_skip_pager_hint(GTK_WINDOW(view->popup), TRUE);
    gtk_window_set_skip_taskbar_hint(GTK_WINDOW(view->popup), TRUE);
+   gtk_window_set_keep_above (GTK_WINDOW(view->popup), TRUE);
+         gtk_window_stick (GTK_WINDOW(view->popup));
+   
    frm = gtk_frame_new(NULL);
    gtk_frame_set_shadow_type(GTK_FRAME(frm), GTK_SHADOW_OUT);
    gtk_container_add(GTK_CONTAINER(view->popup), frm);
@@ -557,6 +562,14 @@ hview_popup_show(HamsterView *view, gboolean atPointer)
          y -= gdk_window_get_height(popup) / 2;
          break;
       }
+      // TODO: Investigate this:
+      /*
+              xfce_panel_plugin_position_widget (view->plugin,
+                                           view->button,
+                                           NULL,
+                                           &x,
+                                           &y);
+     */
    }
    gtk_window_move(GTK_WINDOW(view->popup), x, y);
    gtk_window_present_with_time(GTK_WINDOW(view->popup),
