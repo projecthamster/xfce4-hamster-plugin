@@ -28,6 +28,7 @@ libhamster_la_SOURCES = $(THIRD_PARTY_CODE) $(OWN_CODE)
 libhamster_la_CFLAGS =	-Wall			\
 	-I$(top_builddir)						\
 	-I$(top_srcdir)							\
+	-DLOCALEDIR=\"$(localedir)\"            \
 	$(GIO_CFLAGS)							\
 	$(GIO_UNIX_CFLAGS)						\
 	$(GLIB_CFLAGS)							\
