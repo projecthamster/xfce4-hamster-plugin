@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.69])
-AC_INIT([xfce4-hamster-plugin], [1.7.0], [smultimeter@gmail.com])
+AC_INIT([xfce4-hamster-plugin], [1.10.0], [hakan@erduman.de])
 AM_INIT_AUTOMAKE([silent-rules])
 LT_PREREQ([2.2.6])
 LT_INIT([disable-static])
@@ -31,12 +31,11 @@ if test x$enable_debug_trace = xyes; then
     AC_DEFINE([DEBUG_TRACE], [1], [Set this to 1 to enable full trace debugging.])
 fi
 
-AM_GLIB_GNU_GETTEXT
 # Checks for programs.
 AC_PROG_CC
 #AC_PROG_INSTALL()
 AC_PROG_INTLTOOL()
-AM_GLIB_GNU_GETTEXT
+AC_SUBST(XGETTEXT_ARGS)
 
 AC_CONFIG_FILES([Makefile panel-plugin/Makefile po/Makefile.in])
 
