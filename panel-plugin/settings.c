@@ -31,7 +31,7 @@ config_show(XfcePanelPlugin *plugin, XfconfChannel *channel)
    GtkWidget *cnt, *lbl, *chk;
    g_object_set(G_OBJECT(dlg),
          "title", _("Hamster"),
-         "icon_name", ICON_NAME,
+         "icon_name", "org.gnome.Hamster.GUI",
          "subtitle", _("Time bookkeeping plugin"),
          NULL);
    g_signal_connect_swapped (dlg,

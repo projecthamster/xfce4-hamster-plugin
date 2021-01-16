@@ -16,7 +16,6 @@
 # License along with this library; If not, see <http://www.gnu.org/licenses/>.
 mkdir -p m4
 autoreconf -sif
-intltool-prepare
 ./configure --enable-silent-rules --silent $*
 ./config.status -V
 echo "Preparation done"

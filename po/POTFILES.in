@@ -5,5 +5,3 @@ panel-plugin/view.c
 panel-plugin/settings.c
 
 panel-plugin/hamster.desktop.in
-# files added by intltool-prepare
-build/panel-plugin/hamster.desktop.in

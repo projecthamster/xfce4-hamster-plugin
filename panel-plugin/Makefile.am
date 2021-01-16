@@ -77,7 +77,6 @@ desktopdir = $(datadir)/xfce4/panel/plugins
 desktop_in_files = hamster.desktop.in
 desktop_DATA = $(desktop_in_files:.desktop.in=.desktop)
 @INTLTOOL_DESKTOP_RULE@
-	sed -i 's:@ICON_NAME@:$(with_icon_name):g' hamster.desktop
 
 EXTRA_DIST = hamster.desktop.in xfce4-popup-hamstermenu.sh org.gnome.Hamster.xml org.gnome.Hamster.WindowServer.xml
 
