@@ -39,10 +39,7 @@ Binary distributions do not necessarily provide `D-Bus-Depends` and
 `D-Bus-provides` kind of tags for automatic dependecy resolution. 
 If your distribution doesn't, maybe its time to push the issue.
 
-The icon from hamster is reused and defaults to `org.gnome.Hamster.GUI`.
-If your distribution ships an older version, force the usage of 
-`hamster-applet` or `hamster-time-tracker` (or any other named icon that fits)
-by using e.g. `./configure --with-icon_name=hamster-time-tracker`.
+The icon from hamster is reused as `org.gnome.Hamster.GUI`.
 
 The generated .lo files are best purged since no linkage or development 
 packages are provided.
