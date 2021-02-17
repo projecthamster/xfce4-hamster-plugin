@@ -341,7 +341,7 @@ hview_popup_new(HamsterView *view)
    gtk_window_set_skip_taskbar_hint(GTK_WINDOW(view->popup), TRUE);
    gtk_window_set_keep_above (GTK_WINDOW(view->popup), TRUE);
          gtk_window_stick (GTK_WINDOW(view->popup));
-   
+
    frm = gtk_frame_new(NULL);
    gtk_frame_set_shadow_type(GTK_FRAME(frm), GTK_SHADOW_OUT);
    gtk_container_add(GTK_CONTAINER(view->popup), frm);
@@ -430,21 +430,21 @@ hview_popup_new(HamsterView *view)
    gtk_widget_set_focus_on_click(ovw, FALSE);
    g_signal_connect(ovw, "clicked",
                            G_CALLBACK(hview_cb_show_overview), view);
-   
+
    stp = gtk_button_new_with_label(_("Stop tracking"));
    gtk_widget_set_halign(gtk_bin_get_child(GTK_BIN(stp)), GTK_ALIGN_START);
    gtk_button_set_relief(GTK_BUTTON(stp), GTK_RELIEF_NONE);
    gtk_widget_set_focus_on_click(stp, FALSE);
    g_signal_connect(stp, "clicked",
                            G_CALLBACK(hview_cb_stop_tracking), view);
-   
+
    add = gtk_button_new_with_label(_("Add earlier activity"));
    gtk_widget_set_halign(gtk_bin_get_child(GTK_BIN(add)), GTK_ALIGN_START);
    gtk_button_set_relief(GTK_BUTTON(add), GTK_RELIEF_NONE);
    gtk_widget_set_focus_on_click(add, FALSE);
    g_signal_connect(add, "clicked",
                            G_CALLBACK(hview_cb_add_earlier_activity), view);
-   
+
    cfg = gtk_button_new_with_label(_("Tracking settings"));
    gtk_widget_set_halign(gtk_bin_get_child(GTK_BIN(cfg)), GTK_ALIGN_START);
    gtk_button_set_relief(GTK_BUTTON(cfg), GTK_RELIEF_NONE);
