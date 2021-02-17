@@ -36,7 +36,7 @@ This plug-in is useless without an activatable D-Bus implementation of
 providers of these interfaces should be a hard dependency, even if
 any automated check might detect these as unused.
 Binary distributions do not necessarily provide `D-Bus-Depends` and 
-`D-Bus-provides` kind of tags for automatic dependecy resolution. 
+`D-Bus-provides` kind of tags for automatic dependency resolution. 
 If your distribution doesn't, maybe its time to push the issue.
 
 The icon from hamster is reused as `org.gnome.Hamster.GUI`.
