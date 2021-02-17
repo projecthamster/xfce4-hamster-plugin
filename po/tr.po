@@ -25,7 +25,7 @@ msgstr "Ne var, ne yok?"
 
 #. label
 #: ../panel-plugin/view.c:366
-msgid "Todays activities"
+msgid "Today's activities"
 msgstr "Bugünki etkinlikler"
 
 #: ../panel-plugin/view.c:401

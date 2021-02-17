@@ -369,7 +369,7 @@ hview_popup_new(HamsterView *view)
    gtk_entry_set_completion(GTK_ENTRY(view->entry), completion);
 
    // label
-   lbl = gtk_label_new(_("Todays activities"));
+   lbl = gtk_label_new(_("Today's activities"));
    gtk_container_add(GTK_CONTAINER(view->vbx), lbl);
 
    // tree view

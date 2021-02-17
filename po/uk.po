@@ -24,7 +24,7 @@ msgstr "Що відбувається?"
 
 #. label
 #: ../panel-plugin/view.c:366
-msgid "Todays activities"
+msgid "Today's activities"
 msgstr "Діяльність за сьогодні"
 
 #: ../panel-plugin/view.c:401

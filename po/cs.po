@@ -25,7 +25,7 @@ msgstr "Čím se právě zabýváte?"
 
 #. label
 #: ../panel-plugin/view.c:366
-msgid "Todays activities"
+msgid "Today's activities"
 msgstr "Dnešní aktivity"
 
 #: ../panel-plugin/view.c:401
