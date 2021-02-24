@@ -579,51 +579,87 @@ hview_popup_show(HamsterView *view, gboolean atPointer)
 }
 
 static void
-hview_store_update(HamsterView *view, fact *act, GHashTable *tbl)
+hview_seconds_to_hours_and_minutes(gchar *duration, int length, int seconds)
+{
+  snprintf(duration, length,
+      "%dh %dmin", seconds / 3600, (seconds / 60) % 60);
+}
+
+static void
+hview_times_to_span(gchar *time_span, int length, time_t start_time, time_t end_time)
+{
+   struct tm *time = gmtime(&start_time);
+   strftime(time_span, length, "%H:%M", time);
+   strcat(time_span, " - ");
+
+   gchar *ptr;
+   ptr = time_span + strlen(time_span);
+
+   if(end_time)
+   {
+      time = gmtime(&end_time);
+      strftime(ptr, length, "%H:%M", time);
+   }
+}
+
+static gint*
+hview_create_category(gchar *category, GHashTable *categories)
+{
+  gint *duration_in_seconds;
+  duration_in_seconds = g_new0(gint, 1);
+  g_hash_table_insert(categories, strdup(category), duration_in_seconds);
+
+  return duration_in_seconds;
+}
+
+static void
+hview_increment_category_time(gchar *category, gint duration_in_seconds, GHashTable *categories)
+{
+  gint *category_duration;
+
+  category_duration = g_hash_table_lookup(categories, category);
+  if(category_duration == NULL)
+  {
+    category_duration = hview_create_category(category, categories);
+  }
+
+  *category_duration += duration_in_seconds;
+}
+
+static gboolean
+hview_activity_stopped(fact *activity)
+{
+  if(activity->endTime)
+    return TRUE;
+
+  return FALSE;
+}
+
+static void
+hview_store_update(HamsterView *view, fact *activity, GHashTable *categories)
 {
 
    if(NULL == view->storeFacts)
       return;
-   else
-   {
-      GtkTreeIter   iter;
-      gchar spn[20];
-      gchar dur[20];
-      gchar *ptr;
-      gint *val;
-      gboolean isStopped = FALSE;
 
-      struct tm *tma = gmtime(&act->startTime);
-      strftime(spn, 20, "%H:%M", tma);
-      strcat(spn, " - ");
-      ptr = spn + strlen(spn);
-      if(act->endTime)
-      {
-         tma = gmtime(&act->endTime);
-         strftime(ptr, 20, "%H:%M", tma);
-         isStopped = TRUE;
-      }
-      snprintf(dur, sizeof(dur),
-            "%dh %dmin", act->seconds / 3600, (act->seconds / 60) % 60);
+   gchar time_span[14];
+   hview_times_to_span(time_span, sizeof(time_span), activity->startTime, activity->endTime);
 
-      gtk_list_store_append (view->storeFacts, &iter);  /* Acquire an iterator */
-      gtk_list_store_set (view->storeFacts, &iter,
-                          TIME_SPAN, spn,
-                          TITLE, act->name,
-                          DURATION, dur,
-                          BTNEDIT, "gtk-edit",
-                          BTNCONT, isStopped ? "gtk-media-play" : "",
-                          ID, act->id,
-                          -1);
+   gchar duration[16];
+   hview_seconds_to_hours_and_minutes(duration, sizeof(duration), activity->seconds);
 
-      val = g_hash_table_lookup(tbl, act->category);
-      if(NULL == val)
-      {
-         val = g_new0(gint, 1);
-         g_hash_table_insert(tbl, strdup(act->category), val);
-      }
-      *val += act->seconds;
-   }
+   GtkTreeIter   iter;
+   gtk_list_store_append (view->storeFacts, &iter);  /* Acquire an iterator */
+   gtk_list_store_set (view->storeFacts, &iter,
+                       TIME_SPAN, time_span,
+                       TITLE, activity->name,
+                       DURATION, duration,
+                       BTNEDIT, "gtk-edit",
+                       BTNCONT, hview_activity_stopped(activity) ? "gtk-media-play" : "",
+                       ID, activity->id,
+                       -1);
+
+   hview_increment_category_time(activity->category, activity->seconds, categories);
 }
 
 static void
