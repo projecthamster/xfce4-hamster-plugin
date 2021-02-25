@@ -578,12 +578,19 @@ hview_popup_show(HamsterView *view, gboolean atPointer)
    xfce_panel_plugin_take_window(view->plugin, GTK_WINDOW(view->popup));
 }
 
+// Hours and minutes format when given INT_MAX produces "596523h 14min", but
+// "snprintf" reports max possible output size like below.
+const int HOURS_AND_MINUTES_MIN_LENGTH = 16;
+
 static void
 hview_seconds_to_hours_and_minutes(gchar *duration, int length, int seconds)
 {
   snprintf(duration, length,
       "%dh %dmin", seconds / 3600, (seconds / 60) % 60);
 }
+
+// Using less than that may cause output to be truncated.
+const int HVIEW_TIMES_TO_SPAN_MIN_BUF_SIZE = 14;
 
 static void
 hview_times_to_span(gchar *time_span, int length, time_t start_time, time_t end_time)
@@ -637,10 +644,10 @@ hview_store_update(HamsterView *view, fact *activity, GHashTable *categories)
    if(NULL == view->storeFacts)
       return;
 
-   gchar time_span[14];
+   gchar time_span[HVIEW_TIMES_TO_SPAN_MIN_BUF_SIZE];
    hview_times_to_span(time_span, sizeof(time_span), activity->startTime, activity->endTime);
 
-   gchar duration[16];
+   gchar duration[HOURS_AND_MINUTES_MIN_LENGTH];
    hview_seconds_to_hours_and_minutes(duration, sizeof(duration), activity->seconds);
 
    GtkTreeIter   iter;
