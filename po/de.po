@@ -25,7 +25,7 @@ msgstr "Was liegt an?"
 
 #. label
 #: ../panel-plugin/view.c:366
-msgid "Todays activities"
+msgid "Today's activities"
 msgstr "Heutige Aktivitäten"
 
 #: ../panel-plugin/view.c:401

@@ -25,7 +25,7 @@ msgstr "¿Qué está pasando?"
 
 #. label
 #: ../panel-plugin/view.c:366
-msgid "Todays activities"
+msgid "Today's activities"
 msgstr "Actividades del día"
 
 #: ../panel-plugin/view.c:401
