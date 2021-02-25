@@ -634,7 +634,6 @@ hview_activity_stopped(fact *activity)
 static void
 hview_store_update(HamsterView *view, fact *activity, GHashTable *categories)
 {
-
    if(NULL == view->storeFacts)
       return;
 
