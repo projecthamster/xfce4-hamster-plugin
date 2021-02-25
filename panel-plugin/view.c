@@ -589,23 +589,34 @@ hview_seconds_to_hours_and_minutes(gchar *duration, int length, int seconds)
       "%dh %dmin", seconds / 3600, (seconds / 60) % 60);
 }
 
+static size_t
+hview_time_to_string(char *str, size_t maxsize, time_t time)
+{
+  struct tm *tm = gmtime(&time);
+
+  return strftime(str, maxsize, "%H:%M", tm);
+}
+
 // Using less than that may cause output to be truncated.
 const int HVIEW_TIMES_TO_SPAN_MIN_BUF_SIZE = 14;
 
 static void
-hview_times_to_span(gchar *time_span, int length, time_t start_time, time_t end_time)
+hview_times_to_span(char *time_span, size_t maxsize, time_t start_time, time_t end_time)
 {
-   struct tm *time = gmtime(&start_time);
-   strftime(time_span, length, "%H:%M", time);
-   strcat(time_span, " - ");
+   char *ptr = time_span;
+   size_t charsWritten;
 
-   gchar *ptr = time_span + strlen(time_span);
+   charsWritten = hview_time_to_string(ptr, maxsize, start_time);
+   maxsize -= charsWritten;
+   ptr += charsWritten;
 
-   if(end_time)
-   {
-      time = gmtime(&end_time);
-      strftime(ptr, length, "%H:%M", time);
-   }
+   // snprintf() should never return negative value with static string like this.
+   int dataWritten = snprintf(ptr, maxsize, " - ");
+   maxsize -= dataWritten;
+   ptr += dataWritten;
+
+   if (end_time)
+    hview_time_to_string(ptr, maxsize, end_time);
 }
 
 static gint*
