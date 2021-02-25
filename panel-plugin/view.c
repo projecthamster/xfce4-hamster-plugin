@@ -592,8 +592,7 @@ hview_times_to_span(gchar *time_span, int length, time_t start_time, time_t end_
    strftime(time_span, length, "%H:%M", time);
    strcat(time_span, " - ");
 
-   gchar *ptr;
-   ptr = time_span + strlen(time_span);
+   gchar *ptr = time_span + strlen(time_span);
 
    if(end_time)
    {
@@ -605,8 +604,7 @@ hview_times_to_span(gchar *time_span, int length, time_t start_time, time_t end_
 static gint*
 hview_create_category(gchar *category, GHashTable *categories)
 {
-  gint *duration_in_seconds;
-  duration_in_seconds = g_new0(gint, 1);
+  gint *duration_in_seconds = g_new0(gint, 1);
   g_hash_table_insert(categories, strdup(category), duration_in_seconds);
 
   return duration_in_seconds;
@@ -615,9 +613,7 @@ hview_create_category(gchar *category, GHashTable *categories)
 static void
 hview_increment_category_time(gchar *category, gint duration_in_seconds, GHashTable *categories)
 {
-  gint *category_duration;
-
-  category_duration = g_hash_table_lookup(categories, category);
+  gint *category_duration = g_hash_table_lookup(categories, category);
   if(category_duration == NULL)
   {
     category_duration = hview_create_category(category, categories);
