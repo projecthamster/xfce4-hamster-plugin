@@ -578,6 +578,10 @@ hview_popup_show(HamsterView *view, gboolean atPointer)
    xfce_panel_plugin_take_window(view->plugin, GTK_WINDOW(view->popup));
 }
 
+// Hours and minutes format when given INT_MAX produces "596523h 14min", but
+// "snprintf" reports max possible output size like below.
+const int HOURS_AND_MINUTES_MIN_LENGTH = 16;
+
 static void
 hview_seconds_to_hours_and_minutes(gchar *duration, int length, int seconds)
 {
@@ -585,28 +589,40 @@ hview_seconds_to_hours_and_minutes(gchar *duration, int length, int seconds)
       "%dh %dmin", seconds / 3600, (seconds / 60) % 60);
 }
 
-static void
-hview_times_to_span(gchar *time_span, int length, time_t start_time, time_t end_time)
+static size_t
+hview_time_to_string(char *str, size_t maxsize, time_t time)
 {
-   struct tm *time = gmtime(&start_time);
-   strftime(time_span, length, "%H:%M", time);
-   strcat(time_span, " - ");
+  struct tm *tm = gmtime(&time);
 
-   gchar *ptr;
-   ptr = time_span + strlen(time_span);
+  return strftime(str, maxsize, "%H:%M", tm);
+}
 
-   if(end_time)
-   {
-      time = gmtime(&end_time);
-      strftime(ptr, length, "%H:%M", time);
-   }
+// Using less than that may cause output to be truncated.
+const int HVIEW_TIMES_TO_SPAN_MIN_BUF_SIZE = 14;
+
+static void
+hview_times_to_span(char *time_span, size_t maxsize, time_t start_time, time_t end_time)
+{
+   char *ptr = time_span;
+   size_t charsWritten;
+
+   charsWritten = hview_time_to_string(ptr, maxsize, start_time);
+   maxsize -= charsWritten;
+   ptr += charsWritten;
+
+   // snprintf() should never return negative value with static string like this.
+   int dataWritten = snprintf(ptr, maxsize, " - ");
+   maxsize -= dataWritten;
+   ptr += dataWritten;
+
+   if (end_time)
+    hview_time_to_string(ptr, maxsize, end_time);
 }
 
 static gint*
 hview_create_category(gchar *category, GHashTable *categories)
 {
-  gint *duration_in_seconds;
-  duration_in_seconds = g_new0(gint, 1);
+  gint *duration_in_seconds = g_new0(gint, 1);
   g_hash_table_insert(categories, strdup(category), duration_in_seconds);
 
   return duration_in_seconds;
@@ -615,9 +631,7 @@ hview_create_category(gchar *category, GHashTable *categories)
 static void
 hview_increment_category_time(gchar *category, gint duration_in_seconds, GHashTable *categories)
 {
-  gint *category_duration;
-
-  category_duration = g_hash_table_lookup(categories, category);
+  gint *category_duration = g_hash_table_lookup(categories, category);
   if(category_duration == NULL)
   {
     category_duration = hview_create_category(category, categories);
@@ -638,14 +652,13 @@ hview_activity_stopped(fact *activity)
 static void
 hview_store_update(HamsterView *view, fact *activity, GHashTable *categories)
 {
-
    if(NULL == view->storeFacts)
       return;
 
-   gchar time_span[14];
+   gchar time_span[HVIEW_TIMES_TO_SPAN_MIN_BUF_SIZE];
    hview_times_to_span(time_span, sizeof(time_span), activity->startTime, activity->endTime);
 
-   gchar duration[16];
+   gchar duration[HOURS_AND_MINUTES_MIN_LENGTH];
    hview_seconds_to_hours_and_minutes(duration, sizeof(duration), activity->seconds);
 
    GtkTreeIter   iter;
