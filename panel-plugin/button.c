@@ -148,7 +148,7 @@ places_button_get_ellipsize(PlacesButton *self)
 {
     g_assert(PLACES_IS_BUTTON(self));
 
-    DBG("returning %s", self->ellipsize);
+    DBG("returning %d", self->ellipsize);
     return self->ellipsize;
 }
 

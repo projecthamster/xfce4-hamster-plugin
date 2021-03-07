@@ -22,16 +22,16 @@
 
 typedef struct _fact
 {
-   gint id; // 0
+   int id; // 0
    time_t startTime; // 1
    time_t endTime; // 2
-   gchar *description; // 3
-   gchar *name; // 4
-   gint activityId; // 5
-   gchar *category; // 6
-   gchar **tags; // 7
+   char *description; // 3
+   char *name; // 4
+   int activityId; // 5
+   char *category; // 6
+   char **tags; // 7
    time_t date; // 8
-   gint seconds; // 9
+   int seconds; // 9
 }fact;
 
 fact*

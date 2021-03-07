@@ -68,6 +68,7 @@ enum
    BTNEDIT,
    BTNCONT,
    ID,
+   CATEGORY, 
    NUM_COL
 };
 
@@ -182,14 +183,14 @@ hview_cb_match_select(GtkEntryCompletion *widget,
                      GtkTreeIter *iter,
                      HamsterView *view)
 {
-   gchar *activity, *category;
-   gchar fact[256];
-   gint id = 0;
+   char *activity, *category;
+   char fact[256];
+   int id = 0;
 
    gtk_tree_model_get(model, iter, 0, &activity, 1, &category, -1);
    snprintf(fact, sizeof(fact), "%s@%s", activity, category);
    hamster_call_add_fact_sync(view->hamster, fact, 0, 0, FALSE, &id, NULL, NULL);
-   DBG("activated: %s[%d]", fact, id);
+   DBG("selected: %s[%d]", fact, id);
    if(!view->donthide)
       hview_popup_hide(view);
    g_free(activity);
@@ -201,8 +202,33 @@ static void
 hview_cb_entry_activate(GtkEntry *entry,
                   HamsterView *view)
 {
-   const gchar *fact = gtk_entry_get_text(GTK_ENTRY(view->entry));
-   gint id = 0;
+   const char *fact = gtk_entry_get_text(GTK_ENTRY(view->entry));
+   int id = 0;
+   char buffer[256];
+   GVariant* res;
+   GVariant* child;
+   char* act = NULL;
+   char* cat = NULL;
+
+   if (!strchr(fact, '@'))
+   {
+      hamster_call_get_activities_sync(view->hamster, fact, &res, 0, 0);
+      if (NULL != res && g_variant_n_children(res) > 0)
+      {
+         child = g_variant_get_child_value(res, 0); // topmost in history is OK
+         if (child)
+         {
+            g_variant_get(child, "(ss)", &act, &cat);
+            if (NULL != act && NULL != cat)
+            {
+               snprintf(buffer, sizeof(buffer), "%s@%s", act, cat);
+               fact = buffer;
+            }
+            g_variant_unref(child);
+         }
+      }
+   }
+   
    hamster_call_add_fact_sync(view->hamster, fact, 0, 0, FALSE, &id, NULL, NULL);
    DBG("activated: %s[%d]", fact, id);
    if(!view->donthide)
@@ -252,24 +278,32 @@ hview_cb_tv_button_press(GtkWidget *tv,
          GtkTreeIter iter;
          if (gtk_tree_selection_get_selected(selection, &model, &iter))
          {
-            gint id;
-            gchar *icon;
-            gchar *fact;
-            gtk_tree_model_get(model, &iter, ID, &id, BTNCONT, &icon, TITLE, &fact, -1);
-            //DBG("%s:%d:%s", column->title, id, icon);
+            int id;
+            char* icon;
+            char* fact;
+            char* category;
+            gtk_tree_model_get(model, &iter, 
+               ID, &id, 
+               BTNCONT, &icon, 
+               TITLE, &fact, 
+               CATEGORY, &category, -1);
+            DBG("%s:%s:%s", fact, category, icon);
             if(!strcmp(gtk_tree_view_column_get_title (column), "ed"))
             {
                GVariant *dummy = g_variant_new_int32(id);
                GVariant *var = g_variant_new_variant(dummy);
-                  window_server_call_edit_sync(view->windowserver, var, NULL, NULL);
+               window_server_call_edit_sync(view->windowserver, var, NULL, NULL);
             }
             else if(!strcmp(gtk_tree_view_column_get_title(column), "ct") && !strcmp(icon, "gtk-media-play"))
             {
-               DBG("Resume %s", fact);
-               hamster_call_add_fact_sync(view->hamster, fact, 0, 0, FALSE, &id, NULL, NULL);
+               char fact_at_category[255];
+               snprintf(fact_at_category, sizeof(fact_at_category), "%s@%s", fact, category);
+               DBG("Resume %s", fact_at_category);
+               hamster_call_add_fact_sync(view->hamster, fact_at_category, 0, 0, FALSE, &id, NULL, NULL);
             }
             g_free(icon);
             g_free(fact);
+            g_free(category);
          }
          gtk_tree_path_free(path);
       }
@@ -670,6 +704,7 @@ hview_store_update(HamsterView *view, fact *activity, GHashTable *categories)
                        BTNEDIT, "gtk-edit",
                        BTNCONT, hview_activity_stopped(activity) ? "gtk-media-play" : "",
                        ID, activity->id,
+                       CATEGORY, activity->category,
                        -1);
 
    hview_increment_category_time(activity->category, activity->seconds, categories);
@@ -729,6 +764,7 @@ hview_completion_update(HamsterView *view)
                      0, actlow, 1, cat, -1);
                g_free(actlow);
             }
+            g_variant_unref(res);
          }
       }
    }
@@ -903,7 +939,7 @@ hamster_view_init(XfcePanelPlugin* plugin)
    /* storage */
    view->storeActivities = gtk_list_store_new(2, G_TYPE_STRING, G_TYPE_STRING);
    view->storeFacts = gtk_list_store_new(NUM_COL, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING,
-         G_TYPE_STRING, G_TYPE_STRING, G_TYPE_INT);
+         G_TYPE_STRING, G_TYPE_STRING, G_TYPE_INT, G_TYPE_STRING);
    view->summary = gtk_label_new(NULL);
    view->treeview = gtk_tree_view_new();
 
