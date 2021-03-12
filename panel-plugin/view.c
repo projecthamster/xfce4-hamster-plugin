@@ -211,30 +211,38 @@ hview_cb_match_select(GtkEntryCompletion *widget,
 }
 
 static const char*
-hview_get_fact_by_activity(HamsterView *view, const char* activity)
+hview_get_fact_by_activity(HamsterView *view, const char* activity, const char* category)
 {
    static char buffer[256];
-   GVariant* res;
-   GVariant* child;
-   char* act = NULL;
-   char* cat = NULL;
 
-   hamster_call_get_activities_sync(view->hamster, activity, &res, 0, 0);
-   if (NULL != res && g_variant_n_children(res) > 0)
+   if (NULL == category) // category to be guessed
    {
-      child = g_variant_get_child_value(res, 0); // topmost in history is OK
-      if (child)
-      {
-         g_variant_get(child, "(ss)", &act, &cat);
-         if (NULL != act && NULL != cat)
-         {
-            snprintf(buffer, sizeof(buffer), "%s@%s", act, cat);
-            activity = buffer;
-         }
-         g_variant_unref(child);
-      }
-   }
+      GVariant *res;
+      GVariant *child;
+      char *act = NULL;
+      char *cat = NULL;
 
+      hamster_call_get_activities_sync(view->hamster, activity, &res, 0, 0);
+      if (NULL != res && g_variant_n_children(res) > 0)
+      {
+         child = g_variant_get_child_value(res, 0); // topmost in history is OK
+         if (child)
+         {
+            g_variant_get(child, "(ss)", &act, &cat);
+            if (NULL != act && NULL != cat)
+            {
+               snprintf(buffer, sizeof(buffer), "%s@%s", act, cat);
+               activity = buffer;
+            }
+            g_variant_unref(child);
+         }
+      } // else category stays empty
+   }
+   else // category to be appended
+   {
+      snprintf(buffer, sizeof(buffer), "%s@%s", activity, category);
+      activity = buffer;
+   }
    return activity;
 }
 
@@ -247,7 +255,7 @@ hview_cb_entry_activate(GtkEntry *entry,
 
    if (!strchr(fact, '@'))
    {
-      fact = hview_get_fact_by_activity(view, fact);
+      fact = hview_get_fact_by_activity(view, fact, NULL);
    }
    
    hamster_call_add_fact_sync(view->hamster, fact, 0, 0, FALSE, &id, NULL, NULL);
@@ -379,6 +387,50 @@ hview_cb_style_set(GtkWidget *widget, GtkStyle *previous, HamsterView *view)
    gtk_container_set_border_width(GTK_CONTAINER(view->vbx), border);
 }
 
+static gboolean
+hview_span_to_times(const char *duration, time_t *start_time, time_t *end_time)
+{
+   gboolean rVal = FALSE;
+
+   if (NULL != start_time && NULL != end_time)
+   {
+      struct tm sm, em;
+      time_t now;
+
+      time(&now);
+      localtime_r(&now, &sm);
+      em = sm;
+      switch ( // parse '09:30 - 14:30', accept '09:30' or '09:30 -' for ongoing
+         sscanf(duration, 
+            "%02d:%02d - %02d:%02d", 
+            &sm.tm_hour, &sm.tm_min, 
+            &em.tm_hour, &em.tm_min
+            )
+         )
+      {
+      case 2: // hh:mm OK
+         *start_time = timegm(&sm);
+         *end_time = 0; // hamster accepts 0 as ongoing
+         rVal = (-1 != *start_time);
+         break;
+
+      case 4: // hh:mm - hh:mm OK
+         *start_time = timegm(&sm);
+         *end_time = timegm(&em);
+         rVal = (-1 != *start_time);
+         rVal &= (-1 != *end_time);
+         rVal &= (*end_time > *start_time);
+         break;
+
+      default:
+         *start_time = -1;
+         *end_time = -1;
+         break;
+      }
+   }
+   return rVal;
+}
+
 static void
 hview_cb_editing_done( 
    GtkCellEditable *cell_editable,
@@ -408,6 +460,7 @@ hview_cb_editing_done(
             const char* fact;
             const char* category;
             const char* duration;
+            time_t start_time, stop_time;
             gtk_tree_model_get(model, &iter, 
                ID, &id, 
                TIME_SPAN, &duration,
@@ -416,11 +469,36 @@ hview_cb_editing_done(
                -1);
 
             DBG("old: %d:%s:%s:%s", id, duration, fact, category);
-            //hamster_call_get_fact_sync()
-            fact = hview_get_fact_by_activity(view, val);
-            // #671 does not work: hamster_call_update_fact_sync(view->hamster, id, fact, 0, 0, FALSE, NULL, NULL, NULL);
-            //  "{"activity": "common", "category": "HomeOffice", "description": "", "tags": [], "id": 9241, "activity_id": 70, "range": {"start": "2021-03-11 08:35", "end": "2021-03-11 09:31"}}"
             
+            if (!strcmp("fact", type))
+            {
+               fact = hview_get_fact_by_activity(view, val, NULL);
+            }
+            else if(!strcmp("date", type))
+            {
+               fact = hview_get_fact_by_activity(view, val, category);
+               duration = val;
+            }
+            if (hview_span_to_times(duration, &start_time, &stop_time))
+            {
+               // hamster #671 merged upstream?
+               if (hamster_call_update_fact_sync(view->hamster, id, fact, start_time, stop_time, FALSE, &id, NULL, NULL))
+               {
+                  DBG("UpdateFact worked: new id=%d", id);
+               }
+               else
+               {
+                  DBG("UpdateFact did not work: remove, then add fact #%d", id);
+                  hamster_call_remove_fact_sync(view->hamster, id, NULL, NULL);
+                  hamster_call_add_fact_sync(view->hamster, fact, start_time, stop_time, FALSE, &id, NULL, NULL);
+                  DBG("UpdateFact worked: %d", id);
+               }
+            }
+            else
+            {
+               DBG("Duration '%s' did not parse.", duration);
+            }
+            // use dbus-monitor --session 'path=/org/gnome/Hamster, interface=org.gnome.Hamster, type=method_call'
          }
       }
    }
