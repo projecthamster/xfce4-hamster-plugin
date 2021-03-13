@@ -476,13 +476,14 @@ hview_cb_editing_done(
             }
             else if(!strcmp("date", type))
             {
-               fact = hview_get_fact_by_activity(view, val, category);
+               fact = hview_get_fact_by_activity(view, fact, category);
                duration = val;
             }
             if (hview_span_to_times(duration, &start_time, &stop_time))
             {
                // hamster #671 merged upstream?
-               if (hamster_call_update_fact_sync(view->hamster, id, fact, start_time, stop_time, FALSE, &id, NULL, NULL))
+               if (hamster_call_update_fact_sync(view->hamster, 
+                  id, fact, start_time, stop_time, FALSE, &id, NULL, NULL))
                {
                   DBG("UpdateFact worked: new id=%d", id);
                }
@@ -490,7 +491,8 @@ hview_cb_editing_done(
                {
                   DBG("UpdateFact did not work: remove, then add fact #%d", id);
                   hamster_call_remove_fact_sync(view->hamster, id, NULL, NULL);
-                  hamster_call_add_fact_sync(view->hamster, fact, start_time, stop_time, FALSE, &id, NULL, NULL);
+                  hamster_call_add_fact_sync(view->hamster, 
+                     fact, start_time, stop_time, FALSE, &id, NULL, NULL);
                   DBG("UpdateFact worked: %d", id);
                }
             }
@@ -498,7 +500,6 @@ hview_cb_editing_done(
             {
                DBG("Duration '%s' did not parse.", duration);
             }
-            // use dbus-monitor --session 'path=/org/gnome/Hamster, interface=org.gnome.Hamster, type=method_call'
          }
       }
    }
