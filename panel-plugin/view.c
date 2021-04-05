@@ -472,33 +472,52 @@ hview_cb_editing_done(
             
             if (!strcmp("fact", type))
             {
-               fact = hview_get_fact_by_activity(view, val, NULL);
-            }
-            else if(!strcmp("date", type))
-            {
-               fact = hview_get_fact_by_activity(view, fact, category);
-               duration = val;
-            }
-            if (hview_span_to_times(duration, &start_time, &stop_time))
-            {
-               // hamster #671 merged upstream?
-               if (hamster_call_update_fact_sync(view->hamster, 
-                  id, fact, start_time, stop_time, FALSE, &id, NULL, NULL))
+               if (!strcmp(fact, val))
                {
-                  DBG("UpdateFact worked: new id=%d", id);
+                  DBG("No change ACK of fact");
+                  cancelled = TRUE;
                }
                else
                {
-                  DBG("UpdateFact did not work: remove, then add fact #%d", id);
-                  hamster_call_remove_fact_sync(view->hamster, id, NULL, NULL);
-                  hamster_call_add_fact_sync(view->hamster, 
-                     fact, start_time, stop_time, FALSE, &id, NULL, NULL);
-                  DBG("UpdateFact worked: %d", id);
+                  fact = hview_get_fact_by_activity(view, val, NULL);
                }
             }
-            else
+            else if(!strcmp("date", type))
             {
-               DBG("Duration '%s' did not parse.", duration);
+               if (!strcmp(duration, val))
+               {
+                  DBG("No change ACK of duration");
+                  cancelled = TRUE;
+               }
+               else
+               {
+                  fact = hview_get_fact_by_activity(view, fact, category);
+                  duration = val;
+               }
+            }
+            if (!cancelled)
+            {
+               if (hview_span_to_times(duration, &start_time, &stop_time))
+               {
+                  // hamster #671 merged upstream?
+                  if (hamster_call_update_fact_sync(view->hamster,
+                                                    id, fact, start_time, stop_time, FALSE, &id, NULL, NULL))
+                  {
+                     DBG("UpdateFact worked: new id=%d", id);
+                  }
+                  else
+                  {
+                     DBG("UpdateFact did not work: remove, then add fact #%d", id);
+                     hamster_call_remove_fact_sync(view->hamster, id, NULL, NULL);
+                     hamster_call_add_fact_sync(view->hamster,
+                                                fact, start_time, stop_time, FALSE, &id, NULL, NULL);
+                     DBG("UpdateFact worked: %d", id);
+                  }
+               }
+               else
+               {
+                  DBG("Duration '%s' did not parse.", duration);
+               }
             }
          }
       }
