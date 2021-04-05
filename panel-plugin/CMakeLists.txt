@@ -16,12 +16,13 @@ add_custom_command(OUTPUT xfce4-hamster-plugin.desktop
 
 add_library(
     hamster SHARED
-    hamster.c
+    button.c        button.h
+    hamster.c       hamster.h
     plugin.c
-    settings.c
-    util.c
-    view.c
-    windowserver.c
+    settings.c      settings.h
+    util.c          util.h
+    view.c          view.h
+    windowserver.c  windowserver.h
 )
 
 add_compile_definitions(
