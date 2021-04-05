@@ -44,6 +44,6 @@ fact_free(fact *in)
    g_free(in->description);
    g_free(in->name);
    g_free(in->category);
-   //g_free(in->tags); // TODO: fix leak
+   // must not free in->tags
    g_free(in);
 }
