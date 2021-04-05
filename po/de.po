@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: xfce4-hamster-plugin 0.0.1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-07-27 16:18+0200\n"
+"POT-Creation-Date: 2021-04-05 17:49+0200\n"
 "PO-Revision-Date: 2016-07-27 16:19+0100\n"
 "Last-Translator: Hakan Erduman <hakan@erduman.de>\n"
 "Language-Team: German\n"
@@ -18,73 +18,73 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Generator: Poedit 1.5.4\n"
 
-#. subtitle
-#: ../panel-plugin/view.c:350
-msgid "What goes on?"
-msgstr "Was liegt an?"
+#: ../panel-plugin/settings.c:44
+msgid "<b>Settings</b>"
+msgstr "<b>Einstellungen</b>"
 
-#. label
-#: ../panel-plugin/view.c:366
-msgid "Today's activities"
-msgstr "Heutige Aktivitäten"
-
-#: ../panel-plugin/view.c:401
-msgid "Edit activity"
-msgstr "Aktivität bearbeiten"
-
-#: ../panel-plugin/view.c:407
-msgid "Resume activity"
-msgstr "Aktivität fortsetzen"
-
-#. menuish buttons
-#: ../panel-plugin/view.c:420
-msgid "Show overview"
-msgstr "Übersicht anzeigen"
-
-#: ../panel-plugin/view.c:426
-msgid "Stop tracking"
-msgstr "Erfassung anhalten"
-
-#: ../panel-plugin/view.c:432
+#: ../panel-plugin/view.c:706
 msgid "Add earlier activity"
 msgstr "Frühere Aktivität erfassen"
 
-#: ../panel-plugin/view.c:438
-msgid "Tracking settings"
-msgstr "Einstellungen Zeiterfassung"
+#: ../panel-plugin/view.c:672
+msgid "Edit activity"
+msgstr "Aktivität bearbeiten"
 
-#: ../panel-plugin/view.c:633
-msgid "No activities yet."
-msgstr "Zurzeit keine Aktivitäten."
-
-#: ../panel-plugin/view.c:720
-msgid "inactive"
-msgstr "inaktiv"
+#: ../panel-plugin/settings.c:52
+msgid "Entry completion as dropdown"
+msgstr "Vervollständigung als Kombinationsbox"
 
 #: ../panel-plugin/settings.c:33 ../panel-plugin/hamster.desktop.in.h:1
 msgid "Hamster"
 msgstr "Hamster"
 
+#: ../panel-plugin/settings.c:48
+msgid "Keep popup floating"
+msgstr "Dialog offen lassen"
+
+#: ../panel-plugin/view.c:965
+msgid "No activities yet."
+msgstr "Zurzeit keine Aktivitäten."
+
+#: ../panel-plugin/view.c:678
+msgid "Resume activity"
+msgstr "Aktivität fortsetzen"
+
+#: ../panel-plugin/settings.c:60
+msgid "Sanitize label width"
+msgstr "Leistenschaltfläche verkürzt darstellen"
+
+#. menuish buttons
+#: ../panel-plugin/view.c:692
+msgid "Show overview"
+msgstr "Übersicht anzeigen"
+
+#: ../panel-plugin/settings.c:56
+msgid "Show tooltips on buttons"
+msgstr "Kurzhilfen auf Schaltflächen anzeigen"
+
+#: ../panel-plugin/view.c:699
+msgid "Stop tracking"
+msgstr "Erfassung anhalten"
+
 #: ../panel-plugin/settings.c:35 ../panel-plugin/hamster.desktop.in.h:2
 msgid "Time bookkeeping plugin"
 msgstr "Plug-In zur Zeiterfassung"
 
-#: ../panel-plugin/settings.c:44
-msgid "<b>Settings</b>"
-msgstr "<b>Einstellungen</b>"
+#. label
+#: ../panel-plugin/view.c:616
+msgid "Today's activities"
+msgstr "Heutige Aktivitäten"
 
-#: ../panel-plugin/settings.c:49
-msgid "Keep popup floating"
-msgstr "Dialog offen lassen"
+#: ../panel-plugin/view.c:713
+msgid "Tracking settings"
+msgstr "Einstellungen Zeiterfassung"
 
-#: ../panel-plugin/settings.c:53
-msgid "Entry completion as dropdown"
-msgstr "Vervollständigung als Kombinationsbox"
+#. subtitle
+#: ../panel-plugin/view.c:602
+msgid "What goes on?"
+msgstr "Was liegt an?"
 
-#: ../panel-plugin/settings.c:57
-msgid "Show tooltips on buttons"
-msgstr "Kurzhilfen auf Schaltflächen anzeigen"
-
-#: ../panel-plugin/settings.c:61
-msgid "Sanitize label width"
-msgstr "Leistenschaltfläche verkürzt darstellen"
+#: ../panel-plugin/view.c:1061
+msgid "inactive"
+msgstr "inaktiv"

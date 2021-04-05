@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: xfce4-hamster-plugin 0.0.1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-07-27 16:18+0200\n"
+"POT-Creation-Date: 2021-04-05 17:49+0200\n"
 "PO-Revision-Date: 2016-07-27 16:24+0100\n"
 "Last-Translator: Hakan Erduman <hakan@erduman.de>\n"
 "Language-Team: Turkish\n"
@@ -18,73 +18,73 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Generator: Poedit 1.5.4\n"
 
-#. subtitle
-#: ../panel-plugin/view.c:350
-msgid "What goes on?"
-msgstr "Ne var, ne yok?"
+#: ../panel-plugin/settings.c:44
+msgid "<b>Settings</b>"
+msgstr "<b>Seçenekler</b>"
 
-#. label
-#: ../panel-plugin/view.c:366
-msgid "Today's activities"
-msgstr "Bugünki etkinlikler"
-
-#: ../panel-plugin/view.c:401
-msgid "Edit activity"
-msgstr "Etkinliği düzenle"
-
-#: ../panel-plugin/view.c:407
-msgid "Resume activity"
-msgstr "Etkinliğe devam et"
-
-#. menuish buttons
-#: ../panel-plugin/view.c:420
-msgid "Show overview"
-msgstr "Genel görünüm"
-
-#: ../panel-plugin/view.c:426
-msgid "Stop tracking"
-msgstr "Takibi durdur"
-
-#: ../panel-plugin/view.c:432
+#: ../panel-plugin/view.c:706
 msgid "Add earlier activity"
 msgstr "Önceki etkinliği ekle"
 
-#: ../panel-plugin/view.c:438
-msgid "Tracking settings"
-msgstr "Takip tercihleri"
+#: ../panel-plugin/view.c:672
+msgid "Edit activity"
+msgstr "Etkinliği düzenle"
 
-#: ../panel-plugin/view.c:633
-msgid "No activities yet."
-msgstr "Şimdilik etkinlik yok."
-
-#: ../panel-plugin/view.c:720
-msgid "inactive"
-msgstr "durgun"
+#: ../panel-plugin/settings.c:52
+msgid "Entry completion as dropdown"
+msgstr "Açılır gibi giriş tamamlama"
 
 #: ../panel-plugin/settings.c:33 ../panel-plugin/hamster.desktop.in.h:1
 msgid "Hamster"
 msgstr "Hamster"
 
+#: ../panel-plugin/settings.c:48
+msgid "Keep popup floating"
+msgstr "İletişimi açık tut"
+
+#: ../panel-plugin/view.c:965
+msgid "No activities yet."
+msgstr "Şimdilik etkinlik yok."
+
+#: ../panel-plugin/view.c:678
+msgid "Resume activity"
+msgstr "Etkinliğe devam et"
+
+#: ../panel-plugin/settings.c:60
+msgid "Sanitize label width"
+msgstr "Panel düğmesindeki etkinliği kısa kes"
+
+#. menuish buttons
+#: ../panel-plugin/view.c:692
+msgid "Show overview"
+msgstr "Genel görünüm"
+
+#: ../panel-plugin/settings.c:56
+msgid "Show tooltips on buttons"
+msgstr "Düğmelerde araç ipuçlarını göster"
+
+#: ../panel-plugin/view.c:699
+msgid "Stop tracking"
+msgstr "Takibi durdur"
+
 #: ../panel-plugin/settings.c:35 ../panel-plugin/hamster.desktop.in.h:2
 msgid "Time bookkeeping plugin"
 msgstr "Zaman takipçisi"
 
-#: ../panel-plugin/settings.c:44
-msgid "<b>Settings</b>"
-msgstr "<b>Seçenekler</b>"
+#. label
+#: ../panel-plugin/view.c:616
+msgid "Today's activities"
+msgstr "Bugünki etkinlikler"
 
-#: ../panel-plugin/settings.c:49
-msgid "Keep popup floating"
-msgstr "İletişimi açık tut"
+#: ../panel-plugin/view.c:713
+msgid "Tracking settings"
+msgstr "Takip tercihleri"
 
-#: ../panel-plugin/settings.c:53
-msgid "Entry completion as dropdown"
-msgstr "Açılır gibi giriş tamamlama"
+#. subtitle
+#: ../panel-plugin/view.c:602
+msgid "What goes on?"
+msgstr "Ne var, ne yok?"
 
-#: ../panel-plugin/settings.c:57
-msgid "Show tooltips on buttons"
-msgstr "Düğmelerde araç ipuçlarını göster"
-
-#: ../panel-plugin/settings.c:61
-msgid "Sanitize label width"
-msgstr "Panel düğmesindeki etkinliği kısa kes"
+#: ../panel-plugin/view.c:1061
+msgid "inactive"
+msgstr "durgun"
