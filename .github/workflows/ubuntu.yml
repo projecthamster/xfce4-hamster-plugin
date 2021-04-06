@@ -31,6 +31,6 @@ jobs:
           sudo apt-get install xfce4-dev-tools libxfce4panel-2.0-dev libxfce4ui-2-dev
           mkdir $GITHUB_WORKSPACE/build  
           cd $GITHUB_WORKSPACE/build
-          cmake .. -DCMAKE_INSTALL_REFIX=/usr
+          cmake .. -DCMAKE_INSTALL_PREFIX=/usr
           make
           sudo make install
