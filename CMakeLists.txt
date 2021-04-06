@@ -43,7 +43,7 @@ add_custom_command(OUTPUT ${CMAKE_CURRENT_LIST_DIR}/po/${PROJECT_NAME}.pot
 )
 
 add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/hamster.desktop
-    COMMAND ${INTLTOOLMERGE} -d ${PROJECT_SOURCE_DIR}/po ${PROJECT_SOURCE_DIR}/panel-plugin/hamster.desktop.in ${CMAKE_CURRENT_BINARY_DIR}/hamster.desktop
+    COMMAND ${INTLTOOLMERGE} -d ${PROJECT_SOURCE_DIR}/po ${PROJECT_SOURCE_DIR}/panel-plugin/hamster.desktop.in ${PROJECT_BINARY_DIR}/hamster.desktop
     DEPENDS ${PROJECT_SOURCE_DIR}/panel-plugin/hamster.desktop.in
 )
 
@@ -61,14 +61,20 @@ gettext_create_translations(
     po/uk.po
 )
 
+configure_file(
+    ${PROJECT_SOURCE_DIR}/panel-plugin/xfce4-popup-hamstermenu.sh
+    ${PROJECT_BINARY_DIR}/xfce4-popup-hamstermenu
+)
+
 add_custom_target(
     data ALL
     DEPENDS 
-    ${CMAKE_CURRENT_BINARY_DIR}/hamster.desktop
-    ${CMAKE_CURRENT_LIST_DIR}/po/${PROJECT_NAME}.pot
+    ${PROJECT_BINARY_DIR}/hamster.desktop
+    ${PROJECT_SOURCE_DIR}/po/${PROJECT_NAME}.pot
+    ${PROJECT_BINARY_DIR}/xfce4-popup-hamstermenu
 )
 
 install(TARGETS hamster  LIBRARY DESTINATION lib/xfce4/panel/plugins/)
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/hamster.desktop DESTINATION share/xfce4/panel/plugins/)
-install(PROGRAMS panel-plugin/xfce4-popup-hamstermenu.sh DESTINATION bin)
+install(FILES ${PROJECT_BINARY_DIR}/hamster.desktop DESTINATION share/xfce4/panel/plugins/)
+install(PROGRAMS ${PROJECT_BINARY_DIR}/xfce4-popup-hamstermenu DESTINATION bin)
 

@@ -1,6 +1,7 @@
 #!/bin/sh
 #
 # Copyright (C) 2010 Nick Schermer <nick@xfce.org>
+# Copyright (C) 2021 Hakan Erduman <hakan@erduman.de>
 #
 # This library is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License as published by the Free
@@ -17,7 +18,7 @@
 #
 
 export TEXTDOMAIN="xfce4-panel"
-export TEXTDOMAINDIR="@localedir@"
+export TEXTDOMAINDIR="${CMAKE_INSTALL_FULL_LOCALEDIR}"
 
 ATPOINTER="false"
 
@@ -33,7 +34,7 @@ case "$1" in
     exit 0
     ;;
   -V|--version)
-    exec @bindir@/xfce4-panel -V "$(basename $0)"
+    exec xfce4-panel -V "$(basename $0)"
     exit 0
     ;;
   -p|--pointer)
@@ -41,6 +42,6 @@ case "$1" in
     ;;
 esac
 
-exec @bindir@/xfce4-panel --plugin-event=hamster:popup:bool:$ATPOINTER
+exec xfce4-panel --plugin-event=hamster:popup:bool:$ATPOINTER
 
 # vim:set ts=2 sw=2 et ai:
