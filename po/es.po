@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: xfce4-hamster-plugin 0.0.1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-07-27 16:18+0200\n"
+"POT-Creation-Date: 2021-04-05 17:49+0200\n"
 "PO-Revision-Date: 2016-08-04 11:36+0200\n"
 "Last-Translator: Hakan Erduman <hakan@erduman.de>\n"
 "Language-Team: Spanish\n"
@@ -18,75 +18,75 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Generator: Poedit 1.8.7.1\n"
 
-#. subtitle
-#: ../panel-plugin/view.c:350
-msgid "What goes on?"
-msgstr "¿Qué está pasando?"
+#: ../panel-plugin/settings.c:44
+msgid "<b>Settings</b>"
+msgstr "<b>Preferencias</b>"
 
-#. label
-#: ../panel-plugin/view.c:366
-msgid "Today's activities"
-msgstr "Actividades del día"
-
-#: ../panel-plugin/view.c:401
-msgid "Edit activity"
-msgstr "Editar actividad"
-
-#: ../panel-plugin/view.c:407
-msgid "Resume activity"
-msgstr "Retomar actividad"
-
-#. menuish buttons
-#: ../panel-plugin/view.c:420
-msgid "Show overview"
-msgstr "Mostrar resumen"
-
-#: ../panel-plugin/view.c:426
-msgid "Stop tracking"
-msgstr "Detener el registro"
-
-#: ../panel-plugin/view.c:432
+#: ../panel-plugin/view.c:706
 msgid "Add earlier activity"
 msgstr "Agregar actividad anterior"
 
-#: ../panel-plugin/view.c:438
-msgid "Tracking settings"
-msgstr "Preferencias de registro"
+#: ../panel-plugin/view.c:672
+msgid "Edit activity"
+msgstr "Editar actividad"
 
-#: ../panel-plugin/view.c:633
-msgid "No activities yet."
-msgstr "Sin actividad aun."
-
-# Is the person inactive or the tracking?
-#: ../panel-plugin/view.c:720
-msgid "inactive"
-msgstr "sin actividad"
+#: ../panel-plugin/settings.c:52
+msgid "Entry completion as dropdown"
+msgstr "Autocompletado desplegable"
 
 #: ../panel-plugin/settings.c:33 ../panel-plugin/hamster.desktop.in.h:1
 msgid "Hamster"
 msgstr "Hamster"
 
+#: ../panel-plugin/settings.c:48
+msgid "Keep popup floating"
+msgstr "Mantener abierta la ventana"
+
+#: ../panel-plugin/view.c:965
+msgid "No activities yet."
+msgstr "Sin actividad aun."
+
+#: ../panel-plugin/view.c:678
+msgid "Resume activity"
+msgstr "Retomar actividad"
+
+# Google translated for now
+#: ../panel-plugin/settings.c:60
+msgid "Sanitize label width"
+msgstr "Limitar ancho de la etiqueta"
+
+#. menuish buttons
+#: ../panel-plugin/view.c:692
+msgid "Show overview"
+msgstr "Mostrar resumen"
+
+#: ../panel-plugin/settings.c:56
+msgid "Show tooltips on buttons"
+msgstr "Mostrar ayuda en los botones"
+
+#: ../panel-plugin/view.c:699
+msgid "Stop tracking"
+msgstr "Detener el registro"
+
 #: ../panel-plugin/settings.c:35 ../panel-plugin/hamster.desktop.in.h:2
 msgid "Time bookkeeping plugin"
 msgstr "Complemento de registro de tiempo"
 
-#: ../panel-plugin/settings.c:44
-msgid "<b>Settings</b>"
-msgstr "<b>Preferencias</b>"
+#. label
+#: ../panel-plugin/view.c:616
+msgid "Today's activities"
+msgstr "Actividades del día"
 
-#: ../panel-plugin/settings.c:49
-msgid "Keep popup floating"
-msgstr "Mantener abierta la ventana"
+#: ../panel-plugin/view.c:713
+msgid "Tracking settings"
+msgstr "Preferencias de registro"
 
-#: ../panel-plugin/settings.c:53
-msgid "Entry completion as dropdown"
-msgstr "Autocompletado desplegable"
+#. subtitle
+#: ../panel-plugin/view.c:602
+msgid "What goes on?"
+msgstr "¿Qué está pasando?"
 
-#: ../panel-plugin/settings.c:57
-msgid "Show tooltips on buttons"
-msgstr "Mostrar ayuda en los botones"
-
-# Google translated for now
-#: ../panel-plugin/settings.c:61
-msgid "Sanitize label width"
-msgstr "Limitar ancho de la etiqueta"
+# Is the person inactive or the tracking?
+#: ../panel-plugin/view.c:1061
+msgid "inactive"
+msgstr "sin actividad"

@@ -7,7 +7,7 @@ Dependencies: `xfce4-panel xfconf hamster-applet|hamster-time-tracker`
 Build dependencies[debian, ubuntu]: `libxfce4ui-2-dev libxfce4-panel-2.0-dev
 libxfconf-0-dev libxfce4util-dev`
 
-Common: `build-essential autoconf automake intltool libtool`
+Common: `build-essential cmake intltool`
 
 Tested on Arch with xfce 4.16, Ubuntu 20.04 with xfce 4.14 and
 Debian Buster with xfce 4.12. Uses GTK+3 only, requires APIs that are
@@ -25,10 +25,10 @@ the following bias:
 
 ## Compilation
 Checkout as outlined under Contribution below, cd to the directory and
-issue `./autgen.sh --prefix=/usr`. If this fails, install any missing
-dependencies and issue `./configure --prefix=/usr`. Repeat this until
-success. Finally, issue `make && sudo make install`. Restart the xfce4
-panel with `xfce4-panel -r`.
+issue `cmake -B build -DCMAKE_INSTALL_PREFIX=/usr`. If this fails, install any missing
+dependencies and repeat until success. 
+Finally, issue `cd build && make && sudo make install`. 
+Restart the xfce4 panel with `xfce4-panel -r`.
 
 ## Packagers
 This plug-in is useless without an activatable D-Bus implementation of
