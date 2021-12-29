@@ -11,9 +11,9 @@ find_package(Gettext REQUIRED)
 find_package(Intl REQUIRED)
 include(GNUInstallDirs)
 
-pkg_check_modules(GTK REQUIRED 
-    libxfce4panel-2.0 
-    libxfce4ui-2 
+pkg_check_modules(GTK REQUIRED
+    libxfce4panel-2.0
+    libxfce4ui-2
     libxfconf-0
 )
 
@@ -29,7 +29,7 @@ endif()
 
 find_program(INTLTOOLMERGE NAMES intltool-merge)
 if (NOT INTLTOOLMERGE)
-    message(SEND_ERROR "Could not find intltool-update")
+    message(SEND_ERROR "Could not find intltool-merge")
 endif()
 
 file(GLOB pos
@@ -52,7 +52,7 @@ add_subdirectory(
 )
 
 gettext_create_translations(
-    po/${PROJECT_NAME}.pot ALL 
+    po/${PROJECT_NAME}.pot ALL
     po/cs.po
     po/de.po
     po/es.po
@@ -68,7 +68,7 @@ configure_file(
 
 add_custom_target(
     data ALL
-    DEPENDS 
+    DEPENDS
     ${PROJECT_BINARY_DIR}/hamster.desktop
     ${PROJECT_SOURCE_DIR}/po/${PROJECT_NAME}.pot
     ${PROJECT_BINARY_DIR}/xfce4-popup-hamstermenu

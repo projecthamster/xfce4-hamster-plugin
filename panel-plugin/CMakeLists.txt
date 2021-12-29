@@ -25,6 +25,11 @@ add_library(
     windowserver.c  windowserver.h
 )
 
+add_dependencies(
+    hamster
+    data
+)
+
 add_compile_definitions(
     GETTEXT_PACKAGE="${PROJECT_NAME}"
     LOCALEDIR="${CMAKE_INSTALL_FULL_LOCALEDIR}"
