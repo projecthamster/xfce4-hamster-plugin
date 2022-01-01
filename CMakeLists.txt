@@ -32,19 +32,15 @@ if (NOT INTLTOOLMERGE)
     message(SEND_ERROR "Could not find intltool-merge")
 endif()
 
-file(GLOB pos
-    LIST_DIRECTORIES false
-    ${CMAKE_CURRENT_LIST_DIR}/po/*.po
-)
+set(POT ${CMAKE_CURRENT_LIST_DIR}/po/${PROJECT_NAME}.pot)
 
-add_custom_command(OUTPUT ${CMAKE_CURRENT_LIST_DIR}/po/${PROJECT_NAME}.pot
+add_custom_command(OUTPUT ${POT}
     COMMAND cd ${CMAKE_CURRENT_LIST_DIR}/po && ${INTLTOOLUPDATE} -p -g ${PROJECT_NAME}
-    DEPENDS ${pos}
 )
 
 add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/hamster.desktop
     COMMAND ${INTLTOOLMERGE} -d ${PROJECT_SOURCE_DIR}/po ${PROJECT_SOURCE_DIR}/panel-plugin/hamster.desktop.in ${PROJECT_BINARY_DIR}/hamster.desktop
-    DEPENDS ${PROJECT_SOURCE_DIR}/panel-plugin/hamster.desktop.in
+    DEPENDS ${PROJECT_SOURCE_DIR}/panel-plugin/hamster.desktop.in translations
 )
 
 add_subdirectory(
@@ -69,12 +65,12 @@ configure_file(
 add_custom_target(
     data ALL
     DEPENDS
+    ${POT}
     ${PROJECT_BINARY_DIR}/hamster.desktop
-    ${PROJECT_SOURCE_DIR}/po/${PROJECT_NAME}.pot
     ${PROJECT_BINARY_DIR}/xfce4-popup-hamstermenu
 )
 
-install(TARGETS hamster  LIBRARY DESTINATION lib/xfce4/panel/plugins/)
-install(FILES ${PROJECT_BINARY_DIR}/hamster.desktop DESTINATION share/xfce4/panel/plugins/)
-install(PROGRAMS ${PROJECT_BINARY_DIR}/xfce4-popup-hamstermenu DESTINATION bin)
+install(TARGETS hamster  LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}/xfce4/panel/plugins/)
+install(FILES ${PROJECT_BINARY_DIR}/hamster.desktop DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/xfce4/panel/plugins/)
+install(PROGRAMS ${PROJECT_BINARY_DIR}/xfce4-popup-hamstermenu DESTINATION ${CMAKE_INSTALL_BINDIR})
 
