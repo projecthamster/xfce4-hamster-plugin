@@ -4,7 +4,7 @@ See also the hamster project: <https://github.com/projecthamster/hamster>
 
 Dependencies: `xfce4-panel xfconf hamster-applet|hamster-time-tracker`
 
-Build dependencies[debian, ubuntu]: `libxfce4ui-2-dev libxfce4-panel-2.0-dev
+Build dependencies[debian, ubuntu]: `libxfce4ui-2-dev libxfce4panel-2.0-dev
 libxfconf-0-dev libxfce4util-dev`
 
 Common: `build-essential cmake intltool`
