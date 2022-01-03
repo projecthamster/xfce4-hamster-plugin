@@ -27,7 +27,7 @@ the following bias:
 Checkout as outlined under Contribution below, cd to the directory and
 issue `cmake -B build -DCMAKE_INSTALL_PREFIX=/usr`. If this fails, install any missing
 dependencies and repeat until success. 
-Finally, issue `cd build && make && sudo make install`. 
+Finally, issue `cmake --build build && sudo cmake --install build`. 
 Restart the xfce4 panel with `xfce4-panel -r`.
 
 ## Packagers
