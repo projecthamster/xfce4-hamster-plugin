@@ -39,3 +39,8 @@ fact_new(GVariant *in);
 
 void
 fact_free(fact *in);
+
+#define MAX_FACT_LEN  (256)
+#define unused __attribute__((__unused__))
+#define RIGTH_ANGLE (90)
+#define MIN_FACT_LEN (25) // something@somewhere should not be ellipsized

@@ -21,7 +21,6 @@
 fact *
 fact_new(GVariant *in)
 {
-   //bzero(out, sizeof(fact));
    fact *out = g_new0(fact, 1);
    g_variant_get(in, "(iiissisasii)",
          &out->id,

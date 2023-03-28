@@ -6,6 +6,8 @@ project(xfce4-hamster-plugin
     LANGUAGES C
 )
 
+set (CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
 find_package(PkgConfig REQUIRED)
 find_package(Gettext REQUIRED)
 find_package(Intl REQUIRED)

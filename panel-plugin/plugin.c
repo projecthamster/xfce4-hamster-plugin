@@ -32,10 +32,10 @@
  */
 gboolean
 hamster_popup_remote(XfcePanelPlugin *plugin, gchar *name,
-      GValue *value, HamsterView *view)
+      GValue const * value, HamsterView *view)
 {
    gboolean atPointer;
-   DBG("Popup remote: %s", name);
+   DBG("Popup remote: %s at %s(%d)", name, xfce_panel_plugin_get_name(plugin), xfce_panel_plugin_get_unique_id(plugin));
    atPointer = g_value_get_boolean(value);
    hview_popup_show(view, atPointer);
    return TRUE;
@@ -47,7 +47,7 @@ hamster_popup_remote(XfcePanelPlugin *plugin, gchar *name,
 static void
 hamster_finalize(XfcePanelPlugin *plugin, HamsterView *view)
 {
-    DBG("Finalize: %s", PLUGIN_NAME);
+    DBG("Finalize: %s(%d)", xfce_panel_plugin_get_name(plugin), xfce_panel_plugin_get_unique_id(plugin));
     hamster_view_finalize(view);
 }
 
@@ -65,7 +65,7 @@ hamster_construct(XfcePanelPlugin *plugin)
        return;
     }
 
-    DBG("Construct: %s(%d)", PLUGIN_NAME, xfce_panel_plugin_get_unique_id(plugin));
+    DBG("Construct: %s(%d)", xfce_panel_plugin_get_name(plugin), xfce_panel_plugin_get_unique_id(plugin));
     view = hamster_view_init(plugin);
     /* Set up i18n */
     xfce_textdomain(GETTEXT_PACKAGE, LOCALEDIR, "UTF-8");

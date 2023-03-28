@@ -33,6 +33,7 @@ add_dependencies(
 add_compile_definitions(
     GETTEXT_PACKAGE="${PROJECT_NAME}"
     LOCALEDIR="${CMAKE_INSTALL_FULL_LOCALEDIR}"
+    DEBUG=1
 )
 
 target_include_directories(

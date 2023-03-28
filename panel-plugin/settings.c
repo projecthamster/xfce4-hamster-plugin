@@ -16,6 +16,7 @@
  *  along with this program; If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "libxfce4panel/xfce-panel-plugin.h"
 #ifdef HAVE_CONFIG_H
 #  include "config.h"
 #endif
@@ -27,8 +28,11 @@
 void
 config_show(XfcePanelPlugin *plugin, XfconfChannel *channel)
 {
+   DBG("cb:%s", xfce_panel_plugin_get_name(plugin));
    GtkWidget *dlg = xfce_titled_dialog_new();
-   GtkWidget *cnt, *lbl, *chk;
+   GtkWidget *cnt;
+   GtkWidget *lbl;
+   GtkWidget *chk;
    g_object_set(G_OBJECT(dlg),
          "title", _("Hamster"),
          "icon_name", "org.gnome.Hamster.GUI",
