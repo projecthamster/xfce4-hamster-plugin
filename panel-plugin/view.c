@@ -17,7 +17,7 @@
  */
 
 #ifdef HAVE_CONFIG_H
-#  include "config.h"
+#include "config.h"
 #endif
 #include <gdk/gdk.h>
 #include <gdk/gdkkeysyms.h>
@@ -33,80 +33,78 @@
 
 struct _HamsterView
 {
-    /* plugin */
-    XfcePanelPlugin           *plugin;
+   /* plugin */
+   XfcePanelPlugin *plugin;
 
-    /* view */
-    GtkWidget                 *button;
-    GtkWidget                 *popup;
-    GtkWidget                 *vbx;
-    GtkWidget                 *entry;
-    GtkWidget                 *treeview;
-    GtkWidget                 *summary;
-    gboolean                  alive;
-    guint                     sourceTimeout;
-    gboolean                  inCellEdit;
+   /* view */
+   GtkWidget *button;
+   GtkWidget *popup;
+   GtkWidget *vbx;
+   GtkWidget *entry;
+   GtkWidget *treeview;
+   GtkWidget *summary;
+   gboolean   alive;
+   guint      sourceTimeout;
+   gboolean   inCellEdit;
 
-    /* model */
-    GtkListStore              *storeFacts;
-    GtkListStore              *storeActivities;
-    Hamster                   *hamster;
-    WindowServer              *windowserver;
-    GtkEntryCompletion        *completion;
+   /* model */
+   GtkListStore       *storeFacts;
+   GtkListStore       *storeActivities;
+   Hamster            *hamster;
+   WindowServer       *windowserver;
+   GtkEntryCompletion *completion;
 
 
-    /* config */
-    XfconfChannel             *channel;
-    gboolean                  donthide;
-    gboolean                  tooltips;
-    gboolean                  dropdown;
+   /* config */
+   XfconfChannel *channel;
+   gboolean       donthide;
+   gboolean       tooltips;
+   gboolean       dropdown;
 };
 
 enum _HamsterViewColumns
 {
-   TIME_SPAN,  // 09:00 - 10:15
-   TITLE,      // namedchore, without category
-   DURATION,   // 0h 56min
-   BTNEDIT,    // 
-   BTNCONT,    // 
-   ID,         // hidden, int
-   CATEGORY,   // hidden, int
-   NUM_COL     // not a column, sentinel
+   TIME_SPAN,   // 09:00 - 10:15
+   TITLE,       // namedchore, without category
+   DURATION,    // 0h 56min
+   BTNEDIT,     //
+   BTNCONT,     //
+   ID,          // hidden, int
+   CATEGORY,    // hidden, int
+   NUM_COL      // not a column, sentinel
 };
 
 const int secsperhour = 3600;
-const int secspermin = 60;
+const int secspermin  = 60;
 
 /* Button */
-static void
-hview_popup_hide(HamsterView *view)
+static void hview_popup_hide(HamsterView *view)
 {
-    if (view->donthide)
-    {
+   if (view->donthide)
+   {
       return;
-    }
-    /* untoggle the button */
-    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(view->button), FALSE);
+   }
+   /* untoggle the button */
+   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(view->button), FALSE);
 
-    /* empty entry */
-    if(view->entry)
-    {
-       gtk_entry_set_text(GTK_ENTRY(view->entry), "");
-       gtk_widget_grab_focus(view->entry);
-    }
+   /* empty entry */
+   if (view->entry)
+   {
+      gtk_entry_set_text(GTK_ENTRY(view->entry), "");
+      gtk_widget_grab_focus(view->entry);
+   }
 
-    /* hide the dialog for reuse */
-    if (view->popup)
-    {
-       gtk_widget_hide (view->popup);
-    }
-    view->alive = FALSE;
-    view->inCellEdit = FALSE;
+   /* hide the dialog for reuse */
+   if (view->popup)
+   {
+      gtk_widget_hide(view->popup);
+   }
+   view->alive      = FALSE;
+   view->inCellEdit = FALSE;
 }
 
 /* Button callbacks */
-static void
-hview_cb_show_overview(GtkWidget *widget, HamsterView *view)
+static void hview_cb_show_overview(GtkWidget *widget, HamsterView *view)
 {
    DBG("cb:%s", gtk_widget_get_name(widget));
    window_server_call_overview_sync(view->windowserver, NULL, NULL);
@@ -122,7 +120,7 @@ static void hview_cb_stop_tracking(GtkWidget *widget, HamsterView *view)
    now -= timezone;
    if (tmlt.tm_isdst)
    {
-       now += (daylight * secsperhour);
+      now += (daylight * secsperhour);
    }
    GVariant *stopTime = g_variant_new_int64(now);
    GVariant *var      = g_variant_new_variant(stopTime);
@@ -137,61 +135,55 @@ static void hview_cb_add_earlier_activity(GtkWidget *widget, HamsterView *view)
       G_DBUS_PROXY(view->windowserver), "edit", g_variant_new("()"), G_DBUS_CALL_FLAGS_NONE, -1, NULL, NULL);
    if (_ret == NULL)
    {
-         goto _out;
+      goto _out;
    }
    g_variant_get(_ret, "()");
    g_variant_unref(_ret);
 
-   _out:
+_out:
    hview_popup_hide(view);
 }
 
-static void
-hview_cb_tracking_settings(GtkWidget *widget, HamsterView *view)
+static void hview_cb_tracking_settings(GtkWidget *widget, HamsterView *view)
 {
    DBG("cb:%s", gtk_widget_get_name(widget));
    window_server_call_preferences_sync(view->windowserver, NULL, NULL);
    hview_popup_hide(view);
 }
 
-static gboolean
-hview_cb_timeout(HamsterView *view)
+static gboolean hview_cb_timeout(HamsterView *view)
 {
    hview_popup_hide(view);
    view->sourceTimeout = 0;
    return FALSE;
 }
 
-gboolean
-hview_cb_popup_focus_out (GtkWidget *widget,
-                    GdkEventFocus const * event,
-                    HamsterView *view)
+gboolean hview_cb_popup_focus_out(GtkWidget *widget, GdkEventFocus const *event, HamsterView *view)
 {
    DBG("cb:%s, in=%d", gtk_widget_get_name(widget), event->in);
 
    if (view->donthide)
    {
-         return FALSE;
+      return FALSE;
    }
    if (!view->sourceTimeout)
    {
-      const uint doubleBlinkEye = 50; // milliseconds
-      view->sourceTimeout = g_timeout_add(doubleBlinkEye, (GSourceFunc)hview_cb_timeout, view);
+      const uint doubleBlinkEye = 50;   // milliseconds
+      view->sourceTimeout       = g_timeout_add(doubleBlinkEye, (GSourceFunc)hview_cb_timeout, view);
       return FALSE;
    }
    return TRUE;
 }
 
-static gboolean
-hview_cb_match_select(GtkEntryCompletion *completion,
-                     GtkTreeModel *model,
-                     GtkTreeIter *iter,
-                     HamsterView *view)
+static gboolean hview_cb_match_select(GtkEntryCompletion *completion,
+                                      GtkTreeModel       *model,
+                                      GtkTreeIter        *iter,
+                                      HamsterView        *view)
 {
    char *activity;
    char *category;
-   char fact[MAX_FACT_LEN];
-   int id = 0;
+   char  fact[ MAX_FACT_LEN ];
+   int   id = 0;
 
    DBG("cb:%s", gtk_widget_get_name(GTK_WIDGET(completion)));
    gtk_tree_model_get(model, iter, 0, &activity, 1, &category, -1);
@@ -211,8 +203,7 @@ hview_cb_match_select(GtkEntryCompletion *completion,
    return TRUE;
 }
 
-static const char*
-hview_get_fact_by_activity(HamsterView *view, const char* activity, const char* category)
+static const char *hview_get_fact_by_activity(HamsterView *view, const char *activity, const char *category)
 {
    static char buffer[ MAX_FACT_LEN ];
 
@@ -247,38 +238,34 @@ hview_get_fact_by_activity(HamsterView *view, const char* activity, const char* 
    return activity;
 }
 
-static void
-hview_cb_entry_activate(GtkEntry *entry,
-                  HamsterView *view)
+static void hview_cb_entry_activate(GtkEntry *entry, HamsterView *view)
 {
    DBG("cb:%s", gtk_widget_get_name(GTK_WIDGET(entry)));
    const char *fact = gtk_entry_get_text(GTK_ENTRY(view->entry));
-   int id = 0;
+   int         id   = 0;
 
    if (!strchr(fact, '@'))
    {
       fact = hview_get_fact_by_activity(view, fact, NULL);
    }
-   
+
    hamster_call_add_fact_sync(view->hamster, fact, 0, 0, FALSE, &id, NULL, NULL);
    DBG("activated: %s[%d]", fact, id);
    hview_popup_hide(view);
 }
 
-static gboolean
-hview_cb_tv_query_tooltip(GtkWidget  *widget,
-               gint        x,
-               gint        y,
-               unused  gboolean    keyboard_mode,
-               GtkTooltip *tooltip,
-               const HamsterView *view)
+static gboolean hview_cb_tv_query_tooltip(GtkWidget         *widget,
+                                          gint               x,
+                                          gint               y,
+                                          unused gboolean    keyboard_mode,
+                                          GtkTooltip        *tooltip,
+                                          const HamsterView *view)
 {
-   if(view->tooltips)
+   if (view->tooltips)
    {
-      GtkTreePath *path;
+      GtkTreePath       *path;
       GtkTreeViewColumn *column;
-      if (gtk_tree_view_get_path_at_pos(GTK_TREE_VIEW(widget), x, y, &path,
-            &column, NULL, NULL))
+      if (gtk_tree_view_get_path_at_pos(GTK_TREE_VIEW(widget), x, y, &path, &column, NULL, NULL))
       {
          gchar const *text;
          if (NULL != (text = g_object_get_data(G_OBJECT(column), "tip")))
@@ -291,10 +278,7 @@ hview_cb_tv_query_tooltip(GtkWidget  *widget,
    return FALSE;
 }
 
-static gboolean
-hview_cb_tv_button_press(GtkWidget *tv,
-                  const GdkEventButton* evt,
-                  HamsterView *view)
+static gboolean hview_cb_tv_button_press(GtkWidget *tv, const GdkEventButton *evt, HamsterView *view)
 {
    if (evt->button != 1)
    {
@@ -341,10 +325,7 @@ hview_cb_tv_button_press(GtkWidget *tv,
    return FALSE;
 }
 
-static void
-hview_cb_label_allocate( GtkWidget *label,
-             unused const GtkAllocation *allocation,
-             HamsterView *view )
+static void hview_cb_label_allocate(GtkWidget *label, unused const GtkAllocation *allocation, HamsterView *view)
 {
    if (gtk_widget_get_sensitive(view->treeview))
    {
@@ -362,12 +343,9 @@ hview_cb_label_allocate( GtkWidget *label,
    }
 }
 
-static gboolean
-hview_cb_key_pressed(unused const GtkWidget *widget,
-      const GdkEventKey  *evt,
-      HamsterView *view)
+static gboolean hview_cb_key_pressed(unused const GtkWidget *widget, const GdkEventKey *evt, HamsterView *view)
 {
-   if(evt->keyval == GDK_KEY_Escape && !view->inCellEdit)
+   if (evt->keyval == GDK_KEY_Escape && !view->inCellEdit)
    {
       hview_popup_hide(view);
    }
@@ -375,16 +353,14 @@ hview_cb_key_pressed(unused const GtkWidget *widget,
    return FALSE;
 }
 
-void
-hview_cb_style_set(unused const GtkWidget *widget, unused const GtkStyle *previous, HamsterView *view)
+void hview_cb_style_set(unused const GtkWidget *widget, unused const GtkStyle *previous, HamsterView *view)
 {
    const guint border = 5;
    DBG("style-set %d", border);
    gtk_container_set_border_width(GTK_CONTAINER(view->vbx), border);
 }
 
-static gboolean
-hview_span_to_times(const char *duration, time_t *start_time, time_t *end_time)
+static gboolean hview_span_to_times(const char *duration, time_t *start_time, time_t *end_time)
 {
    gboolean rVal = FALSE;
 
@@ -392,143 +368,127 @@ hview_span_to_times(const char *duration, time_t *start_time, time_t *end_time)
    {
       struct tm sm;
       struct tm em;
-      time_t now;
+      time_t    now;
 
       time(&now);
       localtime_r(&now, &sm);
       em = sm;
-      switch ( // parse '09:30 - 14:30', accept '09:30' or '09:30 -' for ongoing
-         sscanf(duration, 
-            "%02d:%02d - %02d:%02d", 
-            &sm.tm_hour, &sm.tm_min, 
-            &em.tm_hour, &em.tm_min
-            )
-         )
+      switch (   // parse '09:30 - 14:30', accept '09:30' or '09:30 -' for ongoing
+         sscanf(duration, "%02d:%02d - %02d:%02d", &sm.tm_hour, &sm.tm_min, &em.tm_hour, &em.tm_min))
       {
-      case 2: // hh:mm OK
-         *start_time = timegm(&sm);
-         *end_time = 0; // hamster accepts 0 as ongoing
-         rVal = (-1 != *start_time);
-         break;
+         case 2:   // hh:mm OK
+            *start_time = timegm(&sm);
+            *end_time   = 0;   // hamster accepts 0 as ongoing
+            rVal        = (-1 != *start_time);
+            break;
 
-      case 4: // hh:mm - hh:mm OK
-         *start_time = timegm(&sm);
-         *end_time = timegm(&em);
-         rVal = (-1 != *start_time);
-         rVal &= (-1 != *end_time);
-         rVal &= (*end_time > *start_time);
-         break;
+         case 4:   // hh:mm - hh:mm OK
+            *start_time = timegm(&sm);
+            *end_time   = timegm(&em);
+            rVal        = (-1 != *start_time);
+            rVal &= (-1 != *end_time);
+            rVal &= (*end_time > *start_time);
+            break;
 
-      default:
-         *start_time = -1;
-         *end_time = -1;
-         break;
+         default:
+            *start_time = -1;
+            *end_time   = -1;
+            break;
       }
    }
    return rVal;
 }
 
-static void
-hview_cb_editing_done( 
-   GtkCellEditable *cell_editable,
-   HamsterView     *view)
+static gboolean hview_editing_cancelled(GtkCellEditable *cell_editable)
 {
-   if (GTK_IS_ENTRY(cell_editable))
-   {
-      GtkEntry *entry = GTK_ENTRY(cell_editable);
-      gboolean cancelled;
-      g_object_get(cell_editable, "editing-canceled", &cancelled, NULL);
-      const char *type = (const char*)g_object_get_data(G_OBJECT(cell_editable), "type");
-      const char *val = gtk_entry_get_text(entry);
-      DBG("%s:val=%s, type=%s", 
-         cancelled ? "CANCEL" : "DONE",
-         val,
-         type
-         );
-
-      if (!cancelled)
-      {
-         GtkTreeSelection *selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(view->treeview));
-         GtkTreeModel *model = NULL;
-         GtkTreeIter iter;
-         if (gtk_tree_selection_get_selected(selection, &model, &iter))
-         {
-            int id;
-            const char* fact;
-            const char* category;
-            const char* duration;
-            time_t start_time;
-            time_t stop_time;
-            gtk_tree_model_get(model, &iter, 
-               ID, &id, 
-               TIME_SPAN, &duration,
-               TITLE, &fact, 
-               CATEGORY, &category, 
-               -1);
-
-            DBG("old: %d:%s:%s:%s", id, duration, fact, category);
-            
-            if (!strcmp("fact", type))
-            {
-               if (!strcmp(fact, val))
-               {
-                  DBG("No change ACK of fact");
-                  cancelled = TRUE;
-               }
-               else
-               {
-                  fact = hview_get_fact_by_activity(view, val, NULL);
-               }
-            }
-            else if(!strcmp("date", type))
-            {
-               if (!strcmp(duration, val))
-               {
-                  DBG("No change ACK of duration");
-                  cancelled = TRUE;
-               }
-               else
-               {
-                  fact = hview_get_fact_by_activity(view, fact, category);
-                  duration = val;
-               }
-            }
-            if (!cancelled)
-            {
-               if (hview_span_to_times(duration, &start_time, &stop_time))
-               {
-                  // hamster #671 merged upstream?
-                  if (hamster_call_update_fact_sync(view->hamster,
-                                                    id, fact, (gint)start_time, (gint)stop_time, FALSE, &id, NULL, NULL))
-                  {
-                     DBG("UpdateFact worked: new id=%d", id);
-                  }
-                  else
-                  {
-                     DBG("UpdateFact did not work: remove, then add fact #%d", id);
-                     hamster_call_remove_fact_sync(view->hamster, id, NULL, NULL);
-                     hamster_call_add_fact_sync(view->hamster,
-                                                fact, (int)start_time, (int)stop_time, FALSE, &id, NULL, NULL);
-                     DBG("UpdateFact worked: %d", id);
-                  }
-               }
-               else
-               {
-                  DBG("Duration '%s' did not parse.", duration);
-               }
-            }
-         }
-      }
-   }
-   view->inCellEdit = FALSE;
+   gboolean cancelled;
+   g_object_get(cell_editable, "editing-canceled", &cancelled, NULL);
+   return cancelled;
 }
 
-static GtkEntryCompletion *
-hview_completion_new(HamsterView *view, GtkEntry *entry)
+static void hview_fact_update(HamsterView *view, int *id, const char *fact, gint start_time, gint stop_time)
+{
+   // hamster #671 merged upstream?
+   if (!hamster_call_update_fact_sync(view->hamster, *id, fact, start_time, stop_time, FALSE, id, NULL, NULL))
+   {
+      DBG("UpdateFact did not work: remove, then add fact #%d", *id);
+      hamster_call_remove_fact_sync(view->hamster, *id, NULL, NULL);
+      hamster_call_add_fact_sync(view->hamster, fact, start_time, stop_time, FALSE, id, NULL, NULL);
+      DBG("UpdateFact worked: %d", *id);
+      return;
+   }
+   DBG("UpdateFact worked: new id=%d", *id);
+}
+
+
+static void hview_cb_editing_done(GtkCellEditable *cell_editable, HamsterView *view)
+{
+   view->inCellEdit = FALSE;
+
+   if (!GTK_IS_ENTRY(cell_editable))
+   {
+      return;
+   }
+
+   if (hview_editing_cancelled(cell_editable))
+   {
+      return;
+   }
+
+   GtkTreeSelection *selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(view->treeview));
+   GtkTreeModel     *model     = NULL;
+   GtkTreeIter       iter;
+   if (!gtk_tree_selection_get_selected(selection, &model, &iter))
+   {
+      return;
+   }
+   int         id;
+   const char *fact;
+   const char *category;
+   const char *duration;
+   time_t      start_time;
+   time_t      stop_time;
+   gtk_tree_model_get(model, &iter, ID, &id, TIME_SPAN, &duration, TITLE, &fact, CATEGORY, &category, -1);
+
+   DBG("old: %d:%s:%s:%s", id, duration, fact, category);
+
+   const char *type = (const char *)g_object_get_data(G_OBJECT(cell_editable), "type");
+   const char *val  = gtk_entry_get_text(GTK_ENTRY(cell_editable));
+   if (!strcmp("fact", type))
+   {
+      if (!strcmp(fact, val))
+      {
+         DBG("No change ACK of fact");
+         return;
+      }
+
+      fact = hview_get_fact_by_activity(view, val, NULL);
+   }
+   else if (!strcmp("date", type))
+   {
+      if (!strcmp(duration, val))
+      {
+         DBG("No change ACK of duration");
+         return;
+      }
+
+      fact     = hview_get_fact_by_activity(view, fact, category);
+      duration = val;
+   }
+   if (hview_span_to_times(duration, &start_time, &stop_time))
+   {
+      hview_fact_update(view, &id, fact, (gint)start_time, (gint)stop_time);
+   }
+   else
+   {
+      DBG("Duration '%s' did not parse.", duration);
+   }
+}
+
+static GtkEntryCompletion *hview_completion_new(HamsterView *view, GtkEntry *entry)
 {
    GtkEntryCompletion *completion = gtk_entry_completion_new();
-   g_signal_connect(completion, "match-selected",
-                  G_CALLBACK(hview_cb_match_select), view);
+   g_signal_connect(completion, "match-selected", G_CALLBACK(hview_cb_match_select), view);
    gtk_entry_completion_set_text_column(completion, 0);
    gtk_entry_completion_set_model(completion, GTK_TREE_MODEL(view->storeActivities));
    gtk_entry_set_completion(entry, completion);
@@ -561,8 +521,7 @@ static void hview_cb_cell_editing_started(GtkCellRenderer *cell,
    }
 }
 
-static void
-hview_popup_new(HamsterView *view)
+static void hview_popup_new(HamsterView *view)
 {
    GtkWidget         *frm;
    GtkWidget         *lbl;
@@ -701,38 +660,30 @@ hview_popup_new(HamsterView *view)
    hview_cb_style_set(view->button, NULL, view);
 }
 
-static void
-hview_completion_mode_update(HamsterView *view)
+static void hview_completion_mode_update(HamsterView *view)
 {
-   view->dropdown = 
-      xfconf_channel_get_bool(view->channel, XFPROP_DROPDOWN, FALSE);
+   view->dropdown = xfconf_channel_get_bool(view->channel, XFPROP_DROPDOWN, FALSE);
 
-   if(view->entry && gtk_widget_get_realized(view->entry))
+   if (view->entry && gtk_widget_get_realized(view->entry))
    {
-      GtkEntryCompletion *completion = gtk_entry_get_completion(
-            GTK_ENTRY(view->entry));
+      GtkEntryCompletion *completion = gtk_entry_get_completion(GTK_ENTRY(view->entry));
       gtk_entry_completion_set_inline_completion(completion, !view->dropdown);
       gtk_entry_completion_set_popup_completion(completion, view->dropdown);
    }
 }
 
-static void
-hview_autohide_mode_update(HamsterView *view)
+static void hview_autohide_mode_update(HamsterView *view)
 {
-   view->donthide = 
-      xfconf_channel_get_bool(view->channel, XFPROP_DONTHIDE, FALSE);
+   view->donthide = xfconf_channel_get_bool(view->channel, XFPROP_DONTHIDE, FALSE);
 }
 
-static void
-hview_tooltips_mode_update(HamsterView *view)
+static void hview_tooltips_mode_update(HamsterView *view)
 {
-   view->tooltips = 
-      xfconf_channel_get_bool(view->channel, XFPROP_TOOLTIPS, TRUE);
+   view->tooltips = xfconf_channel_get_bool(view->channel, XFPROP_TOOLTIPS, TRUE);
 }
 
 /* Actions */
-void
-hview_popup_show(HamsterView *view, gboolean atPointer)
+void hview_popup_show(HamsterView *view, gboolean atPointer)
 {
    int x = 0;
    int y = 0;
@@ -751,13 +702,14 @@ hview_popup_show(HamsterView *view, gboolean atPointer)
       hview_tooltips_mode_update(view);
       hview_completion_mode_update(view);
    }
-   else if(view->alive)
+   else if (view->alive)
    {
       DBG("alive");
-      if(view->donthide) {
+      if (view->donthide)
+      {
          gdk_window_raise(gtk_widget_get_window(view->popup));
-}
-      if(view->sourceTimeout)
+      }
+      if (view->sourceTimeout)
       {
          g_source_remove(view->sourceTimeout);
          view->sourceTimeout = 0;
@@ -775,39 +727,38 @@ hview_popup_show(HamsterView *view, gboolean atPointer)
    hview_tooltips_mode_update(view);
 
    /* popup popup */
-   if(atPointer)
+   if (atPointer)
    {
       DBG("atpointer");
-		GdkDisplay* display = gdk_display_get_default();
-		GdkSeat* seat = gdk_display_get_default_seat(display);
-		GdkDevice* pointer = gdk_seat_get_pointer(seat);
+      GdkDisplay *display = gdk_display_get_default();
+      GdkSeat    *seat    = gdk_display_get_default_seat(display);
+      GdkDevice  *pointer = gdk_seat_get_pointer(seat);
 
-		gdk_device_get_position (pointer, NULL, &x, &y);
+      gdk_device_get_position(pointer, NULL, &x, &y);
    }
    else
    {
       DBG("atpanel");
-      GdkWindow* popup = gtk_widget_get_window(view->popup);
-      GdkWindow* button = gtk_widget_get_window(view->button);
-      xfce_panel_plugin_position_widget (view->plugin, view->button, NULL, &x,&y);
-      switch(xfce_panel_plugin_get_orientation(view->plugin))
+      GdkWindow *popup  = gtk_widget_get_window(view->popup);
+      GdkWindow *button = gtk_widget_get_window(view->button);
+      xfce_panel_plugin_position_widget(view->plugin, view->button, NULL, &x, &y);
+      switch (xfce_panel_plugin_get_orientation(view->plugin))
       {
          case GTK_ORIENTATION_HORIZONTAL:
-         x += gdk_window_get_width(button) / 2;
-         x -= gdk_window_get_width(popup) / 2;
-         break;
+            x += gdk_window_get_width(button) / 2;
+            x -= gdk_window_get_width(popup) / 2;
+            break;
 
          case GTK_ORIENTATION_VERTICAL:
-         y += gdk_window_get_height(button) / 2;
-         y -= gdk_window_get_height(popup) / 2;
-         break;
+            y += gdk_window_get_height(button) / 2;
+            y -= gdk_window_get_height(popup) / 2;
+            break;
       }
    }
    DBG("move x=%d, y=%d", x, y);
    gtk_window_move(GTK_WINDOW(view->popup), x, y);
-   gtk_window_present_with_time(GTK_WINDOW(view->popup),
-         gtk_get_current_event_time());
-   gtk_widget_add_events(view->popup, GDK_FOCUS_CHANGE_MASK|GDK_KEY_PRESS_MASK);
+   gtk_window_present_with_time(GTK_WINDOW(view->popup), gtk_get_current_event_time());
+   gtk_widget_add_events(view->popup, GDK_FOCUS_CHANGE_MASK | GDK_KEY_PRESS_MASK);
 }
 
 // Hours and minutes format when given INT_MAX produces "596523h 14min", but
@@ -830,10 +781,9 @@ static size_t hview_time_to_string(char *str, size_t maxsize, time_t time)
 // Using less than that may cause output to be truncated.
 const int HVIEW_TIMES_TO_SPAN_MIN_BUF_SIZE = 14;
 
-static void
-hview_times_to_span(char *time_span, size_t maxsize, time_t start_time, time_t end_time)
+static void hview_times_to_span(char *time_span, size_t maxsize, time_t start_time, time_t end_time)
 {
-   char *ptr = time_span;
+   char  *ptr = time_span;
    size_t charsWritten;
 
    charsWritten = hview_time_to_string(ptr, maxsize, start_time);
@@ -851,96 +801,98 @@ hview_times_to_span(char *time_span, size_t maxsize, time_t start_time, time_t e
    }
 }
 
-static gint*
-hview_create_category(const char *category, GHashTable *categories)
+static gint *hview_create_category(const char *category, GHashTable *categories)
 {
-  gint *duration_in_seconds = g_new0(gint, 1);
-  g_hash_table_insert(categories, strdup(category), duration_in_seconds);
+   gint *duration_in_seconds = g_new0(gint, 1);
+   g_hash_table_insert(categories, strdup(category), duration_in_seconds);
 
-  return duration_in_seconds;
+   return duration_in_seconds;
 }
 
-static void
-hview_increment_category_time(gchar const *category, gint duration_in_seconds, GHashTable *categories)
+static void hview_increment_category_time(gchar const *category, gint duration_in_seconds, GHashTable *categories)
 {
-  gint *category_duration = g_hash_table_lookup(categories, category);
-  if(category_duration == NULL)
-  {
-    category_duration = hview_create_category(category, categories);
-  }
+   gint *category_duration = g_hash_table_lookup(categories, category);
+   if (category_duration == NULL)
+   {
+      category_duration = hview_create_category(category, categories);
+   }
 
-  *category_duration += duration_in_seconds;
+   *category_duration += duration_in_seconds;
 }
 
 static gboolean hview_activity_stopped(fact const *activity)
 {
-  if (activity->endTime)
-  {
-    return TRUE;
-  }
+   if (activity->endTime)
+   {
+      return TRUE;
+   }
 
-  return FALSE;
+   return FALSE;
 }
 
 static void hview_store_update(HamsterView *view, fact *activity, GHashTable *categories)
 {
-  if (NULL == view->storeFacts)
-  {
-    return;
-  }
+   if (NULL == view->storeFacts)
+   {
+      return;
+   }
 
-  gchar time_span[ HVIEW_TIMES_TO_SPAN_MIN_BUF_SIZE ];
-  hview_times_to_span(time_span, sizeof(time_span), activity->startTime, activity->endTime);
+   gchar time_span[ HVIEW_TIMES_TO_SPAN_MIN_BUF_SIZE ];
+   hview_times_to_span(time_span, sizeof(time_span), activity->startTime, activity->endTime);
 
-  gchar duration[ HOURS_AND_MINUTES_MIN_LENGTH ];
-  hview_seconds_to_hours_and_minutes(duration, sizeof(duration), activity->seconds);
+   gchar duration[ HOURS_AND_MINUTES_MIN_LENGTH ];
+   hview_seconds_to_hours_and_minutes(duration, sizeof(duration), activity->seconds);
 
-  GtkTreeIter iter;
-  gtk_list_store_append(view->storeFacts, &iter); /* Acquire an iterator */
-  gtk_list_store_set(view->storeFacts,
-                     &iter,
-                     TIME_SPAN,
-                     time_span,
-                     TITLE,
-                     activity->name,
-                     DURATION,
-                     duration,
-                     BTNEDIT,
-                     "gtk-edit",
-                     BTNCONT,
-                     hview_activity_stopped(activity) ? "gtk-media-play" : "",
-                     ID,
-                     activity->id,
-                     CATEGORY,
-                     activity->category,
-                     -1);
+   GtkTreeIter iter;
+   gtk_list_store_append(view->storeFacts, &iter); /* Acquire an iterator */
+   gtk_list_store_set(view->storeFacts,
+                      &iter,
+                      TIME_SPAN,
+                      time_span,
+                      TITLE,
+                      activity->name,
+                      DURATION,
+                      duration,
+                      BTNEDIT,
+                      "gtk-edit",
+                      BTNCONT,
+                      hview_activity_stopped(activity) ? "gtk-media-play" : "",
+                      ID,
+                      activity->id,
+                      CATEGORY,
+                      activity->category,
+                      -1);
 
-  hview_increment_category_time(activity->category, activity->seconds, categories);
+   hview_increment_category_time(activity->category, activity->seconds, categories);
 }
 
-static void
-hview_summary_update(HamsterView *view, GHashTable *tbl)
+static void hview_summary_update(HamsterView *view, GHashTable *tbl)
 {
    GHashTableIter iter;
-   GString *string = g_string_new("");
-   gchar *cat;
-   gint *sum;
-   guint count;
+   GString       *string = g_string_new("");
+   gchar         *cat;
+   gint          *sum;
+   guint          count;
 
-   if(tbl)
+   if (tbl)
    {
       count = g_hash_table_size(tbl);
+      gtk_widget_set_sensitive(view->treeview, count > 0);
       g_hash_table_iter_init(&iter, tbl);
-      while(g_hash_table_iter_next(&iter, (gpointer)&cat, (gpointer)&sum))
+      while (g_hash_table_iter_next(&iter, (gpointer)&cat, (gpointer)&sum))
       {
          count--;
-         g_string_append_printf(string, count ? "%s: %dh %dmin, " : "%s: %dh %dmin",
-               cat, *sum / secsperhour, (*sum / secspermin) % secspermin);
+         g_string_append_printf(string,
+                                count ? "%s: %dh %dmin, " : "%s: %dh %dmin",
+                                cat,
+                                *sum / secsperhour,
+                                (*sum / secspermin) % secspermin);
       }
    }
    else
    {
       g_string_append(string, _("No activities yet."));
+      gtk_widget_set_sensitive(view->treeview, FALSE);
    }
    gtk_label_set_label(GTK_LABEL(view->summary), string->str);
    g_string_free(string, TRUE);
@@ -985,12 +937,49 @@ static void hview_completion_update(HamsterView *view)
    g_variant_unref(res);
 }
 
+static gsize hview_get_facts(HamsterView *view, GVariant **res)
+{
+   gsize count = 0;
+   if (NULL == view->hamster)
+   {
+      return count;
+   }
+
+   if (hamster_call_get_todays_facts_sync(view->hamster, res, NULL, NULL) && NULL != *res)
+   {
+      count = g_variant_n_children(*res);
+   }
+   return count;
+}
+
+static void hview_label_update(HamsterView *view, fact *last)
+{
+   gboolean ellipsize = xfconf_channel_get_bool(view->channel, XFPROP_SANITIZE, FALSE);
+   places_button_set_ellipsize(PLACES_BUTTON(view->button), ellipsize);
+
+   if (NULL == last)
+   {
+      places_button_set_label(PLACES_BUTTON(view->button), _("inactive"));
+      gtk_window_resize(GTK_WINDOW(view->popup), 1, 1);
+      return;
+   }
+
+   if (0 == last->endTime)
+   {
+      gchar label[ MAX_FACT_LEN ];
+      snprintf(label,
+               sizeof(label),
+               "%s %d:%02d",
+               last->name,
+               last->seconds / secsperhour,
+               (last->seconds / secspermin) % secspermin);
+      places_button_set_label(PLACES_BUTTON(view->button), label);
+      return;
+   }
+}
+
 static void hview_button_update(HamsterView *view)
 {
-   GVariant *res;
-   gsize     count = 0;
-   gboolean  ellipsize;
-
    if (view->inCellEdit)
    {
       return;
@@ -1001,55 +990,33 @@ static void hview_button_update(HamsterView *view)
       gtk_list_store_clear(view->storeFacts);
    }
 
-   if (NULL != view->hamster)
+   GVariant *res;
+   gsize     count = hview_get_facts(view, &res);
+   if (count)
    {
-      ellipsize = xfconf_channel_get_bool(view->channel, XFPROP_SANITIZE, FALSE);
-      places_button_set_ellipsize(PLACES_BUTTON(view->button), ellipsize);
-
-      if (hamster_call_get_todays_facts_sync(view->hamster, &res, NULL, NULL) && NULL != res)
+      GHashTable *tbl = g_hash_table_new(g_str_hash, g_str_equal);
+      for (gsize i = 0; i < count; i++)
       {
-         GHashTable *tbl = g_hash_table_new(g_str_hash, g_str_equal);
-         gtk_widget_set_sensitive(view->treeview, TRUE);
-         for (gsize i = 0; i < g_variant_n_children(res); i++)
-         {
          GVariant *dbusFact = g_variant_get_child_value(res, i);
          fact     *last     = fact_new(dbusFact);
          g_variant_unref(dbusFact);
          hview_store_update(view, last, tbl);
          if (last->id && i == count - 1)
          {
-               hview_summary_update(view, tbl);
-               if (0 == last->endTime)
-               {
-                  gchar label[ MAX_FACT_LEN ];
-                  snprintf(label,
-                           sizeof(label),
-                           "%s %d:%02d",
-                           last->name,
-                           last->seconds / secsperhour,
-                           (last->seconds / secspermin) % secspermin);
-                  places_button_set_label(PLACES_BUTTON(view->button), label);
-                  fact_free(last);
-                  g_hash_table_unref(tbl);
-                  return;
-               }
+            hview_summary_update(view, tbl);
+            hview_label_update(view, last);
          }
          fact_free(last);
-         }
-         g_hash_table_unref(tbl);
       }
-      gtk_window_resize(GTK_WINDOW(view->popup), 1, 1);
+      g_hash_table_unref(tbl);
+      return;
    }
-   places_button_set_label(PLACES_BUTTON(view->button), _("inactive"));
-   if (!count)
-   {
-      hview_summary_update(view, NULL);
-   }
-   gtk_widget_set_sensitive(view->treeview, count > 0);
+
+   hview_summary_update(view, NULL);
+   hview_label_update(view, NULL);
 }
 
-static gboolean
-hview_cb_button_pressed(unused const GtkWidget *widget, const GdkEventButton *evt, HamsterView *view)
+static gboolean hview_cb_button_pressed(unused const GtkWidget *widget, const GdkEventButton *evt, HamsterView *view)
 {
    /* (it's the way xfdesktop popup does it...) */
    if ((evt->state & GDK_CONTROL_MASK) && !(evt->state & (GDK_MOD1_MASK | GDK_SHIFT_MASK | GDK_MOD4_MASK)))
@@ -1077,8 +1044,7 @@ hview_cb_button_pressed(unused const GtkWidget *widget, const GdkEventButton *ev
    return TRUE;
 }
 
-static gboolean
-hview_cb_hamster_changed(Hamster *hamster, HamsterView *view)
+static gboolean hview_cb_hamster_changed(Hamster *hamster, HamsterView *view)
 {
    DBG("dbus-callback %p->%p", hamster, view);
    hview_button_update(view);
@@ -1086,8 +1052,7 @@ hview_cb_hamster_changed(Hamster *hamster, HamsterView *view)
    return FALSE;
 }
 
-static gboolean
-hview_cb_cyclic(HamsterView *view)
+static gboolean hview_cb_cyclic(HamsterView *view)
 {
    hview_button_update(view);
    return TRUE;
@@ -1095,7 +1060,7 @@ hview_cb_cyclic(HamsterView *view)
 
 static void hview_cb_channel(XfconfChannel *channel, gchar *property, GValue const *value, HamsterView *view)
 {
-   DBG("%s=%d, locked=%d", property, xfconf_channel_is_property_locked(channel, property),  g_value_get_boolean(value));
+   DBG("%s=%d, locked=%d", property, xfconf_channel_is_property_locked(channel, property), g_value_get_boolean(value));
    if (!strcmp(property, XFPROP_DROPDOWN))
    {
       hview_completion_mode_update(view);
@@ -1114,15 +1079,14 @@ static void hview_cb_channel(XfconfChannel *channel, gchar *property, GValue con
    }
 }
 
-HamsterView*
-hamster_view_init(XfcePanelPlugin* plugin)
+HamsterView *hamster_view_init(XfcePanelPlugin *plugin)
 {
    HamsterView *view;
 
    g_assert(plugin != NULL);
 
-   view            = g_new0(HamsterView, 1);
-   view->plugin    = plugin;
+   view         = g_new0(HamsterView, 1);
+   view->plugin = plugin;
    DBG("initializing %p", view);
 
    /* init button */
@@ -1135,48 +1099,39 @@ hamster_view_init(XfcePanelPlugin* plugin)
    gtk_widget_show(view->button);
 
    /* button signal */
-   g_signal_connect(view->button, "button-press-event",
-                            G_CALLBACK(hview_cb_button_pressed), view);
+   g_signal_connect(view->button, "button-press-event", G_CALLBACK(hview_cb_button_pressed), view);
 
    g_timeout_add_seconds(secspermin, (GSourceFunc)hview_cb_cyclic, view);
 
    /* remote control */
-   view->hamster = hamster_proxy_new_for_bus_sync
-         (
-                     G_BUS_TYPE_SESSION,
-                     G_DBUS_PROXY_FLAGS_NONE,
-                     "org.gnome.Hamster",             /* bus name */
-                     "/org/gnome/Hamster",            /* object */
-                     NULL,                            /* GCancellable */
-                     NULL);
+   view->hamster = hamster_proxy_new_for_bus_sync(G_BUS_TYPE_SESSION,
+                                                  G_DBUS_PROXY_FLAGS_NONE,
+                                                  "org.gnome.Hamster",  /* bus name */
+                                                  "/org/gnome/Hamster", /* object */
+                                                  NULL,                 /* GCancellable */
+                                                  NULL);
 
-   g_signal_connect(view->hamster, "facts-changed",
-                            G_CALLBACK(hview_cb_hamster_changed), view);
-   g_signal_connect(view->hamster, "activities-changed",
-                            G_CALLBACK(hview_cb_hamster_changed), view);
+   g_signal_connect(view->hamster, "facts-changed", G_CALLBACK(hview_cb_hamster_changed), view);
+   g_signal_connect(view->hamster, "activities-changed", G_CALLBACK(hview_cb_hamster_changed), view);
 
-   view->windowserver = window_server_proxy_new_for_bus_sync
-         (
-               G_BUS_TYPE_SESSION,
-               G_DBUS_PROXY_FLAGS_NONE,
-               "org.gnome.Hamster.WindowServer",      /* bus name */
-               "/org/gnome/Hamster/WindowServer",     /* object */
-               NULL,                                  /* GCancellable */
-               NULL);
+   view->windowserver = window_server_proxy_new_for_bus_sync(G_BUS_TYPE_SESSION,
+                                                             G_DBUS_PROXY_FLAGS_NONE,
+                                                             "org.gnome.Hamster.WindowServer",  /* bus name */
+                                                             "/org/gnome/Hamster/WindowServer", /* object */
+                                                             NULL,                              /* GCancellable */
+                                                             NULL);
 
    /* storage */
    view->storeActivities = gtk_list_store_new(2, G_TYPE_STRING, G_TYPE_STRING);
-   view->storeFacts = gtk_list_store_new(NUM_COL, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING,
-         G_TYPE_STRING, G_TYPE_STRING, G_TYPE_INT, G_TYPE_STRING);
-   view->summary = gtk_label_new(NULL);
+   view->storeFacts      = gtk_list_store_new(
+      NUM_COL, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_INT, G_TYPE_STRING);
+   view->summary  = gtk_label_new(NULL);
    view->treeview = gtk_tree_view_new();
 
    /* config */
    view->channel = xfce_panel_plugin_xfconf_channel_new(view->plugin);
-   g_signal_connect(view->channel, "property-changed",
-                        G_CALLBACK(hview_cb_channel), view);
-   g_signal_connect(view->plugin, "configure-plugin",
-                        G_CALLBACK(config_show), view->channel);
+   g_signal_connect(view->channel, "property-changed", G_CALLBACK(hview_cb_channel), view);
+   g_signal_connect(view->plugin, "configure-plugin", G_CALLBACK(config_show), view->channel);
    xfce_panel_plugin_menu_show_configure(view->plugin);
 
    /* time helpers */
@@ -1191,10 +1146,7 @@ hamster_view_init(XfcePanelPlugin* plugin)
    return view;
 }
 
-void
-hamster_view_finalize(HamsterView* view)
+void hamster_view_finalize(HamsterView *view)
 {
    g_free(view);
 }
-
-

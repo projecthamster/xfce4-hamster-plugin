@@ -7,3 +7,4 @@ po/Makefile.in
 po/POTFILES
 po/stamp-it
 po/xfce4-hamster-plugin.pot
+compile_commands.json
