@@ -33,8 +33,12 @@ add_dependencies(
 add_compile_definitions(
     GETTEXT_PACKAGE="${PROJECT_NAME}"
     LOCALEDIR="${CMAKE_INSTALL_FULL_LOCALEDIR}"
-    DEBUG=1
 )
+
+if(CMAKE_BUILD_TYPE STREQUAL "DEBUG")
+    message("Build DEBUG version")
+    add_compile_definitions(DEBUG=1)
+endif()
 
 target_include_directories(
     hamster PUBLIC

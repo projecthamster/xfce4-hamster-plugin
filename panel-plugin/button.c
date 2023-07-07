@@ -44,10 +44,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
 #include <gtk/gtk.h>
 #include <libxfce4util/libxfce4util.h>
 #include <libxfce4panel/libxfce4panel.h>
@@ -382,7 +378,9 @@ static void places_button_resize(PlacesButton *self)
    places_button_resize_label(self, show_label);
 }
 
-static void places_button_mode_changed(unused const XfcePanelPlugin *plugin, XfcePanelPluginMode mode, PlacesButton *self)
+static void places_button_mode_changed(unused const XfcePanelPlugin *plugin,
+                                       XfcePanelPluginMode           mode,
+                                       PlacesButton                 *self)
 {
    DBG("orientation changed");
    gtk_orientable_set_orientation(

@@ -16,9 +16,7 @@
  *  along with this program; If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
+
 #include <gdk/gdk.h>
 #include <gdk/gdkkeysyms.h>
 #include <libxfce4util/libxfce4util.h>
@@ -53,7 +51,6 @@ struct _HamsterView
    Hamster            *hamster;
    WindowServer       *windowserver;
    GtkEntryCompletion *completion;
-
 
    /* config */
    XfconfChannel *channel;
@@ -133,14 +130,11 @@ static void hview_cb_add_earlier_activity(GtkWidget *widget, HamsterView *view)
    DBG("cb:%s", gtk_widget_get_name(widget));
    GVariant *_ret = g_dbus_proxy_call_sync(
       G_DBUS_PROXY(view->windowserver), "edit", g_variant_new("()"), G_DBUS_CALL_FLAGS_NONE, -1, NULL, NULL);
-   if (_ret == NULL)
+   if (_ret)
    {
-      goto _out;
+      g_variant_get(_ret, "()");
+      g_variant_unref(_ret);
    }
-   g_variant_get(_ret, "()");
-   g_variant_unref(_ret);
-
-_out:
    hview_popup_hide(view);
 }
 
@@ -532,6 +526,7 @@ static void hview_popup_new(HamsterView *view)
    GtkCellRenderer   *renderer;
    GtkTreeViewColumn *column;
 
+
    /* Create a new popup */
    view->popup = gtk_window_new(GTK_WINDOW_TOPLEVEL);
    gtk_window_set_type_hint(GTK_WINDOW(view->popup), GDK_WINDOW_TYPE_HINT_UTILITY);
@@ -558,11 +553,11 @@ static void hview_popup_new(HamsterView *view)
    gtk_container_add(GTK_CONTAINER(view->vbx), lbl);
 
    // entry
-   view->entry = gtk_entry_new();
+   view->entry      = gtk_entry_new();
+   view->completion = hview_completion_new(view, GTK_ENTRY(view->entry));
    g_object_set_data(G_OBJECT(view->entry), "type", "new");
    g_signal_connect(view->completion, "match-selected", G_CALLBACK(hview_cb_match_select), view);
    g_signal_connect(view->entry, "activate", G_CALLBACK(hview_cb_entry_activate), view);
-   view->completion = hview_completion_new(view, GTK_ENTRY(view->entry));
    gtk_container_add(GTK_CONTAINER(view->vbx), view->entry);
 
    // label
