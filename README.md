@@ -41,9 +41,6 @@ If your distribution doesn't, maybe its time to push the issue.
 
 The icon from hamster is reused as `org.gnome.Hamster.GUI`.
 
-The generated .lo files are best purged since no linkage or development
-packages are provided.
-
 [![Packaging status](https://repology.org/badge/vertical-allrepos/xfce4-hamster-plugin.svg)](https://repology.org/project/xfce4-hamster-plugin/versions)
 
 ## Contributing
@@ -61,4 +58,8 @@ I'd like to thank the following translators:
 - Nicolas Reynolds
 - fauno
 
-
+## Development
+The Compilation steps are available within a convenience `Makefile`. If CPack is 
+installed, this Makefile may also generate `.deb` and `.rpm` packages 
+with the `deb` and `rpm` make targets. Keeping debug info is achieved with `make CMAKE_BUILD_TYPE=DEBUG`. 
+This will also make `DBG()` output visible in the console.

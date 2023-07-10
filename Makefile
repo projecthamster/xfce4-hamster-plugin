@@ -12,8 +12,14 @@ default: cmake
 cmake: ./build
 	cmake --build build 
 
-install:
+install: cmake
 	cmake --install build
 
 clean:
 	rm -rf build
+
+deb: cmake
+	cd build && cpack -G DEB
+
+rpm: cmake
+	cd build && cpack -G RPM

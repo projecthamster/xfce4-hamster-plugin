@@ -5,8 +5,8 @@ project(xfce4-hamster-plugin
     DESCRIPTION "A recreation of the gnome hamster shell extension for the xfce4 panel"
     LANGUAGES C
 )
-
-set (CMAKE_EXPORT_COMPILE_COMMANDS ON)
+set(CMAKE_PROJECT_HOMEPAGE_URL "https://github.com/projecthamster/xfce4-hamster-plugin")
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 find_package(PkgConfig REQUIRED)
 find_package(Gettext REQUIRED)
@@ -76,3 +76,18 @@ install(TARGETS hamster  LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}/xfce4/panel
 install(FILES ${PROJECT_BINARY_DIR}/hamster.desktop DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/xfce4/panel/plugins/)
 install(PROGRAMS ${PROJECT_BINARY_DIR}/xfce4-popup-hamstermenu DESTINATION ${CMAKE_INSTALL_BINDIR})
 
+# CPACK
+set(CPACK_ADD_VERSION 2)
+set(CPACK_PACKAGE_CONTACT "Hakan Erduman <hakan@erduman.de>")
+
+# deb specific
+set(CPACK_DEBIAN_FILE_NAME "DEB-DEFAULT")
+set(CPACK_DEBIAN_PACKAGE_RELEASE ${CPACK_ADD_VERSION})
+set(CPACK_DEBIAN_PACKAGE_SECTION "Xfce")
+set(CPACK_DEBIAN_PACKAGE_SHLIBDEPS ON)
+
+# rpm specific
+set(CPACK_RPM_FILE_NAME, "RPM-DEFAULT")
+set(CPACK_RPM_PACKAGE_RELEASE ${CPACK_ADD_VERSION})
+
+include(CPack)
