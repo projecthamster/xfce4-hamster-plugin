@@ -952,25 +952,21 @@ static void hview_label_update(HamsterView *view, fact *last)
    gboolean ellipsize = xfconf_channel_get_bool(view->channel, XFPROP_SANITIZE, FALSE);
    places_button_set_ellipsize(PLACES_BUTTON(view->button), ellipsize);
 
-   if (NULL == last)
+   if (NULL == last || 0 != last->endTime)
    {
       places_button_set_label(PLACES_BUTTON(view->button), _("inactive"));
       gtk_window_resize(GTK_WINDOW(view->popup), 1, 1);
       return;
    }
 
-   if (0 == last->endTime)
-   {
-      gchar label[ MAX_FACT_LEN ];
-      snprintf(label,
-               sizeof(label),
-               "%s %d:%02d",
-               last->name,
-               last->seconds / secsperhour,
-               (last->seconds / secspermin) % secspermin);
-      places_button_set_label(PLACES_BUTTON(view->button), label);
-      return;
-   }
+   gchar label[ MAX_FACT_LEN ];
+   snprintf(label,
+            sizeof(label),
+            "%s %d:%02d",
+            last->name,
+            last->seconds / secsperhour,
+            (last->seconds / secspermin) % secspermin);
+   places_button_set_label(PLACES_BUTTON(view->button), label);
 }
 
 static void hview_button_update(HamsterView *view)
@@ -987,6 +983,7 @@ static void hview_button_update(HamsterView *view)
 
    GVariant *res;
    gsize     count = hview_get_facts(view, &res);
+   DBG("count=%lu", count);
    if (count)
    {
       GHashTable *tbl = g_hash_table_new(g_str_hash, g_str_equal);
