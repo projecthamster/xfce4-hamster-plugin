@@ -13,4 +13,4 @@ Diagnostics:
     Remove:
     - modernize-macro-to-enum
     - readability-identifier-length
-
+    - readability-redundant-function-ptr-dereference

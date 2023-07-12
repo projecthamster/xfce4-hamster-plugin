@@ -1,6 +1,6 @@
 /*  xfce4-hamster-plugin
  *
- *  Copyright (c) 2014 Hakan Erduman <smultimeter@gmail.com>
+ *  Copyright (c) 2014-2023 Hakan Erduman <hakan@erduman.de>
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by

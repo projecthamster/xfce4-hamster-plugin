@@ -406,5 +406,3 @@ static void places_button_theme_changed(PlacesButton *self)
    DBG("theme changed");
    places_button_resize(self);
 }
-
-/* vim: set ai et tabstop=4: */

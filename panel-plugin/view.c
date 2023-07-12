@@ -1,6 +1,6 @@
 /*  xfce4-hamster-plugin
  *
- *  Copyright (c) 2014 Hakan Erduman <smultimeter@gmail.com>
+ *  Copyright (c) 2014-2023 Hakan Erduman <hakan@erduman.de>
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -13,7 +13,7 @@
  *  GNU Library General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with this program; If not, see <http://www.gnu.org/licenses/>.
+ *  along with this program; If not, see <https://www.gnu.org/licenses/>.
  */
 
 
@@ -955,7 +955,10 @@ static void hview_label_update(HamsterView *view, fact *last)
    if (NULL == last || 0 != last->endTime)
    {
       places_button_set_label(PLACES_BUTTON(view->button), _("inactive"));
-      gtk_window_resize(GTK_WINDOW(view->popup), 1, 1);
+      if (view->alive)
+      {
+         gtk_window_resize(GTK_WINDOW(view->popup), 1, 1);
+      }
       return;
    }
 
