@@ -50,6 +50,9 @@ target_link_directories(
     hamster PUBLIC
     ${GTK_LIBRARY_DIRS}
 )
+target_compile_options(
+    hamster PUBLIC "-ffile-prefix-map=${CMAKE_SOURCE_DIR}=."
+)
 
 target_link_libraries(
     hamster ${GTK_LIBRARIES}

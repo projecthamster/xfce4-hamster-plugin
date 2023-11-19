@@ -9,9 +9,9 @@ libxfconf-0-dev libxfce4util-dev`
 
 Common: `build-essential cmake intltool`
 
-Tested on Arch with xfce 4.16, Ubuntu 20.04 with xfce 4.14 and
-Debian Buster with xfce 4.12. Uses GTK+3 only, requires APIs that are
-not available before xfce 4.10. Support for older versions are in
+Tested on Arch with xfce 4.18, Ubuntu 22.04 with xfce 4.16 and
+Debian Bookworm with xfce 4.18. Uses GTK+3 only, requires APIs that are
+not available before xfce 4.10. Support for older versions are 
 available in the git history. Also seen running on Alpine and void (musl).
 
 ## Translators
@@ -26,9 +26,12 @@ the following bias:
 ## Compilation
 Checkout as outlined under Contribution below, cd to the directory and
 issue `cmake -B build -DCMAKE_INSTALL_PREFIX=/usr`. If this fails, install any missing
-dependencies and repeat until success. 
+dependencies and you may need to rinse and repeat until success. 
 Finally, issue `cmake --build build && sudo cmake --install build`. 
 Restart the xfce4 panel with `xfce4-panel -r`.
+If the plugin does not show up, check if the installation location is indeed `/usr`; 
+the panel does only seek for plugins on a location hardcoded at the time of compilation
+of xfce4 itself, so you `/usr/local` may be fine on the \*BSDs.
 
 ## Packagers
 This plug-in is useless without an activatable D-Bus implementation of
