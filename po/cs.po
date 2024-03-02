@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: xfce4-hamster-plugin 0.0.1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-04-05 17:49+0200\n"
+"POT-Creation-Date: 2023-07-11 18:00+0200\n"
 "PO-Revision-Date: 2018-08-06 16:43+0200\n"
 "Last-Translator: Pavel Borecki <pavel.borecki@gmail.com>\n"
 "Language-Team: Czech\n"
@@ -18,15 +18,20 @@ msgstr ""
 "Plural-Forms: nplurals=3; plural=(n==1) ? 0 : (n>=2 && n<=4) ? 1 : 2;\n"
 "X-Generator: Poedit 2.0.4\n"
 
+#: ../panel-plugin/view.c:765
+#, c-format
+msgid "%dh %dmin"
+msgstr ""
+
 #: ../panel-plugin/settings.c:44
 msgid "<b>Settings</b>"
 msgstr "<b>Nastavení</b>"
 
-#: ../panel-plugin/view.c:706
+#: ../panel-plugin/view.c:632
 msgid "Add earlier activity"
 msgstr "Přidat dřívější aktivitu"
 
-#: ../panel-plugin/view.c:672
+#: ../panel-plugin/view.c:604
 msgid "Edit activity"
 msgstr "Upravit aktivitu"
 
@@ -34,7 +39,7 @@ msgstr "Upravit aktivitu"
 msgid "Entry completion as dropdown"
 msgstr "Dokončení položky jako rozbalovací nabídka"
 
-#: ../panel-plugin/settings.c:33 ../panel-plugin/hamster.desktop.in.h:1
+#: ../panel-plugin/settings.c:34 ../panel-plugin/hamster.desktop.in.h:1
 msgid "Hamster"
 msgstr "Hamster"
 
@@ -42,11 +47,11 @@ msgstr "Hamster"
 msgid "Keep popup floating"
 msgstr "Ponechat vyskakovací okno otevřené"
 
-#: ../panel-plugin/view.c:965
+#: ../panel-plugin/view.c:889
 msgid "No activities yet."
 msgstr "Doposud žádné aktivity."
 
-#: ../panel-plugin/view.c:678
+#: ../panel-plugin/view.c:607
 msgid "Resume activity"
 msgstr "Pokračovat v aktivitě"
 
@@ -55,7 +60,7 @@ msgid "Sanitize label width"
 msgstr "Přizpůsobit šířku štítku"
 
 #. menuish buttons
-#: ../panel-plugin/view.c:692
+#: ../panel-plugin/view.c:620
 msgid "Show overview"
 msgstr "Zobrazit přehled"
 
@@ -63,28 +68,28 @@ msgstr "Zobrazit přehled"
 msgid "Show tooltips on buttons"
 msgstr "Zobrazovat popisky tlačítek"
 
-#: ../panel-plugin/view.c:699
+#: ../panel-plugin/view.c:626
 msgid "Stop tracking"
 msgstr "Zastavit sledování"
 
-#: ../panel-plugin/settings.c:35 ../panel-plugin/hamster.desktop.in.h:2
+#: ../panel-plugin/settings.c:38 ../panel-plugin/hamster.desktop.in.h:2
 msgid "Time bookkeeping plugin"
 msgstr "Zásuvný modul pro evidenci času"
 
 #. label
-#: ../panel-plugin/view.c:616
+#: ../panel-plugin/view.c:564
 msgid "Today's activities"
 msgstr "Dnešní aktivity"
 
-#: ../panel-plugin/view.c:713
+#: ../panel-plugin/view.c:638
 msgid "Tracking settings"
 msgstr "Nastavení sledování"
 
 #. subtitle
-#: ../panel-plugin/view.c:602
+#: ../panel-plugin/view.c:552
 msgid "What goes on?"
 msgstr "Čím se právě zabýváte?"
 
-#: ../panel-plugin/view.c:1061
+#: ../panel-plugin/view.c:957
 msgid "inactive"
 msgstr "neaktivní"

@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: xfce4-hamster-plugin 0.0.1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-04-05 17:49+0200\n"
+"POT-Creation-Date: 2023-07-11 18:00+0200\n"
 "PO-Revision-Date: 2016-07-20 13:49+0300\n"
 "Last-Translator: Sergey Panasenko <sergey.panasenko@gmail.com>\n"
 "Language-Team: Russian\n"
@@ -17,15 +17,20 @@ msgstr ""
 "X-Poedit-Basepath: ../panel-plugin\n"
 "X-Poedit-SearchPath-0: .\n"
 
+#: ../panel-plugin/view.c:765
+#, c-format
+msgid "%dh %dmin"
+msgstr ""
+
 #: ../panel-plugin/settings.c:44
 msgid "<b>Settings</b>"
 msgstr "<b>Налаштування</b>"
 
-#: ../panel-plugin/view.c:706
+#: ../panel-plugin/view.c:632
 msgid "Add earlier activity"
 msgstr "Додати попередню діяльність"
 
-#: ../panel-plugin/view.c:672
+#: ../panel-plugin/view.c:604
 msgid "Edit activity"
 msgstr "Редагувати"
 
@@ -33,7 +38,7 @@ msgstr "Редагувати"
 msgid "Entry completion as dropdown"
 msgstr "Завершення введення у вигляді списку"
 
-#: ../panel-plugin/settings.c:33 ../panel-plugin/hamster.desktop.in.h:1
+#: ../panel-plugin/settings.c:34 ../panel-plugin/hamster.desktop.in.h:1
 msgid "Hamster"
 msgstr "Хом'як (Hamster)"
 
@@ -42,11 +47,11 @@ msgstr "Хом'як (Hamster)"
 msgid "Keep popup floating"
 msgstr "Тримати спливаюче вікно"
 
-#: ../panel-plugin/view.c:965
+#: ../panel-plugin/view.c:889
 msgid "No activities yet."
 msgstr "Ніякої діяльності."
 
-#: ../panel-plugin/view.c:678
+#: ../panel-plugin/view.c:607
 msgid "Resume activity"
 msgstr "Продовжити"
 
@@ -55,7 +60,7 @@ msgid "Sanitize label width"
 msgstr ""
 
 #. menuish buttons
-#: ../panel-plugin/view.c:692
+#: ../panel-plugin/view.c:620
 msgid "Show overview"
 msgstr "Показати огляд"
 
@@ -63,28 +68,28 @@ msgstr "Показати огляд"
 msgid "Show tooltips on buttons"
 msgstr "Показати підказки до кнопок"
 
-#: ../panel-plugin/view.c:699
+#: ../panel-plugin/view.c:626
 msgid "Stop tracking"
 msgstr "Припинити облік"
 
-#: ../panel-plugin/settings.c:35 ../panel-plugin/hamster.desktop.in.h:2
+#: ../panel-plugin/settings.c:38 ../panel-plugin/hamster.desktop.in.h:2
 msgid "Time bookkeeping plugin"
 msgstr "Плагін обліку часу"
 
 #. label
-#: ../panel-plugin/view.c:616
+#: ../panel-plugin/view.c:564
 msgid "Today's activities"
 msgstr "Діяльність за сьогодні"
 
-#: ../panel-plugin/view.c:713
+#: ../panel-plugin/view.c:638
 msgid "Tracking settings"
 msgstr "Налаштування обліку"
 
 #. subtitle
-#: ../panel-plugin/view.c:602
+#: ../panel-plugin/view.c:552
 msgid "What goes on?"
 msgstr "Що відбувається?"
 
-#: ../panel-plugin/view.c:1061
+#: ../panel-plugin/view.c:957
 msgid "inactive"
 msgstr "не дію"

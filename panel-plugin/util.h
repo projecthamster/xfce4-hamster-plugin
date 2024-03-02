@@ -1,6 +1,6 @@
 /*  xfce4-hamster-plugin
  *
- *  Copyright (c) 2014 Hakan Erduman <smultimeter@gmail.com>
+ *  Copyright (c) 2014-2023 Hakan Erduman <hakan@erduman.de>
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -39,3 +39,8 @@ fact_new(GVariant *in);
 
 void
 fact_free(fact *in);
+
+#define MAX_FACT_LEN  (256)
+#define unused __attribute__((__unused__))
+#define RIGTH_ANGLE (90)
+#define MIN_FACT_LEN (25) // something@somewhere should not be ellipsized

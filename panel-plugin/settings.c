@@ -1,6 +1,6 @@
 /*  xfce4-hamster-plugin
  *
- *  Copyright (c) 2014 Hakan Erduman <smultimeter@gmail.com>
+ *  Copyright (c) 2014-2023 Hakan Erduman <hakan@erduman.de>
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -16,28 +16,28 @@
  *  along with this program; If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifdef HAVE_CONFIG_H
-#  include "config.h"
-#endif
+#include "libxfce4panel/xfce-panel-plugin.h"
 #include <libxfce4ui/libxfce4ui.h>
 #include <libxfce4panel/libxfce4panel.h>
 #include <xfconf/xfconf.h>
 #include "settings.h"
 
-void
-config_show(XfcePanelPlugin *plugin, XfconfChannel *channel)
+void config_show(XfcePanelPlugin *plugin, XfconfChannel *channel)
 {
+   DBG("cb:%s", xfce_panel_plugin_get_name(plugin));
    GtkWidget *dlg = xfce_titled_dialog_new();
-   GtkWidget *cnt, *lbl, *chk;
+   GtkWidget *cnt;
+   GtkWidget *lbl;
+   GtkWidget *chk;
    g_object_set(G_OBJECT(dlg),
-         "title", _("Hamster"),
-         "icon_name", "org.gnome.Hamster.GUI",
-         "subtitle", _("Time bookkeeping plugin"),
-         NULL);
-   g_signal_connect_swapped (dlg,
-                             "response",
-                             G_CALLBACK (gtk_widget_destroy),
-                             dlg);
+                "title",
+                _("Hamster"),
+                "icon_name",
+                "org.gnome.Hamster.GUI",
+                "subtitle",
+                _("Time bookkeeping plugin"),
+                NULL);
+   g_signal_connect_swapped(dlg, "response", G_CALLBACK(gtk_widget_destroy), dlg);
 
    cnt = gtk_dialog_get_content_area(GTK_DIALOG(dlg));
 
@@ -65,5 +65,6 @@ config_show(XfcePanelPlugin *plugin, XfconfChannel *channel)
 
    gtk_widget_show_all(dlg);
    gtk_dialog_run(GTK_DIALOG(dlg));
-   gtk_widget_destroy(dlg);
+   // this dialog self-destructs its widget
+   DBG("EOF settings");
 }

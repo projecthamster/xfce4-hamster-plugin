@@ -1,0 +1,16 @@
+# vim: set ft=yaml
+CompileFlags:
+  CompilationDatabase: ./build
+Diagnostics:
+  UnusedIncludes: Strict
+  ClangTidy:
+    Add: 
+    - linuxkernel-*
+    - llvmlibc-*
+    - modernize-*
+    - portability-*
+    - readability-*
+    Remove:
+    - modernize-macro-to-enum
+    - readability-identifier-length
+    - readability-redundant-function-ptr-dereference
