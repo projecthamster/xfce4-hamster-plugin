@@ -4,9 +4,9 @@ name: CI
 
 # Controls when the action will run. 
 on:
-  # Triggers on all pushes and PRs targeting master
+  # Triggers the workflow on push or pull request events but only for the master branch
   push:
-    branches: [ "**" ]
+    branches: [ master ]
   pull_request:
     branches: [ master ]
 
