@@ -1,6 +1,6 @@
 /*  xfce4-hamster-plugin
  *
- *  Copyright (c) 2014 Hakan Erduman <smultimeter@gmail.com>
+ *  Copyright (c) 2014-2023 Hakan Erduman <hakan@erduman.de>
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -22,3 +22,4 @@
 #define XFPROP_DROPDOWN "/dropdown"
 #define XFPROP_TOOLTIPS "/tooltips"
 #define XFPROP_SANITIZE "/sanitize"
+#define XFPROP_POPUPMODE "/popup-mode"

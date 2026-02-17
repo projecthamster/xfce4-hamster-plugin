@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: xfce4-hamster-plugin 0.0.1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-04-05 17:49+0200\n"
+"POT-Creation-Date: 2026-02-17 21:12+0100\n"
 "PO-Revision-Date: 2016-07-20 13:49+0300\n"
 "Last-Translator: Sergey Panasenko <sergey.panasenko@gmail.com>\n"
 "Language-Team: Russian\n"
@@ -10,81 +10,102 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n"
-"%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
+"n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
 "X-Generator: Poedit 1.8.7.1\n"
 "X-Poedit-SourceCharset: UTF-8\n"
 "X-Poedit-Basepath: ../panel-plugin\n"
 "X-Poedit-SearchPath-0: .\n"
 
-#: ../panel-plugin/settings.c:44
+#: ../panel-plugin/view.c:945
+#, c-format
+msgid "%dh %dmin"
+msgstr ""
+
+#: ../panel-plugin/settings.c:45
 msgid "<b>Settings</b>"
 msgstr "<b>Налаштування</b>"
 
-#: ../panel-plugin/view.c:706
+#: ../panel-plugin/view.c:688
 msgid "Add earlier activity"
 msgstr "Додати попередню діяльність"
 
-#: ../panel-plugin/view.c:672
+#: ../panel-plugin/settings.c:70
+msgid "Auto (Recommended / Vanilla Xfce)"
+msgstr "Авто (Рекомендовано / Стандартний Xfce)"
+
+#: ../panel-plugin/view.c:660
 msgid "Edit activity"
 msgstr "Редагувати"
 
-#: ../panel-plugin/settings.c:52
+#: ../panel-plugin/settings.c:53
 msgid "Entry completion as dropdown"
 msgstr "Завершення введення у вигляді списку"
 
-#: ../panel-plugin/settings.c:33 ../panel-plugin/hamster.desktop.in.h:1
+#: ../panel-plugin/settings.c:35 ../panel-plugin/hamster.desktop.in.h:1
 msgid "Hamster"
 msgstr "Хом'як (Hamster)"
 
-#: ../panel-plugin/settings.c:48
+#: ../panel-plugin/settings.c:49
 #, fuzzy
 msgid "Keep popup floating"
 msgstr "Тримати спливаюче вікно"
 
-#: ../panel-plugin/view.c:965
+#: ../panel-plugin/view.c:1069
 msgid "No activities yet."
 msgstr "Ніякої діяльності."
 
-#: ../panel-plugin/view.c:678
+#: ../panel-plugin/settings.c:71
+msgid "Popover (Dropdown, compositor dependent)"
+msgstr "Popover (Випадний список, залежить від композитора)"
+
+#: ../panel-plugin/settings.c:65
+msgid "Popup mode"
+msgstr "Режим спливаючого вікна"
+
+#: ../panel-plugin/view.c:663
 msgid "Resume activity"
 msgstr "Продовжити"
 
-#: ../panel-plugin/settings.c:60
+#: ../panel-plugin/settings.c:61
 msgid "Sanitize label width"
 msgstr ""
 
 #. menuish buttons
-#: ../panel-plugin/view.c:692
+#: ../panel-plugin/view.c:676
 msgid "Show overview"
 msgstr "Показати огляд"
 
-#: ../panel-plugin/settings.c:56
+#: ../panel-plugin/settings.c:57
 msgid "Show tooltips on buttons"
 msgstr "Показати підказки до кнопок"
 
-#: ../panel-plugin/view.c:699
+#: ../panel-plugin/view.c:682
 msgid "Stop tracking"
 msgstr "Припинити облік"
 
-#: ../panel-plugin/settings.c:35 ../panel-plugin/hamster.desktop.in.h:2
+#: ../panel-plugin/settings.c:39 ../panel-plugin/hamster.desktop.in.h:2
 msgid "Time bookkeeping plugin"
 msgstr "Плагін обліку часу"
 
 #. label
-#: ../panel-plugin/view.c:616
+#: ../panel-plugin/view.c:620
 msgid "Today's activities"
 msgstr "Діяльність за сьогодні"
 
-#: ../panel-plugin/view.c:713
+#: ../panel-plugin/view.c:694
 msgid "Tracking settings"
 msgstr "Налаштування обліку"
 
 #. subtitle
-#: ../panel-plugin/view.c:602
+#: ../panel-plugin/view.c:608
 msgid "What goes on?"
 msgstr "Що відбувається?"
 
-#: ../panel-plugin/view.c:1061
+#: ../panel-plugin/settings.c:72
+msgid "Window (Compatibility fallback)"
+msgstr "Вікно (Режим сумісності)"
+
+#: ../panel-plugin/view.c:1137
 msgid "inactive"
 msgstr "не дію"
