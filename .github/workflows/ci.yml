@@ -19,7 +19,7 @@ jobs:
   build:
     # The type of runner that the job will run on
     runs-on: ubuntu-latest
-    container: debian:stable
+    container: ghcr.io/${{ github.repository_owner }}/xfce4-hamster-plugin-ci:debian-stable
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
@@ -27,20 +27,8 @@ jobs:
       - uses: actions/checkout@v4
 
       # Runs a set of commands using the runners shell
-      - name: Build and Install
+      - name: Build
         run: |
           set -e
-          apt-get update
-          apt-get install -y --no-install-recommends \
-            build-essential \
-            cmake \
-            pkg-config \
-            gettext \
-            intltool \
-            libglib2.0-dev-bin \
-            libxfce4panel-2.0-dev \
-            libxfce4ui-2-dev \
-            libxfconf-0-dev \
-            libxfce4util-dev
           cmake -S "$GITHUB_WORKSPACE" -B "$GITHUB_WORKSPACE/build" -DCMAKE_INSTALL_PREFIX=/usr
           cmake --build "$GITHUB_WORKSPACE/build" --parallel

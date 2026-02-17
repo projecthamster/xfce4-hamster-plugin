@@ -1,4 +1,6 @@
 .*
+!.devcontainer/
+!.devcontainer/**
 !.github/
 !.github/**
 !.vscode/
