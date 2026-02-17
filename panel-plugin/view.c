@@ -43,6 +43,7 @@ struct _HamsterView
    GtkWidget *summary;
    gboolean   alive;
    guint      sourceTimeout;
+   guint      sourcePopupIdle;
    gboolean   inCellEdit;
 
    /* model */
@@ -57,6 +58,9 @@ struct _HamsterView
    gboolean       donthide;
    gboolean       tooltips;
    gboolean       dropdown;
+   gboolean       styleHandlerConnected;
+   gint           popupMode;
+   gboolean       popupModeForced;
 };
 
 enum _HamsterViewColumns
@@ -74,12 +78,68 @@ enum _HamsterViewColumns
 const int secsperhour = 3600;
 const int secspermin  = 60;
 
+enum
+{
+   HVIEW_POPUP_MODE_AUTO,
+   HVIEW_POPUP_MODE_POPOVER,
+   HVIEW_POPUP_MODE_WINDOW
+};
+
+static gboolean hview_is_wayland_backend(void)
+{
+   GdkDisplay  *display = gdk_display_get_default();
+   const gchar *name;
+
+   if (display == NULL)
+   {
+      return FALSE;
+   }
+
+   name = gdk_display_get_name(display);
+   return (name != NULL && g_str_has_prefix(name, "wayland"));
+}
+
+static gint hview_popup_mode_from_string(const gchar *mode)
+{
+   if (mode == NULL || *mode == '\0')
+   {
+      return HVIEW_POPUP_MODE_AUTO;
+   }
+   if (!g_ascii_strcasecmp(mode, "popover"))
+   {
+      return HVIEW_POPUP_MODE_POPOVER;
+   }
+   if (!g_ascii_strcasecmp(mode, "window"))
+   {
+      return HVIEW_POPUP_MODE_WINDOW;
+   }
+   return HVIEW_POPUP_MODE_AUTO;
+}
+
+static gboolean hview_popup_mode_from_env(gint *mode)
+{
+   const gchar *value = g_getenv("HAMSTER_POPUP_MODE");
+
+   if (value == NULL || *value == '\0')
+   {
+      return FALSE;
+   }
+
+   *mode = hview_popup_mode_from_string(value);
+   return TRUE;
+}
+
 /* Button */
 static void hview_popup_hide(HamsterView *view)
 {
    if (view->donthide)
    {
       return;
+   }
+   if (view->sourcePopupIdle)
+   {
+      g_source_remove(view->sourcePopupIdle);
+      view->sourcePopupIdle = 0;
    }
    /* untoggle the button */
    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(view->button), FALSE);
@@ -94,7 +154,14 @@ static void hview_popup_hide(HamsterView *view)
    /* hide the dialog for reuse */
    if (view->popup)
    {
-      gtk_widget_hide(view->popup);
+      if (GTK_IS_POPOVER(view->popup))
+      {
+         gtk_popover_popdown(GTK_POPOVER(view->popup));
+      }
+      else
+      {
+         gtk_widget_hide(view->popup);
+      }
    }
    view->alive      = FALSE;
    view->inCellEdit = FALSE;
@@ -155,6 +222,11 @@ static gboolean hview_cb_timeout(HamsterView *view)
 gboolean hview_cb_popup_focus_out(GtkWidget *widget, GdkEventFocus const *event, HamsterView *view)
 {
    DBG("cb:%s, in=%d", gtk_widget_get_name(widget), event->in);
+
+   if (GTK_IS_POPOVER(view->popup))
+   {
+      return FALSE;
+   }
 
    if (view->donthide)
    {
@@ -515,7 +587,7 @@ static void hview_cb_cell_editing_started(GtkCellRenderer *cell,
    }
 }
 
-static void hview_popup_new(HamsterView *view)
+static GtkWidget *hview_popup_content_new(HamsterView *view)
 {
    GtkWidget         *frm;
    GtkWidget         *lbl;
@@ -527,26 +599,10 @@ static void hview_popup_new(HamsterView *view)
    GtkTreeViewColumn *column;
 
 
-   /* Create a new popup */
-   view->popup = gtk_window_new(GTK_WINDOW_TOPLEVEL);
-   gtk_window_set_type_hint(GTK_WINDOW(view->popup), GDK_WINDOW_TYPE_HINT_UTILITY);
-   gtk_window_set_decorated(GTK_WINDOW(view->popup), FALSE);
-   gtk_window_set_resizable(GTK_WINDOW(view->popup), FALSE);
-   gtk_window_set_position(GTK_WINDOW(view->popup), GTK_WIN_POS_MOUSE);
-   gtk_window_set_screen(GTK_WINDOW(view->popup), gtk_widget_get_screen(view->button));
-   gtk_window_set_skip_pager_hint(GTK_WINDOW(view->popup), TRUE);
-   gtk_window_set_skip_taskbar_hint(GTK_WINDOW(view->popup), TRUE);
-   gtk_window_set_keep_above(GTK_WINDOW(view->popup), TRUE);
-   gtk_window_stick(GTK_WINDOW(view->popup));
-
    frm = gtk_frame_new(NULL);
    gtk_frame_set_shadow_type(GTK_FRAME(frm), GTK_SHADOW_OUT);
-   gtk_container_add(GTK_CONTAINER(view->popup), frm);
-   gtk_container_set_border_width(GTK_CONTAINER(view->popup), 0);
    view->vbx = gtk_box_new(GTK_ORIENTATION_VERTICAL, 1);
    gtk_container_add(GTK_CONTAINER(frm), view->vbx);
-   /* handle ESC */
-   g_signal_connect(view->popup, "key-press-event", G_CALLBACK(hview_cb_key_pressed), view);
 
    // subtitle
    lbl = gtk_label_new(_("What goes on?"));
@@ -646,11 +702,63 @@ static void hview_popup_new(HamsterView *view)
    gtk_box_pack_start(GTK_BOX(view->vbx), add, FALSE, FALSE, 0);
    gtk_box_pack_start(GTK_BOX(view->vbx), cfg, FALSE, FALSE, 0);
 
+   return frm;
+}
+
+static void hview_popover_new(HamsterView *view)
+{
+   GtkWidget *content;
+
+   view->popup = gtk_popover_new(view->button);
+   gtk_popover_set_relative_to(GTK_POPOVER(view->popup), view->button);
+   gtk_popover_set_position(GTK_POPOVER(view->popup), GTK_POS_BOTTOM);
+   gtk_popover_set_modal(GTK_POPOVER(view->popup), FALSE);
+   gtk_container_set_border_width(GTK_CONTAINER(view->popup), 0);
+
+   content = hview_popup_content_new(view);
+   gtk_container_add(GTK_CONTAINER(view->popup), content);
+
+   g_signal_connect(view->popup, "key-press-event", G_CALLBACK(hview_cb_key_pressed), view);
+   if (!view->styleHandlerConnected)
+   {
+      g_signal_connect(G_OBJECT(view->button), "style-set", G_CALLBACK(hview_cb_style_set), view);
+      view->styleHandlerConnected = TRUE;
+   }
+   hview_cb_style_set(view->button, NULL, view);
+}
+
+static void hview_popup_new(HamsterView *view)
+{
+   GtkWidget *content;
+
+   /* Create a new popup */
+   view->popup = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+   gtk_window_set_type_hint(GTK_WINDOW(view->popup), GDK_WINDOW_TYPE_HINT_UTILITY);
+   gtk_window_set_decorated(GTK_WINDOW(view->popup), FALSE);
+   gtk_window_set_resizable(GTK_WINDOW(view->popup), FALSE);
+   gtk_window_set_position(GTK_WINDOW(view->popup), GTK_WIN_POS_MOUSE);
+   gtk_window_set_screen(GTK_WINDOW(view->popup), gtk_widget_get_screen(view->button));
+   gtk_window_set_skip_pager_hint(GTK_WINDOW(view->popup), TRUE);
+   gtk_window_set_skip_taskbar_hint(GTK_WINDOW(view->popup), TRUE);
+   gtk_window_set_keep_above(GTK_WINDOW(view->popup), TRUE);
+   gtk_window_stick(GTK_WINDOW(view->popup));
+   gtk_container_set_border_width(GTK_CONTAINER(view->popup), 0);
+
+   content = hview_popup_content_new(view);
+   gtk_container_add(GTK_CONTAINER(view->popup), content);
+
+   /* handle ESC */
+   g_signal_connect(view->popup, "key-press-event", G_CALLBACK(hview_cb_key_pressed), view);
+
    gtk_widget_show_all(view->popup);
 
    g_signal_connect(G_OBJECT(view->popup), "focus-out-event", G_CALLBACK(hview_cb_popup_focus_out), view);
 
-   g_signal_connect(G_OBJECT(view->button), "style-set", G_CALLBACK(hview_cb_style_set), view);
+   if (!view->styleHandlerConnected)
+   {
+      g_signal_connect(G_OBJECT(view->button), "style-set", G_CALLBACK(hview_cb_style_set), view);
+      view->styleHandlerConnected = TRUE;
+   }
 
    hview_cb_style_set(view->button, NULL, view);
 }
@@ -677,19 +785,58 @@ static void hview_tooltips_mode_update(HamsterView *view)
    view->tooltips = xfconf_channel_get_bool(view->channel, XFPROP_TOOLTIPS, TRUE);
 }
 
+static void hview_popup_mode_update(HamsterView *view)
+{
+   if (view->popupModeForced)
+   {
+      return;
+   }
+
+   view->popupMode = hview_popup_mode_from_string(xfconf_channel_get_string(view->channel, XFPROP_POPUPMODE, "auto"));
+}
+
 /* Actions */
 void hview_popup_show(HamsterView *view, gboolean atPointer)
 {
+   gboolean isWayland = hview_is_wayland_backend();
+   gboolean usePopover = FALSE;
+
+   switch (view->popupMode)
+   {
+      case HVIEW_POPUP_MODE_POPOVER:
+         usePopover = !atPointer;
+         break;
+
+      case HVIEW_POPUP_MODE_WINDOW:
+         usePopover = FALSE;
+         break;
+
+      default:
+         usePopover = !atPointer && !isWayland;
+         break;
+   }
+
    int x = 0;
    int y = 0;
 
    /* check if popup is needed, or it needs an update */
-   if (view->popup == NULL)
+   if (view->popup == NULL || (usePopover && !GTK_IS_POPOVER(view->popup)) || (!usePopover && !GTK_IS_WINDOW(view->popup)))
    {
+      if (view->popup != NULL)
+      {
+         gtk_widget_destroy(view->popup);
+      }
       DBG("new");
-      hview_popup_new(view);
-      gtk_widget_realize(view->popup);
-      xfce_panel_plugin_take_window(view->plugin, GTK_WINDOW(view->popup));
+      if (usePopover)
+      {
+         hview_popover_new(view);
+      }
+      else
+      {
+         hview_popup_new(view);
+         gtk_widget_realize(view->popup);
+         xfce_panel_plugin_take_window(view->plugin, GTK_WINDOW(view->popup));
+      }
 
 
       /* init properties from xfconf */
@@ -700,7 +847,11 @@ void hview_popup_show(HamsterView *view, gboolean atPointer)
    else if (view->alive)
    {
       DBG("alive");
-      if (view->donthide)
+      if (GTK_IS_POPOVER(view->popup))
+      {
+         gtk_popover_popup(GTK_POPOVER(view->popup));
+      }
+      else if (view->donthide && !isWayland)
       {
          gdk_window_raise(gtk_widget_get_window(view->popup));
       }
@@ -708,7 +859,14 @@ void hview_popup_show(HamsterView *view, gboolean atPointer)
       {
          g_source_remove(view->sourceTimeout);
          view->sourceTimeout = 0;
-         gdk_window_raise(gtk_widget_get_window(view->popup));
+         if (GTK_IS_POPOVER(view->popup))
+         {
+            gtk_popover_popup(GTK_POPOVER(view->popup));
+         }
+         else if (!isWayland)
+         {
+            gdk_window_raise(gtk_widget_get_window(view->popup));
+         }
       }
       return; /* avoid double invocation */
    }
@@ -721,18 +879,37 @@ void hview_popup_show(HamsterView *view, gboolean atPointer)
    hview_completion_mode_update(view);
    hview_tooltips_mode_update(view);
 
+   if (GTK_IS_POPOVER(view->popup))
+   {
+      gtk_widget_show_all(view->popup);
+      gtk_widget_show(view->popup);
+      gtk_popover_popup(GTK_POPOVER(view->popup));
+      if (view->entry)
+      {
+         gtk_widget_grab_focus(view->entry);
+      }
+      return;
+   }
+
    /* popup popup */
-   if (atPointer)
+   if (atPointer && !isWayland)
    {
       DBG("atpointer");
       GdkDisplay *display = gdk_display_get_default();
-      GdkSeat    *seat    = gdk_display_get_default_seat(display);
-      GdkDevice  *pointer = gdk_seat_get_pointer(seat);
+      GdkSeat    *seat    = display != NULL ? gdk_display_get_default_seat(display) : NULL;
+      GdkDevice  *pointer = seat != NULL ? gdk_seat_get_pointer(seat) : NULL;
 
-      gdk_device_get_position(pointer, NULL, &x, &y);
+      if (pointer != NULL)
+      {
+         gdk_device_get_position(pointer, NULL, &x, &y);
+      }
    }
    else
    {
+      if (atPointer && isWayland)
+      {
+         DBG("atpointer ignored on wayland, falling back to panel anchor");
+      }
       DBG("atpanel");
       GdkWindow *popup  = gtk_widget_get_window(view->popup);
       GdkWindow *button = gtk_widget_get_window(view->button);
@@ -751,7 +928,10 @@ void hview_popup_show(HamsterView *view, gboolean atPointer)
       }
    }
    DBG("move x=%d, y=%d", x, y);
-   gtk_window_move(GTK_WINDOW(view->popup), x, y);
+   if (!isWayland)
+   {
+      gtk_window_move(GTK_WINDOW(view->popup), x, y);
+   }
    gtk_window_present_with_time(GTK_WINDOW(view->popup), gtk_get_current_event_time());
    gtk_widget_add_events(view->popup, GDK_FOCUS_CHANGE_MASK | GDK_KEY_PRESS_MASK);
 }
@@ -955,7 +1135,7 @@ static void hview_label_update(HamsterView *view, fact *last)
    if (NULL == last || 0 != last->endTime)
    {
       places_button_set_label(PLACES_BUTTON(view->button), _("inactive"));
-      if (view->alive)
+      if (view->alive && GTK_IS_WINDOW(view->popup))
       {
          gtk_window_resize(GTK_WINDOW(view->popup), 1, 1);
       }
@@ -1011,7 +1191,15 @@ static void hview_button_update(HamsterView *view)
    hview_label_update(view, NULL);
 }
 
-static gboolean hview_cb_button_pressed(unused const GtkWidget *widget, const GdkEventButton *evt, HamsterView *view)
+static gboolean hview_cb_popup_show_idle(HamsterView *view)
+{
+   view->sourcePopupIdle = 0;
+   hview_popup_show(view, FALSE);
+   hview_button_update(view);
+   return FALSE;
+}
+
+static gboolean hview_cb_button_released(unused const GtkWidget *widget, const GdkEventButton *evt, HamsterView *view)
 {
    /* (it's the way xfdesktop popup does it...) */
    if ((evt->state & GDK_CONTROL_MASK) && !(evt->state & (GDK_MOD1_MASK | GDK_SHIFT_MASK | GDK_MOD4_MASK)))
@@ -1028,7 +1216,10 @@ static gboolean hview_cb_button_pressed(unused const GtkWidget *widget, const Gd
       }
       else
       {
-         hview_popup_show(view, FALSE);
+         if (!view->sourcePopupIdle)
+         {
+            view->sourcePopupIdle = g_idle_add((GSourceFunc)hview_cb_popup_show_idle, view);
+         }
       }
    }
    else if (evt->button == 2)
@@ -1055,7 +1246,19 @@ static gboolean hview_cb_cyclic(HamsterView *view)
 
 static void hview_cb_channel(XfconfChannel *channel, gchar *property, GValue const *value, HamsterView *view)
 {
-   DBG("%s=%d, locked=%d", property, xfconf_channel_is_property_locked(channel, property), g_value_get_boolean(value));
+   if (G_VALUE_HOLDS_BOOLEAN(value))
+   {
+      DBG("%s=%d, locked=%d", property, xfconf_channel_is_property_locked(channel, property), g_value_get_boolean(value));
+   }
+   else if (G_VALUE_HOLDS_STRING(value))
+   {
+      DBG("%s=%s, locked=%d", property, g_value_get_string(value), xfconf_channel_is_property_locked(channel, property));
+   }
+   else
+   {
+      DBG("%s changed, locked=%d", property, xfconf_channel_is_property_locked(channel, property));
+   }
+
    if (!strcmp(property, XFPROP_DROPDOWN))
    {
       hview_completion_mode_update(view);
@@ -1071,6 +1274,10 @@ static void hview_cb_channel(XfconfChannel *channel, gchar *property, GValue con
    else if (!strcmp(property, XFPROP_SANITIZE))
    {
       hview_button_update(view);
+   }
+   else if (!strcmp(property, XFPROP_POPUPMODE))
+   {
+      hview_popup_mode_update(view);
    }
 }
 
@@ -1094,7 +1301,7 @@ HamsterView *hamster_view_init(XfcePanelPlugin *plugin)
    gtk_widget_show(view->button);
 
    /* button signal */
-   g_signal_connect(view->button, "button-press-event", G_CALLBACK(hview_cb_button_pressed), view);
+   g_signal_connect(view->button, "button-release-event", G_CALLBACK(hview_cb_button_released), view);
 
    g_timeout_add_seconds(secspermin, (GSourceFunc)hview_cb_cyclic, view);
 
@@ -1121,10 +1328,17 @@ HamsterView *hamster_view_init(XfcePanelPlugin *plugin)
    view->storeFacts      = gtk_list_store_new(
       NUM_COL, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_INT, G_TYPE_STRING);
    view->summary  = gtk_label_new(NULL);
+   g_object_ref_sink(view->summary);
    view->treeview = gtk_tree_view_new();
+   g_object_ref_sink(view->treeview);
+   view->styleHandlerConnected = FALSE;
+   view->sourcePopupIdle = 0;
+   view->popupMode = HVIEW_POPUP_MODE_AUTO;
+   view->popupModeForced = hview_popup_mode_from_env(&view->popupMode);
 
    /* config */
    view->channel = xfce_panel_plugin_xfconf_channel_new(view->plugin);
+   hview_popup_mode_update(view);
    g_signal_connect(view->channel, "property-changed", G_CALLBACK(hview_cb_channel), view);
    g_signal_connect(view->plugin, "configure-plugin", G_CALLBACK(config_show), view->channel);
    xfce_panel_plugin_menu_show_configure(view->plugin);
@@ -1143,5 +1357,15 @@ HamsterView *hamster_view_init(XfcePanelPlugin *plugin)
 
 void hamster_view_finalize(HamsterView *view)
 {
+   if (view->summary)
+   {
+      g_object_unref(view->summary);
+      view->summary = NULL;
+   }
+   if (view->treeview)
+   {
+      g_object_unref(view->treeview);
+      view->treeview = NULL;
+   }
    g_free(view);
 }

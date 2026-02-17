@@ -29,6 +29,7 @@ void config_show(XfcePanelPlugin *plugin, XfconfChannel *channel)
    GtkWidget *cnt;
    GtkWidget *lbl;
    GtkWidget *chk;
+   GtkWidget *cmb;
    g_object_set(G_OBJECT(dlg),
                 "title",
                 _("Hamster"),
@@ -60,6 +61,18 @@ void config_show(XfcePanelPlugin *plugin, XfconfChannel *channel)
    chk = gtk_check_button_new_with_label(_("Sanitize label width"));
    xfconf_g_property_bind(channel, XFPROP_SANITIZE, G_TYPE_BOOLEAN, G_OBJECT(chk), "active");
    gtk_container_add(GTK_CONTAINER(cnt), chk);
+
+   lbl = gtk_label_new(_("Popup mode"));
+   gtk_widget_set_halign(lbl, GTK_ALIGN_START);
+   gtk_container_add(GTK_CONTAINER(cnt), lbl);
+
+   cmb = gtk_combo_box_text_new();
+   gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(cmb), "auto", _("Auto (Recommended / Vanilla Xfce)"));
+   gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(cmb), "popover", _("Popover (Dropdown, compositor dependent)"));
+   gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(cmb), "window", _("Window (Compatibility fallback)"));
+   gtk_combo_box_set_active_id(GTK_COMBO_BOX(cmb), xfconf_channel_get_string(channel, XFPROP_POPUPMODE, "auto"));
+   xfconf_g_property_bind(channel, XFPROP_POPUPMODE, G_TYPE_STRING, G_OBJECT(cmb), "active-id");
+   gtk_container_add(GTK_CONTAINER(cnt), cmb);
 
    gtk_dialog_add_button(GTK_DIALOG(dlg), "_Close", 0);
 

@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.13)
-
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 project(xfce4-hamster-plugin
     VERSION 1.18
     DESCRIPTION "A recreation of the gnome hamster shell extension for the xfce4 panel"

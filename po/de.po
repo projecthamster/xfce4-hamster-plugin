@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: xfce4-hamster-plugin 0.0.1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-07-11 18:00+0200\n"
+"POT-Creation-Date: 2026-02-17 21:12+0100\n"
 "PO-Revision-Date: 2016-07-27 16:19+0100\n"
 "Last-Translator: Hakan Erduman <hakan@erduman.de>\n"
 "Language-Team: German\n"
@@ -18,78 +18,94 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Generator: Poedit 1.5.4\n"
 
-#: ../panel-plugin/view.c:765
+#: ../panel-plugin/view.c:945
 #, c-format
 msgid "%dh %dmin"
 msgstr ""
 
-#: ../panel-plugin/settings.c:44
+#: ../panel-plugin/settings.c:45
 msgid "<b>Settings</b>"
 msgstr "<b>Einstellungen</b>"
 
-#: ../panel-plugin/view.c:632
+#: ../panel-plugin/view.c:688
 msgid "Add earlier activity"
 msgstr "Frühere Aktivität erfassen"
 
-#: ../panel-plugin/view.c:604
+#: ../panel-plugin/settings.c:70
+msgid "Auto (Recommended / Vanilla Xfce)"
+msgstr "Automatisch (Empfohlen / Standard-Xfce)"
+
+#: ../panel-plugin/view.c:660
 msgid "Edit activity"
 msgstr "Aktivität bearbeiten"
 
-#: ../panel-plugin/settings.c:52
+#: ../panel-plugin/settings.c:53
 msgid "Entry completion as dropdown"
 msgstr "Vervollständigung als Kombinationsbox"
 
-#: ../panel-plugin/settings.c:34 ../panel-plugin/hamster.desktop.in.h:1
+#: ../panel-plugin/settings.c:35 ../panel-plugin/hamster.desktop.in.h:1
 msgid "Hamster"
 msgstr "Hamster"
 
-#: ../panel-plugin/settings.c:48
+#: ../panel-plugin/settings.c:49
 msgid "Keep popup floating"
 msgstr "Dialog offen lassen"
 
-#: ../panel-plugin/view.c:889
+#: ../panel-plugin/view.c:1069
 msgid "No activities yet."
 msgstr "Zurzeit keine Aktivitäten."
 
-#: ../panel-plugin/view.c:607
+#: ../panel-plugin/settings.c:71
+msgid "Popover (Dropdown, compositor dependent)"
+msgstr "Popover (Dropdown, abhängig vom Compositor)"
+
+#: ../panel-plugin/settings.c:65
+msgid "Popup mode"
+msgstr "Popup-Modus"
+
+#: ../panel-plugin/view.c:663
 msgid "Resume activity"
 msgstr "Aktivität fortsetzen"
 
-#: ../panel-plugin/settings.c:60
+#: ../panel-plugin/settings.c:61
 msgid "Sanitize label width"
 msgstr "Leistenschaltfläche verkürzt darstellen"
 
 #. menuish buttons
-#: ../panel-plugin/view.c:620
+#: ../panel-plugin/view.c:676
 msgid "Show overview"
 msgstr "Übersicht anzeigen"
 
-#: ../panel-plugin/settings.c:56
+#: ../panel-plugin/settings.c:57
 msgid "Show tooltips on buttons"
 msgstr "Kurzhilfen auf Schaltflächen anzeigen"
 
-#: ../panel-plugin/view.c:626
+#: ../panel-plugin/view.c:682
 msgid "Stop tracking"
 msgstr "Erfassung anhalten"
 
-#: ../panel-plugin/settings.c:38 ../panel-plugin/hamster.desktop.in.h:2
+#: ../panel-plugin/settings.c:39 ../panel-plugin/hamster.desktop.in.h:2
 msgid "Time bookkeeping plugin"
 msgstr "Plug-In zur Zeiterfassung"
 
 #. label
-#: ../panel-plugin/view.c:564
+#: ../panel-plugin/view.c:620
 msgid "Today's activities"
 msgstr "Heutige Aktivitäten"
 
-#: ../panel-plugin/view.c:638
+#: ../panel-plugin/view.c:694
 msgid "Tracking settings"
 msgstr "Einstellungen Zeiterfassung"
 
 #. subtitle
-#: ../panel-plugin/view.c:552
+#: ../panel-plugin/view.c:608
 msgid "What goes on?"
 msgstr "Was liegt an?"
 
-#: ../panel-plugin/view.c:957
+#: ../panel-plugin/settings.c:72
+msgid "Window (Compatibility fallback)"
+msgstr "Fenster (Kompatibilitäts-Fallback)"
+
+#: ../panel-plugin/view.c:1137
 msgid "inactive"
 msgstr "inaktiv"
