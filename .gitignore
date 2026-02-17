@@ -1,4 +1,8 @@
 .*
+!.github/
+!.github/**
+!.vscode/
+!.vscode/**
 build/
 debian
 obj-*
