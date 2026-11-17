@@ -1,0 +1,11 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Stop xfce4-panel",
+      "type": "shell",
+      "command": "pkill xfce4-panel || true",
+      "problemMatcher": []
+    }
+  ]
+}

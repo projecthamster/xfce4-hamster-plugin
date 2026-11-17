@@ -35,6 +35,11 @@ add_compile_definitions(
     LOCALEDIR="${CMAKE_INSTALL_FULL_LOCALEDIR}"
 )
 
+if(CMAKE_BUILD_TYPE STREQUAL "DEBUG")
+    message("Build DEBUG version")
+    add_compile_definitions(DEBUG=1)
+endif()
+
 target_include_directories(
     hamster PUBLIC
     ${GTK_INCLUDE_DIRS}
@@ -44,6 +49,9 @@ target_include_directories(
 target_link_directories(
     hamster PUBLIC
     ${GTK_LIBRARY_DIRS}
+)
+target_compile_options(
+    hamster PUBLIC "-ffile-prefix-map=${CMAKE_SOURCE_DIR}=."
 )
 
 target_link_libraries(

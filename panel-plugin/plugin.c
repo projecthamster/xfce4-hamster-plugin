@@ -1,6 +1,6 @@
 /*  xfce4-hamster-plugin
  *
- *  Copyright (c) 2014 Hakan Erduman <smultimeter@gmail.com>
+ *  Copyright (c) 2014-2023 Hakan Erduman <hakan@erduman.de>
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -16,10 +16,6 @@
  *  along with this program; If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifdef HAVE_CONFIG_H
-#  include "config.h"
-#endif
-
 #include <glib.h>
 
 #include <libxfce4util/libxfce4util.h>
@@ -32,10 +28,10 @@
  */
 gboolean
 hamster_popup_remote(XfcePanelPlugin *plugin, gchar *name,
-      GValue *value, HamsterView *view)
+      GValue const * value, HamsterView *view)
 {
    gboolean atPointer;
-   DBG("Popup remote: %s", name);
+   DBG("Popup remote: %s at %s(%d)", name, xfce_panel_plugin_get_name(plugin), xfce_panel_plugin_get_unique_id(plugin));
    atPointer = g_value_get_boolean(value);
    hview_popup_show(view, atPointer);
    return TRUE;
@@ -47,7 +43,7 @@ hamster_popup_remote(XfcePanelPlugin *plugin, gchar *name,
 static void
 hamster_finalize(XfcePanelPlugin *plugin, HamsterView *view)
 {
-    DBG("Finalize: %s", PLUGIN_NAME);
+    DBG("Finalize: %s(%d)", xfce_panel_plugin_get_name(plugin), xfce_panel_plugin_get_unique_id(plugin));
     hamster_view_finalize(view);
 }
 
@@ -65,7 +61,7 @@ hamster_construct(XfcePanelPlugin *plugin)
        return;
     }
 
-    DBG("Construct: %s(%d)", PLUGIN_NAME, xfce_panel_plugin_get_unique_id(plugin));
+    DBG("Construct: %s(%d)", xfce_panel_plugin_get_name(plugin), xfce_panel_plugin_get_unique_id(plugin));
     view = hamster_view_init(plugin);
     /* Set up i18n */
     xfce_textdomain(GETTEXT_PACKAGE, LOCALEDIR, "UTF-8");
@@ -82,5 +78,3 @@ hamster_construct(XfcePanelPlugin *plugin)
 }
 
 XFCE_PANEL_PLUGIN_REGISTER(hamster_construct);
-
-/* vim: set ai et tabstop=4: */

@@ -1,6 +1,6 @@
 /*  xfce4-hamster-plugin
  *
- *  Copyright (c) 2014 Hakan Erduman <smultimeter@gmail.com>
+ *  Copyright (c) 2014-2023 Hakan Erduman <hakan@erduman.de>
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -16,28 +16,29 @@
  *  along with this program; If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifdef HAVE_CONFIG_H
-#  include "config.h"
-#endif
+#include "libxfce4panel/xfce-panel-plugin.h"
 #include <libxfce4ui/libxfce4ui.h>
 #include <libxfce4panel/libxfce4panel.h>
 #include <xfconf/xfconf.h>
 #include "settings.h"
 
-void
-config_show(XfcePanelPlugin *plugin, XfconfChannel *channel)
+void config_show(XfcePanelPlugin *plugin, XfconfChannel *channel)
 {
+   DBG("cb:%s", xfce_panel_plugin_get_name(plugin));
    GtkWidget *dlg = xfce_titled_dialog_new();
-   GtkWidget *cnt, *lbl, *chk;
+   GtkWidget *cnt;
+   GtkWidget *lbl;
+   GtkWidget *chk;
+   GtkWidget *cmb;
    g_object_set(G_OBJECT(dlg),
-         "title", _("Hamster"),
-         "icon_name", "org.gnome.Hamster.GUI",
-         "subtitle", _("Time bookkeeping plugin"),
-         NULL);
-   g_signal_connect_swapped (dlg,
-                             "response",
-                             G_CALLBACK (gtk_widget_destroy),
-                             dlg);
+                "title",
+                _("Hamster"),
+                "icon_name",
+                "org.gnome.Hamster.GUI",
+                "subtitle",
+                _("Time bookkeeping plugin"),
+                NULL);
+   g_signal_connect_swapped(dlg, "response", G_CALLBACK(gtk_widget_destroy), dlg);
 
    cnt = gtk_dialog_get_content_area(GTK_DIALOG(dlg));
 
@@ -61,9 +62,22 @@ config_show(XfcePanelPlugin *plugin, XfconfChannel *channel)
    xfconf_g_property_bind(channel, XFPROP_SANITIZE, G_TYPE_BOOLEAN, G_OBJECT(chk), "active");
    gtk_container_add(GTK_CONTAINER(cnt), chk);
 
+   lbl = gtk_label_new(_("Popup mode"));
+   gtk_widget_set_halign(lbl, GTK_ALIGN_START);
+   gtk_container_add(GTK_CONTAINER(cnt), lbl);
+
+   cmb = gtk_combo_box_text_new();
+   gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(cmb), "auto", _("Auto (Recommended / Vanilla Xfce)"));
+   gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(cmb), "popover", _("Popover (Dropdown, compositor dependent)"));
+   gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(cmb), "window", _("Window (Compatibility fallback)"));
+   gtk_combo_box_set_active_id(GTK_COMBO_BOX(cmb), xfconf_channel_get_string(channel, XFPROP_POPUPMODE, "auto"));
+   xfconf_g_property_bind(channel, XFPROP_POPUPMODE, G_TYPE_STRING, G_OBJECT(cmb), "active-id");
+   gtk_container_add(GTK_CONTAINER(cnt), cmb);
+
    gtk_dialog_add_button(GTK_DIALOG(dlg), "_Close", 0);
 
    gtk_widget_show_all(dlg);
    gtk_dialog_run(GTK_DIALOG(dlg));
-   gtk_widget_destroy(dlg);
+   // this dialog self-destructs its widget
+   DBG("EOF settings");
 }

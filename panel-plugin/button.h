@@ -25,6 +25,7 @@
 #define _XFCE_PANEL_PLACES_BUTTON_H
 
 #include <gtk/gtk.h>
+#include <libxfce4panel/xfce-panel-plugin.h>
 
 #define PLACES_TYPE_BUTTON             (places_button_get_type ())
 #define PLACES_BUTTON(obj)             (G_TYPE_CHECK_INSTANCE_CAST ((obj), PLACES_TYPE_BUTTON, PlacesButton))
@@ -62,7 +63,7 @@ GType
 places_button_get_type();
 
 GtkWidget*
-places_button_new();
+places_button_new(XfcePanelPlugin *plugin);
 
 void
 places_button_set_label(PlacesButton*, const gchar *label);

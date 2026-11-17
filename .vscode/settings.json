@@ -1,0 +1,10 @@
+{
+  "C_Cpp.default.compileCommands": "${workspaceFolder}/compile_commands.json",
+  "C_Cpp.default.compilerPath": "/usr/bin/gcc",
+  "C_Cpp.default.intelliSenseMode": "linux-gcc-x64",
+  "C_Cpp.intelliSenseEngine": "default",
+  "clangd.arguments": [
+    "--compile-commands-dir=build"
+  ],
+  "sonarlint.pathToCompileCommands": "${workspaceFolder}/build/compile_commands.json"
+}

@@ -1,0 +1,97 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Launch xfce4-panel (gdb)",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "/usr/bin/xfce4-panel",
+      "args": [
+        "--disable-wm-check"
+      ],
+      "cwd": "${workspaceFolder}",
+      "MIMode": "gdb",
+      "miDebuggerPath": "/usr/bin/gdb",
+      "externalConsole": false,
+      "stopAtEntry": false,
+      "preLaunchTask": "Stop xfce4-panel",
+      "environment": [
+        {
+          "name": "DISPLAY",
+          "value": "${env:DISPLAY}"
+        },
+        {
+          "name": "WAYLAND_DISPLAY",
+          "value": "${env:WAYLAND_DISPLAY}"
+        },
+        {
+          "name": "XDG_RUNTIME_DIR",
+          "value": "${env:XDG_RUNTIME_DIR}"
+        },
+        {
+          "name": "DBUS_SESSION_BUS_ADDRESS",
+          "value": "${env:DBUS_SESSION_BUS_ADDRESS}"
+        },
+        {
+          "name": "G_MESSAGES_DEBUG",
+          "value": "all"
+        }
+      ],
+      "setupCommands": [
+        {
+          "description": "Enable pretty-printing for gdb",
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": true
+        }
+      ]
+    },
+    {
+      "name": "Launch xfce4-panel (gdb, fatal warnings)",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "/usr/bin/xfce4-panel",
+      "args": [
+        "--disable-wm-check"
+      ],
+      "cwd": "${workspaceFolder}",
+      "MIMode": "gdb",
+      "miDebuggerPath": "/usr/bin/gdb",
+      "externalConsole": false,
+      "stopAtEntry": false,
+      "preLaunchTask": "Stop xfce4-panel",
+      "environment": [
+        {
+          "name": "DISPLAY",
+          "value": "${env:DISPLAY}"
+        },
+        {
+          "name": "WAYLAND_DISPLAY",
+          "value": "${env:WAYLAND_DISPLAY}"
+        },
+        {
+          "name": "XDG_RUNTIME_DIR",
+          "value": "${env:XDG_RUNTIME_DIR}"
+        },
+        {
+          "name": "DBUS_SESSION_BUS_ADDRESS",
+          "value": "${env:DBUS_SESSION_BUS_ADDRESS}"
+        },
+        {
+          "name": "G_MESSAGES_DEBUG",
+          "value": "all"
+        },
+        {
+          "name": "G_DEBUG",
+          "value": "fatal-warnings,fatal-criticals"
+        }
+      ],
+      "setupCommands": [
+        {
+          "description": "Enable pretty-printing for gdb",
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": true
+        }
+      ]
+    }
+  ]
+}
