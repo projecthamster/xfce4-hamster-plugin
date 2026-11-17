@@ -36,8 +36,19 @@ endif()
 
 set(POT ${CMAKE_CURRENT_LIST_DIR}/po/${PROJECT_NAME}.pot)
 
+# the template is git-ignored; track the files it is extracted from so it is
+# regenerated when they change instead of silently going stale
+file(STRINGS ${CMAKE_CURRENT_SOURCE_DIR}/po/POTFILES.in POTFILES)
+set(POT_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/po/POTFILES.in)
+foreach(POTFILE ${POTFILES})
+    if(NOT POTFILE MATCHES "^#")
+        list(APPEND POT_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/${POTFILE})
+    endif()
+endforeach()
+
 add_custom_command(OUTPUT ${POT}
     COMMAND cd ${CMAKE_CURRENT_LIST_DIR}/po && ${INTLTOOLUPDATE} -p -g ${PROJECT_NAME}
+    DEPENDS ${POT_DEPENDS}
 )
 
 add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/hamster.desktop
@@ -49,15 +60,34 @@ add_subdirectory(
     panel-plugin
 )
 
-gettext_create_translations(
-    po/${PROJECT_NAME}.pot ALL
-    po/cs.po
-    po/de.po
-    po/es.po
-    po/ru.po
-    po/tr.po
-    po/uk.po
-)
+# Merge and compile translations in the build tree so a build never writes
+# back into po/ (which also lets the source tree be mounted read-only).
+set(PO_LANGUAGES cs de es ru tr uk)
+set(GMO_FILES)
+foreach(LANG ${PO_LANGUAGES})
+    set(PO_SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/po/${LANG}.po)
+    set(PO_BUILD ${CMAKE_CURRENT_BINARY_DIR}/po/${LANG}.po)
+    set(GMO_BUILD ${CMAKE_CURRENT_BINARY_DIR}/po/${LANG}.gmo)
+    add_custom_command(
+        OUTPUT ${PO_BUILD}
+        COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_BINARY_DIR}/po
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different ${PO_SOURCE} ${PO_BUILD}
+        DEPENDS ${PO_SOURCE}
+    )
+    add_custom_command(
+        OUTPUT ${GMO_BUILD}
+        COMMAND ${GETTEXT_MSGMERGE_EXECUTABLE} --quiet --update --backup=none -s ${PO_BUILD} ${POT}
+        COMMAND ${GETTEXT_MSGFMT_EXECUTABLE} -o ${GMO_BUILD} ${PO_BUILD}
+        DEPENDS ${PO_BUILD} ${POT}
+    )
+    install(FILES ${GMO_BUILD}
+        DESTINATION ${CMAKE_INSTALL_LOCALEDIR}/${LANG}/LC_MESSAGES
+        RENAME ${PROJECT_NAME}.mo
+    )
+    list(APPEND GMO_FILES ${GMO_BUILD})
+endforeach()
+
+add_custom_target(translations ALL DEPENDS ${GMO_FILES})
 
 configure_file(
     ${PROJECT_SOURCE_DIR}/panel-plugin/xfce4-popup-hamstermenu.sh
