@@ -7,12 +7,29 @@ Dependencies: `xfce4-panel xfconf hamster-applet|hamster-time-tracker`
 Build dependencies[debian, ubuntu]: `libxfce4ui-2-dev libxfce4panel-2.0-dev
 libxfconf-0-dev libxfce4util-dev`
 
-Common: `build-essential cmake intltool`
+Common: `build-essential cmake intltool gettext`, and `gdbus-codegen`
+(from `libglib2.0-dev-bin`, pulled in by `libglib2.0-dev`). `intltool` is kept for now; its removal is deferred.
 
-Tested on Arch with xfce 4.18, Ubuntu 22.04 with xfce 4.16 and
-Debian Bookworm with xfce 4.18. Uses GTK+3 only, requires APIs that are
-not available before xfce 4.10. Support for older versions are 
-available in the git history. Also seen running on Alpine and void (musl).
+Tested with Xfce 4.18, 4.20 and 4.22 (4.22 is built against
+libxfce4panel 4.21.3-dev). Recommended: Xfce 4.18 or newer. Uses GTK+ 3 and
+libxfce4panel-2.0. Older libxfce4panel versions still build and use the
+legacy popup path. Also seen running on Alpine and void (musl).
+
+### Wayland
+On Wayland the default (`auto`) and `popover` popup modes always use a
+GtkPopover anchored to the panel button; pointer positioning is ignored
+because Wayland clients cannot place popups. The explicit `window` mode uses
+`xfce_panel_plugin_popup_window()` with layer-shell when built against
+libxfce4panel 4.19 or newer, and keeps the legacy behaviour otherwise.
+Wayland support on Xfce 4.22 is experimental. The explicit `window` mode
+needs a compositor with layer-shell, such as labwc or sway. The default and
+`popover` modes work on Wayland generally, on any compositor that supports
+GTK popovers. X11 remains the fully supported default,
+and its behaviour, including pointer popups (`-p`), is unchanged.
+
+The popup mode is the xfconf property `/popup-mode` (`auto`, `popover`,
+`window`) and can be forced with the `HAMSTER_POPUP_MODE` environment
+variable.
 
 ## Translators
 It is my wish that the string 'What goes on?' is to be translated with

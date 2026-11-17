@@ -10,7 +10,6 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 find_package(PkgConfig REQUIRED)
 find_package(Gettext REQUIRED)
-find_package(Intl REQUIRED)
 include(GNUInstallDirs)
 
 pkg_check_modules(GTK REQUIRED
@@ -62,7 +61,13 @@ add_subdirectory(
 
 # Merge and compile translations in the build tree so a build never writes
 # back into po/ (which also lets the source tree be mounted read-only).
-set(PO_LANGUAGES cs de es ru tr uk)
+# po/*.po is the single source of truth for the language list.
+file(GLOB PO_SOURCES CONFIGURE_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/po/*.po)
+set(PO_LANGUAGES)
+foreach(PO_FILE ${PO_SOURCES})
+    get_filename_component(LANG ${PO_FILE} NAME_WE)
+    list(APPEND PO_LANGUAGES ${LANG})
+endforeach()
 set(GMO_FILES)
 foreach(LANG ${PO_LANGUAGES})
     set(PO_SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/po/${LANG}.po)
@@ -117,7 +122,7 @@ set(CPACK_DEBIAN_PACKAGE_SECTION "Xfce")
 set(CPACK_DEBIAN_PACKAGE_SHLIBDEPS ON)
 
 # rpm specific
-set(CPACK_RPM_FILE_NAME, "RPM-DEFAULT")
+set(CPACK_RPM_FILE_NAME "RPM-DEFAULT")
 set(CPACK_RPM_PACKAGE_RELEASE ${CPACK_ADD_VERSION})
 
 include(CPack)

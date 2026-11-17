@@ -9,11 +9,6 @@ add_custom_command(OUTPUT windowserver.c windowserver.h
     DEPENDS ${CMAKE_CURRENT_LIST_DIR}/org.gnome.Hamster.WindowServer.xml
 )
 
-add_custom_command(OUTPUT xfce4-hamster-plugin.desktop
-    COMMAND ${GDBUSCODEGEN} --generate-c-code windowserver --interface-prefix org.gnome.Hamster ${CMAKE_CURRENT_LIST_DIR}/org.gnome.Hamster.WindowServer.xml
-    DEPENDS ${CMAKE_CURRENT_LIST_DIR}/org.gnome.Hamster.WindowServer.xml
-)
-
 add_library(
     hamster SHARED
     button.c        button.h

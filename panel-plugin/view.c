@@ -241,6 +241,35 @@ gboolean hview_cb_popup_focus_out(GtkWidget *widget, GdkEventFocus const *event,
    return TRUE;
 }
 
+/* The panel plugin hides the window itself (click outside, ESC), so keep our
+ * own state in sync. "hide" is only emitted on a visible -> hidden transition,
+ * making the nested gtk_widget_hide in hview_popup_hide a no-op. */
+static void hview_cb_popup_hidden(GtkWidget *widget, HamsterView *view)
+{
+   DBG("cb:%s", gtk_widget_get_name(widget));
+   if (view->popup != widget)
+   {
+      return; /* destroy-time hide, e.g. popup mode switch */
+   }
+   /* the panel hides the window even when donthide is set, so reset what it
+    * already forced; hview_popup_hide() keeps honoring donthide for X11. */
+   view->alive      = FALSE;
+   view->inCellEdit = FALSE;
+   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(view->button), FALSE);
+   hview_popup_hide(view);
+}
+
+/* A non-modal GtkPopover dismisses itself on an outside click without telling
+ * us, so only reset our own state here (we are inside its dismissal and must
+ * not call hview_popup_hide). Wayland only, X11 keeps its old behavior. */
+static void hview_cb_popover_closed(GtkPopover *popover, HamsterView *view)
+{
+   DBG("cb:%s", gtk_widget_get_name(GTK_WIDGET(popover)));
+   view->alive      = FALSE;
+   view->inCellEdit = FALSE;
+   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(view->button), FALSE);
+}
+
 static gboolean hview_cb_match_select(GtkEntryCompletion *completion,
                                       GtkTreeModel       *model,
                                       GtkTreeIter        *iter,
@@ -719,6 +748,10 @@ static void hview_popover_new(HamsterView *view)
    gtk_container_add(GTK_CONTAINER(view->popup), content);
 
    g_signal_connect(view->popup, "key-press-event", G_CALLBACK(hview_cb_key_pressed), view);
+   if (hview_is_wayland_backend())
+   {
+      g_signal_connect(G_OBJECT(view->popup), "closed", G_CALLBACK(hview_cb_popover_closed), view);
+   }
    if (!view->styleHandlerConnected)
    {
       g_signal_connect(G_OBJECT(view->button), "style-set", G_CALLBACK(hview_cb_style_set), view);
@@ -727,7 +760,7 @@ static void hview_popover_new(HamsterView *view)
    hview_cb_style_set(view->button, NULL, view);
 }
 
-static void hview_popup_new(HamsterView *view)
+static void hview_popup_new(HamsterView *view, gboolean managedPanelWindow)
 {
    GtkWidget *content;
 
@@ -736,12 +769,15 @@ static void hview_popup_new(HamsterView *view)
    gtk_window_set_type_hint(GTK_WINDOW(view->popup), GDK_WINDOW_TYPE_HINT_UTILITY);
    gtk_window_set_decorated(GTK_WINDOW(view->popup), FALSE);
    gtk_window_set_resizable(GTK_WINDOW(view->popup), FALSE);
-   gtk_window_set_position(GTK_WINDOW(view->popup), GTK_WIN_POS_MOUSE);
-   gtk_window_set_screen(GTK_WINDOW(view->popup), gtk_widget_get_screen(view->button));
-   gtk_window_set_skip_pager_hint(GTK_WINDOW(view->popup), TRUE);
-   gtk_window_set_skip_taskbar_hint(GTK_WINDOW(view->popup), TRUE);
-   gtk_window_set_keep_above(GTK_WINDOW(view->popup), TRUE);
-   gtk_window_stick(GTK_WINDOW(view->popup));
+   if (!managedPanelWindow)
+   {
+      gtk_window_set_position(GTK_WINDOW(view->popup), GTK_WIN_POS_MOUSE);
+      gtk_window_set_screen(GTK_WINDOW(view->popup), gtk_widget_get_screen(view->button));
+      gtk_window_set_skip_pager_hint(GTK_WINDOW(view->popup), TRUE);
+      gtk_window_set_skip_taskbar_hint(GTK_WINDOW(view->popup), TRUE);
+      gtk_window_set_keep_above(GTK_WINDOW(view->popup), TRUE);
+      gtk_window_stick(GTK_WINDOW(view->popup));
+   }
    gtk_container_set_border_width(GTK_CONTAINER(view->popup), 0);
 
    content = hview_popup_content_new(view);
@@ -750,9 +786,19 @@ static void hview_popup_new(HamsterView *view)
    /* handle ESC */
    g_signal_connect(view->popup, "key-press-event", G_CALLBACK(hview_cb_key_pressed), view);
 
-   gtk_widget_show_all(view->popup);
+   if (managedPanelWindow)
+   {
+      /* xfce_panel_plugin_popup_window shows only the toplevel and handles
+       * click-outside itself, so map the content and skip focus-out here. */
+      gtk_widget_show_all(content);
+      g_signal_connect(G_OBJECT(view->popup), "hide", G_CALLBACK(hview_cb_popup_hidden), view);
+   }
+   else
+   {
+      gtk_widget_show_all(view->popup);
 
-   g_signal_connect(G_OBJECT(view->popup), "focus-out-event", G_CALLBACK(hview_cb_popup_focus_out), view);
+      g_signal_connect(G_OBJECT(view->popup), "focus-out-event", G_CALLBACK(hview_cb_popup_focus_out), view);
+   }
 
    if (!view->styleHandlerConnected)
    {
@@ -800,21 +846,39 @@ void hview_popup_show(HamsterView *view, gboolean atPointer)
 {
    gboolean isWayland = hview_is_wayland_backend();
    gboolean usePopover = FALSE;
+   gboolean usePanelWindow = FALSE;
 
-   switch (view->popupMode)
+   if (isWayland && view->popupMode != HVIEW_POPUP_MODE_WINDOW)
    {
-      case HVIEW_POPUP_MODE_POPOVER:
-         usePopover = !atPointer;
-         break;
-
-      case HVIEW_POPUP_MODE_WINDOW:
-         usePopover = FALSE;
-         break;
-
-      default:
-         usePopover = !atPointer && !isWayland;
-         break;
+      /* GtkPopover works on Wayland (subsurfaces), an unmanaged toplevel
+       * cannot be positioned there. */
+      if (atPointer)
+      {
+         DBG("wayland: using popover, atpointer ignored");
+      }
+      usePopover = TRUE;
    }
+   else
+   {
+      switch (view->popupMode)
+      {
+         case HVIEW_POPUP_MODE_POPOVER:
+            usePopover = !atPointer;
+            break;
+
+         case HVIEW_POPUP_MODE_WINDOW:
+            usePopover = FALSE;
+            break;
+
+         default:
+            usePopover = !atPointer && !isWayland;
+            break;
+      }
+   }
+
+#if LIBXFCE4PANEL_CHECK_VERSION(4,19,0)
+   usePanelWindow = !usePopover && isWayland;
+#endif
 
    int x = 0;
    int y = 0;
@@ -833,9 +897,12 @@ void hview_popup_show(HamsterView *view, gboolean atPointer)
       }
       else
       {
-         hview_popup_new(view);
-         gtk_widget_realize(view->popup);
-         xfce_panel_plugin_take_window(view->plugin, GTK_WINDOW(view->popup));
+         hview_popup_new(view, usePanelWindow);
+         if (!usePanelWindow)
+         {
+            gtk_widget_realize(view->popup);
+            xfce_panel_plugin_take_window(view->plugin, GTK_WINDOW(view->popup));
+         }
       }
 
 
@@ -891,6 +958,17 @@ void hview_popup_show(HamsterView *view, gboolean atPointer)
       return;
    }
 
+#if LIBXFCE4PANEL_CHECK_VERSION(4,19,0)
+   if (usePanelWindow)
+   {
+      /* libxfce4panel sets the hints, positions the window (layer-shell when
+       * available), blocks autohide, grabs the seat and shows the window. */
+      gtk_widget_add_events(view->popup, GDK_KEY_PRESS_MASK);
+      xfce_panel_plugin_popup_window(view->plugin, GTK_WINDOW(view->popup), view->button);
+      return;
+   }
+#endif
+
    /* popup popup */
    if (atPointer && !isWayland)
    {
@@ -908,7 +986,7 @@ void hview_popup_show(HamsterView *view, gboolean atPointer)
    {
       if (atPointer && isWayland)
       {
-         DBG("atpointer ignored on wayland, falling back to panel anchor");
+         DBG("atpointer ignored on wayland (no xfce4panel layer-shell support), compositor places the window");
       }
       DBG("atpanel");
       GdkWindow *popup  = gtk_widget_get_window(view->popup);

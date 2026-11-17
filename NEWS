@@ -1,5 +1,10 @@
 Most recent NEWS are here:
 
+2026-11-17: 1.18: Wayland popup support: on Wayland the default and popover popup modes always use a GtkPopover anchored to the panel button (pointer positioning is ignored, Wayland clients cannot place popups); explicit window popup mode uses xfce_panel_plugin_popup_window() when built against libxfce4panel >= 4.19, with layer-shell placement when the panel library and compositor support it. Older libxfce4panel keeps the legacy behaviour. X11 behaviour, including -p pointer popups, is unchanged.
+2026-11-17: 1.18: Popup mode is the xfconf property /popup-mode (auto, popover, window), or forced with HAMSTER_POPUP_MODE. Remote popup script: xfce4-popup-hamstermenu (also -p for pointer mode on X11).
+2026-11-17: 1.18: cs translation is now shipped.
+2026-11-17: 1.18: Build fixes: installed languages derived from po/*.po, CPack RPM file naming corrected, dead CMake rule and unused Intl requirement removed.
+
 2021-04-06: #43: Changed from autotools to cmake
 
 2021-04-05: #40: Editable grid view
