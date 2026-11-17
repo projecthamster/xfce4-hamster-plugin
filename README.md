@@ -52,6 +52,31 @@ If the plugin does not show up, check if the installation location is indeed `/u
 the panel does only seek for plugins on a location hardcoded at the time of compilation
 of xfce4 itself, so you `/usr/local` may be fine on the \*BSDs.
 
+## Testing
+`make test` configures and builds in `build-test/` and runs CTest with the
+local toolchain. If you have Docker or Podman, `make docker-test` does the
+same inside the CI image (building it first, including Xvfb and sway), so no
+local toolchain or display server is needed.
+
+The suite has three tests. `popup-decision` is display-free and checks the
+popup decision matrix for every mode, pointer request, backend and panel
+capability, plus the mode-name and display-name parsing. `popup-x11` starts a
+throwaway Xvfb and `popup-wayland` a headless sway
+(`WLR_BACKENDS=headless`); both run `popup-probe`, which checks that the GDK
+backend is detected from the display name and that a real GtkPopover and an
+undecorated utility toplevel map. On the Wayland run `popup-runtime.sh` also
+asserts that the compositor exports `zwlr_layer_shell_v1`; the X11 run has no
+such global to check.
+
+`popup-x11` and `popup-wayland` are skipped when Xvfb, sway or wayland-utils
+are missing, and `-DHAMSTER_REQUIRE_RUNTIME_TESTS=ON` makes a missing tool a
+configure error (`make docker-test` uses it).
+
+They cannot cover the panel itself: without a live xfce4-panel there is no
+anchoring, autohide blocking or click-outside handling, and at-pointer
+positioning is only decided, never exercised. The Wayland test compositor is
+not a real desktop compositor either.
+
 ## Packagers
 This plug-in is useless without an activatable D-Bus implementation of
 `org.gnome.Hamster` and `org.gnome.Hamster.WindowServer`. Hence the

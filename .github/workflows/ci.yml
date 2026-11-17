@@ -32,3 +32,6 @@ jobs:
           set -e
           cmake -S "$GITHUB_WORKSPACE" -B "$GITHUB_WORKSPACE/build" -DCMAKE_INSTALL_PREFIX=/usr
           cmake --build "$GITHUB_WORKSPACE/build" --parallel
+
+      - name: Test
+        run: ctest --test-dir "$GITHUB_WORKSPACE/build" --output-on-failure

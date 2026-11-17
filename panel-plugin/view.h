@@ -22,6 +22,14 @@
 #include <gtk/gtk.h>
 #include <libxfce4panel/libxfce4panel.h>
 
+/* libxfce4panel 4.19 added xfce_panel_plugin_popup_window(), which positions
+ * a plugin window (layer-shell on Wayland) and handles click-outside. */
+#if LIBXFCE4PANEL_CHECK_VERSION(4,19,0)
+#define HVIEW_CAN_PANEL_POPUP_WINDOW 1
+#else
+#define HVIEW_CAN_PANEL_POPUP_WINDOW 0
+#endif
+
 typedef struct _HamsterView HamsterView;
 
 /* Init & Finalize */

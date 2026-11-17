@@ -25,6 +25,7 @@
 #include "view.h"
 #include "button.h"
 #include "hamster.h"
+#include "popup-decision.h"
 #include "windowserver.h"
 #include "util.h"
 #include "settings.h"
@@ -78,13 +79,6 @@ enum _HamsterViewColumns
 const int secsperhour = 3600;
 const int secspermin  = 60;
 
-enum
-{
-   HVIEW_POPUP_MODE_AUTO,
-   HVIEW_POPUP_MODE_POPOVER,
-   HVIEW_POPUP_MODE_WINDOW
-};
-
 static gboolean hview_is_wayland_backend(void)
 {
    GdkDisplay  *display = gdk_display_get_default();
@@ -96,24 +90,7 @@ static gboolean hview_is_wayland_backend(void)
    }
 
    name = gdk_display_get_name(display);
-   return (name != NULL && g_str_has_prefix(name, "wayland"));
-}
-
-static gint hview_popup_mode_from_string(const gchar *mode)
-{
-   if (mode == NULL || *mode == '\0')
-   {
-      return HVIEW_POPUP_MODE_AUTO;
-   }
-   if (!g_ascii_strcasecmp(mode, "popover"))
-   {
-      return HVIEW_POPUP_MODE_POPOVER;
-   }
-   if (!g_ascii_strcasecmp(mode, "window"))
-   {
-      return HVIEW_POPUP_MODE_WINDOW;
-   }
-   return HVIEW_POPUP_MODE_AUTO;
+   return hview_display_name_is_wayland(name);
 }
 
 static gboolean hview_popup_mode_from_env(gint *mode)
@@ -845,40 +822,22 @@ static void hview_popup_mode_update(HamsterView *view)
 void hview_popup_show(HamsterView *view, gboolean atPointer)
 {
    gboolean isWayland = hview_is_wayland_backend();
-   gboolean usePopover = FALSE;
-   gboolean usePanelWindow = FALSE;
+   HviewPopupRequest request = {
+      .mode               = view->popupMode,
+      .at_pointer         = atPointer,
+      .wayland            = isWayland,
+      .panel_popup_window = HVIEW_CAN_PANEL_POPUP_WINDOW,
+   };
+   HviewPopupKind kind = hview_popup_kind(&request);
+   gboolean usePopover = (kind == HVIEW_POPUP_KIND_POPOVER);
+   gboolean usePanelWindow = (kind == HVIEW_POPUP_KIND_PANEL_WINDOW);
 
-   if (isWayland && view->popupMode != HVIEW_POPUP_MODE_WINDOW)
+   if (kind == HVIEW_POPUP_KIND_POPOVER && isWayland && atPointer)
    {
       /* GtkPopover works on Wayland (subsurfaces), an unmanaged toplevel
        * cannot be positioned there. */
-      if (atPointer)
-      {
-         DBG("wayland: using popover, atpointer ignored");
-      }
-      usePopover = TRUE;
+      DBG("wayland: using popover, atpointer ignored");
    }
-   else
-   {
-      switch (view->popupMode)
-      {
-         case HVIEW_POPUP_MODE_POPOVER:
-            usePopover = !atPointer;
-            break;
-
-         case HVIEW_POPUP_MODE_WINDOW:
-            usePopover = FALSE;
-            break;
-
-         default:
-            usePopover = !atPointer && !isWayland;
-            break;
-      }
-   }
-
-#if LIBXFCE4PANEL_CHECK_VERSION(4,19,0)
-   usePanelWindow = !usePopover && isWayland;
-#endif
 
    int x = 0;
    int y = 0;

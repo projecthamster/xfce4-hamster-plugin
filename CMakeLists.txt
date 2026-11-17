@@ -59,6 +59,12 @@ add_subdirectory(
     panel-plugin
 )
 
+option(HAMSTER_BUILD_TESTS "Build the popup decision and runtime tests" ON)
+if(HAMSTER_BUILD_TESTS)
+    enable_testing()
+    add_subdirectory(tests)
+endif()
+
 # Merge and compile translations in the build tree so a build never writes
 # back into po/ (which also lets the source tree be mounted read-only).
 # po/*.po is the single source of truth for the language list.

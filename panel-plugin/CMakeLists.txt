@@ -14,6 +14,7 @@ add_library(
     button.c        button.h
     hamster.c       hamster.h
     plugin.c
+    popup-decision.c popup-decision.h
     settings.c      settings.h
     util.c          util.h
     view.c          view.h

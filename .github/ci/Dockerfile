@@ -14,4 +14,11 @@ RUN apt-get update \
         libxfce4ui-2-dev \
         libxfconf-0-dev \
         libxfce4util-dev \
+        xvfb \
+        sway \
+        wayland-utils \
     && rm -rf /var/lib/apt/lists/*
+
+# runtime test tools: xvfb is the X11 server behind popup-x11, sway is the
+# headless Wayland compositor with wlr-layer-shell behind popup-wayland, and
+# wayland-utils provides wayland-info, which probes the compositor globals.
