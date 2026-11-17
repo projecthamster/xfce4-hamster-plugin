@@ -81,7 +81,7 @@ foreach(LANG ${PO_LANGUAGES})
     )
     add_custom_command(
         OUTPUT ${GMO_BUILD}
-        COMMAND ${GETTEXT_MSGMERGE_EXECUTABLE} --quiet --update --backup=none -s ${PO_BUILD} ${POT}
+        COMMAND ${GETTEXT_MSGMERGE_EXECUTABLE} --quiet --update --backup=none ${PO_BUILD} ${POT}
         COMMAND ${GETTEXT_MSGFMT_EXECUTABLE} -o ${GMO_BUILD} ${PO_BUILD}
         DEPENDS ${PO_BUILD} ${POT}
     )
