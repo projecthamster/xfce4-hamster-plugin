@@ -1,6 +1,6 @@
 {
 	"name": "xfce4-hamster-plugin",
-	"image": "ghcr.io/projecthamster/xfce4-hamster-plugin-ci:sha-d34adde",
+	"image": "ghcr.io/projecthamster/xfce4-hamster-plugin-ci:sha-ba3279e",
 
 	"customizations": {
 		"vscode": {

@@ -29,6 +29,8 @@ issue `cmake -B build -DCMAKE_INSTALL_PREFIX=/usr`. If this fails, install any m
 dependencies and you may need to rinse and repeat until success. 
 Finally, issue `cmake --build build && sudo cmake --install build`. 
 Restart the xfce4 panel with `xfce4-panel -r`.
+If you have Docker or Podman, `make docker` builds the CI image and compiles
+the plugin inside it, so no local toolchain is needed.
 If the plugin does not show up, check if the installation location is indeed `/usr`; 
 the panel does only seek for plugins on a location hardcoded at the time of compilation
 of xfce4 itself, so you `/usr/local` may be fine on the \*BSDs.
