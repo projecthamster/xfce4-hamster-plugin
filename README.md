@@ -55,27 +55,64 @@ of xfce4 itself, so you `/usr/local` may be fine on the \*BSDs.
 ## Testing
 `make test` configures and builds in `build-test/` and runs CTest with the
 local toolchain. If you have Docker or Podman, `make docker-test` does the
-same inside the CI image (building it first, including Xvfb and sway), so no
-local toolchain or display server is needed.
+same inside the CI image (building it first, including Xvfb, sway and a real
+xfce4-panel), so no local toolchain or display server is needed.
 
-The suite has three tests. `popup-decision` is display-free and checks the
+The suite has five tests. `popup-decision` is display-free and checks the
 popup decision matrix for every mode, pointer request, backend and panel
 capability, plus the mode-name and display-name parsing. `popup-x11` starts a
-throwaway Xvfb and `popup-wayland` a headless sway
-(`WLR_BACKENDS=headless`); both run `popup-probe`, which checks that the GDK
-backend is detected from the display name and that a real GtkPopover and an
-undecorated utility toplevel map. On the Wayland run `popup-runtime.sh` also
-asserts that the compositor exports `zwlr_layer_shell_v1`; the X11 run has no
-such global to check.
+throwaway Xvfb and `popup-wayland` a headless sway (`WLR_BACKENDS=headless`);
+both run `popup-probe`, which checks that the GDK backend is detected from the
+display name and that a real GtkPopover and an undecorated utility toplevel
+map. On the Wayland run `popup-runtime.sh` also asserts that the compositor
+exports `zwlr_layer_shell_v1`.
 
-`popup-x11` and `popup-wayland` are skipped when Xvfb, sway or wayland-utils
-are missing, and `-DHAMSTER_REQUIRE_RUNTIME_TESTS=ON` makes a missing tool a
-configure error (`make docker-test` uses it).
+`popup-panel-x11` and `popup-panel-wayland` run a live `xfce4-panel` with the
+built plugin. They lay out a throwaway prefix containing `libhamster.so` and
+`hamster.desktop`, a private HOME/XDG tree and a private session bus for
+xfconf, then start the real panel (Xvfb plus xfwm4, or headless sway). Popups
+are opened through the real `xfce4-popup-hamstermenu` script, i.e.
+`xfce4-panel --plugin-event`, and through clicks on the plugin button. When the
+container uid has no passwd entry, the test provides a synthetic one via
+libnss-wrapper, which dbus-daemon needs for the private session bus.
 
-They cannot cover the panel itself: without a live xfce4-panel there is no
-anchoring, autohide blocking or click-outside handling, and at-pointer
-positioning is only decided, never exercised. The Wayland test compositor is
-not a real desktop compositor either.
+The X11 test covers the whole window path: `-p` maps the popup at the pointer
+(640,400), a real focus change (clicking an `xmessage` window) dismisses it,
+the anchored popup maps below the panel and horizontally overlapping the
+button, the button toggles the window with one click, and changing popup-mode
+while the window is open is deferred. In popover and auto mode it only asserts
+that no mapped utility toplevel is created, i.e. that the popover route was
+chosen; its visibility is not asserted.
+
+On Wayland the auto/popover routing is asserted by clicking the button and
+checking that no new layer surface appears. The explicit window mode is
+asserted end to end: a new `new layer surface` line in the `sway -d` log and
+popup pixels in a grim screenshot below the panel, with its top at the panel
+edge and its left edge over the button area, closed by the next click and
+reopened by one click. A mode switch to popover while the window popup is open
+is deferred and keeps both its pixels and its layer surface.
+
+The limits are worth stating plainly. GtkPopover is not visibly rendered under
+the test servers used here (Xvfb with xfwm4 and headless sway), even for a
+plain GTK3 application, so the live tests never assert popover pixels or
+visibility; they only assert that the popover route is selected (no utility
+toplevel on X11, no new layer surface on Wayland). Popover visibility stays a
+manual desktop check. Wayland has no global pointer grab, so click-outside
+dismissal cannot be asserted there; only X11 tests it, through a real focus
+change. Autohide remains a manual check.
+
+The live panel tests are skipped when a required tool is missing: xfce4-panel,
+xfwm4, xdotool, x11-utils (`xwininfo`, `xprop`, `xmessage`), xfconf
+(`xfconf-query`), dbus-daemon, Xvfb, sway and `swaymsg`, grim, and
+wayland-scanner/wayland-client for the Wayland click helper. `popup-x11` and
+`popup-wayland` are skipped when Xvfb, sway or wayland-utils are missing;
+`popup-decision` never skips.
+`-DHAMSTER_REQUIRE_RUNTIME_TESTS=ON` makes any missing tool a configure error
+(`make docker-test` and CI use it, and the CI image provides them all). CI makes
+the tools mandatory only when the image carries the marker
+`/usr/share/xfce4-hamster-plugin-ci/live-panel-tools`; an image built before the
+live tests warns and skips the panel tests, and the run on the published image is
+strict (5/5).
 
 ## Packagers
 This plug-in is useless without an activatable D-Bus implementation of

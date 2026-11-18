@@ -79,8 +79,11 @@ docker: image
 			cmake --build /build --parallel'
 
 # build and run the popup tests in the CI container; needs no local toolchain
-# and no local Xvfb/sway, the image provides them. The runtime tests are
-# mandatory here, so a missing tool fails the configure step.
+# and no local Xvfb/sway, the image provides them. This includes the live panel
+# tests (popup-panel-x11 and popup-panel-wayland), which start a real
+# xfce4-panel. The runtime tools are mandatory here
+# (-DHAMSTER_REQUIRE_RUNTIME_TESTS=ON), so a missing tool fails the configure
+# step instead of skipping a test.
 docker-test: image
 	rm -rf "$(TEST_BUILD_DIR)"
 	mkdir -p "$(TEST_BUILD_DIR)"

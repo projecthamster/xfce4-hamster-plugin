@@ -33,5 +33,19 @@ jobs:
           cmake -S "$GITHUB_WORKSPACE" -B "$GITHUB_WORKSPACE/build" -DCMAKE_INSTALL_PREFIX=/usr
           cmake --build "$GITHUB_WORKSPACE/build" --parallel
 
+      # The image marker decides strictness: an image built before the live
+      # panel tests lacks it, so this warns and skips them instead of failing
+      # configuration; the published image carries it and runs them strictly.
       - name: Test
-        run: ctest --test-dir "$GITHUB_WORKSPACE/build" --output-on-failure
+        run: |
+          set -e
+          strict=ON
+          if [ ! -f /usr/share/xfce4-hamster-plugin-ci/live-panel-tools ]; then
+            strict=OFF
+            echo "::warning::This CI image predates the live panel tests; configuring without HAMSTER_REQUIRE_RUNTIME_TESTS so the panel tests skip instead of failing. Publish the new image and re-run for 5/5."
+          fi
+          cmake -S "$GITHUB_WORKSPACE" -B "$GITHUB_WORKSPACE/build" \
+            -DCMAKE_INSTALL_PREFIX=/usr \
+            -DHAMSTER_REQUIRE_RUNTIME_TESTS="$strict"
+          cmake --build "$GITHUB_WORKSPACE/build" --parallel
+          ctest --test-dir "$GITHUB_WORKSPACE/build" --output-on-failure
