@@ -47,6 +47,12 @@ msgstr "Dokončení položky jako rozbalovací nabídka"
 msgid "Hamster"
 msgstr "Hamster"
 
+msgid "Hamster project"
+msgstr "Projekt Hamster"
+
+msgid "translator-credits"
+msgstr "Pavel Borecki"
+
 #: ../panel-plugin/settings.c:49
 msgid "Keep popup floating"
 msgstr "Ponechat vyskakovací okno otevřené"

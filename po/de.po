@@ -47,6 +47,12 @@ msgstr "Vervollständigung als Kombinationsbox"
 msgid "Hamster"
 msgstr "Hamster"
 
+msgid "Hamster project"
+msgstr "Hamster-Projekt"
+
+msgid "translator-credits"
+msgstr "Hakan Erduman"
+
 #: ../panel-plugin/settings.c:49
 msgid "Keep popup floating"
 msgstr "Dialog offen lassen"

@@ -1,3 +1,10 @@
+set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS
+    ${PROJECT_SOURCE_DIR}/COPYING)
+file(READ ${PROJECT_SOURCE_DIR}/COPYING HAMSTER_LICENSE_TEXT)
+string(REPLACE "\\" "\\\\" HAMSTER_LICENSE_TEXT "${HAMSTER_LICENSE_TEXT}")
+string(REPLACE "\"" "\\\"" HAMSTER_LICENSE_TEXT "${HAMSTER_LICENSE_TEXT}")
+string(REPLACE "\n" "\\n\"\n\"" HAMSTER_LICENSE_TEXT "${HAMSTER_LICENSE_TEXT}")
+configure_file(license.h.in license.h @ONLY)
 
 add_custom_command(OUTPUT hamster.c hamster.h
     COMMAND ${GDBUSCODEGEN} --generate-c-code hamster --interface-prefix org.gnome. ${CMAKE_CURRENT_LIST_DIR}/org.gnome.Hamster.xml
@@ -28,6 +35,7 @@ add_dependencies(
 
 add_compile_definitions(
     GETTEXT_PACKAGE="${PROJECT_NAME}"
+    PACKAGE_VERSION="${PROJECT_VERSION}"
     LOCALEDIR="${CMAKE_INSTALL_FULL_LOCALEDIR}"
 )
 

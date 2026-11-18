@@ -47,6 +47,14 @@ msgstr "Autocompletado desplegable"
 msgid "Hamster"
 msgstr "Hamster"
 
+msgid "Hamster project"
+msgstr "Proyecto Hamster"
+
+msgid "translator-credits"
+msgstr ""
+"Nicolás Reynolds (fauno)\n"
+"Hakan Erduman"
+
 #: ../panel-plugin/settings.c:49
 msgid "Keep popup floating"
 msgstr "Mantener abierta la ventana"

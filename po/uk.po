@@ -46,6 +46,12 @@ msgstr "Завершення введення у вигляді списку"
 msgid "Hamster"
 msgstr "Хом'як (Hamster)"
 
+msgid "Hamster project"
+msgstr "Проєкт Hamster"
+
+msgid "translator-credits"
+msgstr "Sergey Panasenko"
+
 #: ../panel-plugin/settings.c:49
 #, fuzzy
 msgid "Keep popup floating"

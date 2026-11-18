@@ -48,6 +48,11 @@ issue `cmake -B build -DCMAKE_INSTALL_PREFIX=/usr`. If this fails, install any m
 dependencies and you may need to rinse and repeat until success. 
 Finally, issue `cmake --build build && sudo cmake --install build`. 
 Restart the xfce4 panel with `xfce4-panel -r`.
+With the convenience Makefile, use `make && sudo make install`: the install
+target only installs existing build outputs and never configures or rebuilds
+as root. Avoid `sudo make` and `sudo cmake --build build`, which can leave
+root-owned build files. If an earlier privileged build caused this, restore
+ownership once with `sudo chown -R "$(id -u):$(id -g)" build`.
 If you have Docker or Podman, `make docker` builds the CI image and compiles
 the plugin inside it, so no local toolchain is needed.
 If the plugin does not show up, check if the installation location is indeed `/usr`; 

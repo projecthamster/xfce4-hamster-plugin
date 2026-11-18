@@ -21,6 +21,7 @@
 #include <libxfce4util/libxfce4util.h>
 #include <libxfce4panel/libxfce4panel.h>
 #include <xfconf/xfconf.h>
+#include "license.h"
 #include "view.h"
 
 /**
@@ -45,6 +46,41 @@ hamster_finalize(XfcePanelPlugin *plugin, HamsterView *view)
 {
     DBG("Finalize: %s(%d)", xfce_panel_plugin_get_name(plugin), xfce_panel_plugin_get_unique_id(plugin));
     hamster_view_finalize(view);
+}
+
+static void
+hamster_about(XfcePanelPlugin *plugin)
+{
+    const gchar *authors[] = { "Hakan Erduman", NULL };
+    const gchar *translators = _("translator-credits");
+    GtkWidget *dialog = gtk_about_dialog_new();
+
+    if (g_strcmp0(translators, "translator-credits") == 0)
+    {
+        translators = "Hakan Erduman\n"
+                      "Pavel Borecki\n"
+                      "Sergey Panasenko\n"
+                      "Nicolas Reynolds (fauno)";
+    }
+
+    g_object_set(dialog,
+                 "program-name", GETTEXT_PACKAGE,
+                 "version", PACKAGE_VERSION,
+                 "comments", _("Time bookkeeping plugin"),
+                 "website", "https://github.com/projecthamster/hamster",
+                 "website-label", _("Hamster project"),
+                 "logo-icon-name", "org.gnome.Hamster.GUI",
+                 "authors", authors,
+                 "translator-credits", translators,
+                 "copyright", "Copyright (c) 2014-2026 Hakan Erduman",
+                 "license", hamster_license_text,
+                 "wrap-license", TRUE,
+                 NULL);
+    gtk_window_set_transient_for(GTK_WINDOW(dialog),
+                                GTK_WINDOW(gtk_widget_get_toplevel(GTK_WIDGET(plugin))));
+    xfce_panel_plugin_take_window(plugin, GTK_WINDOW(dialog));
+    g_signal_connect_swapped(dialog, "response", G_CALLBACK(gtk_widget_destroy), dialog);
+    gtk_window_present(GTK_WINDOW(dialog));
 }
 
 /**
@@ -73,6 +109,9 @@ hamster_construct(XfcePanelPlugin *plugin)
     /* Connect the remote-event callback */
     g_signal_connect(plugin, "remote-event",
                      G_CALLBACK(hamster_popup_remote), view);
+
+    g_signal_connect(plugin, "about", G_CALLBACK(hamster_about), NULL);
+    xfce_panel_plugin_menu_show_about(plugin);
 
     DBG("done");
 }

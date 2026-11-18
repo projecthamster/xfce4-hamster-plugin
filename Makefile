@@ -27,7 +27,8 @@ configure:
 cmake: configure
 	cmake --build build 
 
-install: cmake
+# Build with "make" first; "sudo make install" must not rebuild as root.
+install:
 	cmake --install build
 
 uninstall:

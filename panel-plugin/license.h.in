@@ -1,0 +1,4 @@
+#pragma once
+
+static const char hamster_license_text[] =
+"@HAMSTER_LICENSE_TEXT@";
