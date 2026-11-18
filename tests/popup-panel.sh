@@ -30,11 +30,11 @@
 # servers (even for a plain GTK3 application), so only the routing (no mapped
 # toplevel) is asserted; popover visibility stays a manual desktop check.
 #
-# Wayland (headless sway): auto/popover must not create a layer surface, which
-# proves the routing. Window mode is asserted end to end: a new "new layer
-# surface" line in the sway -d log plus popup pixels in a grim screenshot,
-# anchored below the panel. GtkPopover is not visibly rendered under the
-# headless test servers, so popover pixels are never asserted. Click-outside
+# Wayland (headless sway): explicit popover mode must not create a layer surface,
+# which proves the routing. Auto/window modes are asserted end to end: a new
+# "new layer surface" line in the sway -d log plus popup pixels in a grim
+# screenshot, anchored below the panel. Popover visibility stays a manual
+# desktop check. Click-outside
 # dismissal is not asserted on Wayland: there is no global pointer grab.
 #
 # usage: popup-panel.sh x11 LIBHAMPSTER DESKTOP PREFIX LIBDIR DATAROOT POPUP_SCRIPT XVFB XFWM4 XDOTOOL XWININFO XPROP XMESSAGE DBUS_DAEMON XFCONF_QUERY
@@ -1120,8 +1120,8 @@ run_wayland()
    sleep 0.2
    echo "ok button click closed the deferred window popup"
 
-   # 4. after the deferred close, popover mode must not create a layer surface,
-   #    and the plugin must survive; visibility is not asserted
+   # 4. after the deferred close, explicit popover mode must not create a layer
+   #    surface, and the plugin must survive; visibility is not asserted
    layer_before=$(layer_count)
    wayland_click 20 13
    sleep 0.8
@@ -1145,22 +1145,20 @@ run_wayland()
    wayland_click 20 13
    wait_unchanged || fail "the final window popup did not close"
 
-   # 6. auto mode selects the popover path. Run last, after the window-mode
-   #    clicks above proved that (20,13) reaches the plugin. GtkPopover is not
-   #    visibly rendered under the headless test server, so assert only that no
-   #    layer surface (the window-mode mechanism) was created; visibility is a
-   #    manual desktop check.
+   # 6. auto mode uses the panel-managed window too, keeping the popup below
+   #    the top panel instead of letting GtkPopover place it offscreen.
    xfconf_set_mode auto
    sleep 0.5
    layer_before=$(layer_count)
    wayland_click 20 13
-   sleep 0.8
-   if [ "$(layer_count)" -ne "$layer_before" ]; then
-      fail "auto mode created a layer surface although the popover path should have been selected"
-   fi
+   wait_layer_count "$((layer_before + 1))" \
+      || fail "auto mode did not create a panel-managed layer surface"
+   bbox=$(wait_changed) || fail "auto-mode popup pixels did not appear below the top panel"
+   check_wayland_bbox "auto popup" "$bbox"
    check_panel_alive "auto mode"
-   echo "ok auto mode created no layer surface, popover routing selected (visibility not asserted)"
+   echo "ok auto mode created a layer surface and visible pixels below the panel ($bbox)"
    wayland_click 20 13
+   wait_unchanged || fail "auto popup pixels did not disappear after the button click"
    sleep 0.3
 
    check_panel_alive "end of test"

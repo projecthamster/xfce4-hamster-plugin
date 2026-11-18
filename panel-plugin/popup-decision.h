@@ -58,8 +58,10 @@ hview_popup_mode_from_string(const char *mode);
 /* Decide which kind of popup to show for the given request.
  *
  * NULL is treated like an all-zero request (auto mode, no pointer, X11).
- * On Wayland only WINDOW mode can produce a window, and only when
- * panel_popup_window is set; every other Wayland request uses a popover.
+ * On Wayland AUTO (including unknown modes) prefers a panel-managed window
+ * when panel_popup_window is set, otherwise a popover. POPOVER always uses a
+ * popover; WINDOW uses a panel-managed window or a legacy unmanaged window.
+ * at_pointer is ignored on Wayland.
  * On X11 WINDOW mode and at_pointer produce a window, and panel_popup_window
  * never produces a panel window. The function is pure: no globals, no I/O. */
 HviewPopupKind

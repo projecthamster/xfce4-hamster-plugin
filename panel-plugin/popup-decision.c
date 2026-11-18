@@ -94,12 +94,18 @@ HviewPopupKind hview_popup_kind(const HviewPopupRequest *request)
 
    if (wayland)
    {
+      /* Unlike GtkPopover subsurfaces, the panel-managed window is positioned
+       * within the monitor. Keep the explicit popover choice available. */
+      if (panel && mode != HVIEW_POPUP_MODE_POPOVER)
+      {
+         return HVIEW_POPUP_KIND_PANEL_WINDOW;
+      }
       if (mode == HVIEW_POPUP_MODE_WINDOW)
       {
-         return panel ? HVIEW_POPUP_KIND_PANEL_WINDOW : HVIEW_POPUP_KIND_WINDOW;
+         return HVIEW_POPUP_KIND_WINDOW;
       }
-      /* AUTO, POPOVER and unknown modes: a toplevel cannot be positioned on
-       * Wayland, so always use the popover. at_pointer is ignored. */
+      /* Without the panel API, AUTO still falls back to a popover.
+       * at_pointer is ignored on Wayland. */
       return HVIEW_POPUP_KIND_POPOVER;
    }
 

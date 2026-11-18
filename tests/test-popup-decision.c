@@ -113,7 +113,7 @@ static const WaylandNameCase wayland_name_cases[] = {
 };
 
 /* The decision table, written out literally so the test does not repeat the
- * implementation. Wayland window mode depends on the panel capability. */
+ * implementation. Wayland auto/window modes depend on the panel capability. */
 typedef struct
 {
    int mode;
@@ -125,9 +125,9 @@ typedef struct
 
 static const KindCase kind_cases[] = {
    { HVIEW_POPUP_MODE_AUTO, 0, HVIEW_POPUP_KIND_POPOVER,
-     HVIEW_POPUP_KIND_POPOVER, HVIEW_POPUP_KIND_POPOVER },
+     HVIEW_POPUP_KIND_POPOVER, HVIEW_POPUP_KIND_PANEL_WINDOW },
    { HVIEW_POPUP_MODE_AUTO, 1, HVIEW_POPUP_KIND_WINDOW,
-     HVIEW_POPUP_KIND_POPOVER, HVIEW_POPUP_KIND_POPOVER },
+     HVIEW_POPUP_KIND_POPOVER, HVIEW_POPUP_KIND_PANEL_WINDOW },
    { HVIEW_POPUP_MODE_POPOVER, 0, HVIEW_POPUP_KIND_POPOVER,
      HVIEW_POPUP_KIND_POPOVER, HVIEW_POPUP_KIND_POPOVER },
    { HVIEW_POPUP_MODE_POPOVER, 1, HVIEW_POPUP_KIND_WINDOW,
@@ -214,8 +214,7 @@ static void test_popup_kind(void)
       }
    }
 
-   /* Unknown mode 42 is treated like auto: pointer only matters on X11 and
-    * the panel capability only applies to explicit window mode. */
+   /* Unknown mode 42 is treated like auto on both backends. */
    request.mode = 42;
    request.at_pointer = 0;
    request.wayland = 0;
@@ -229,8 +228,8 @@ static void test_popup_kind(void)
    CHECK_INT("kind wayland mode=42 pointer=1 panel=0 -> popover",
              hview_popup_kind(&request), HVIEW_POPUP_KIND_POPOVER);
    request.panel_popup_window = 1;
-   CHECK_INT("kind wayland mode=42 pointer=1 panel=1 -> popover",
-             hview_popup_kind(&request), HVIEW_POPUP_KIND_POPOVER);
+   CHECK_INT("kind wayland mode=42 pointer=1 panel=1 -> panel-window",
+             hview_popup_kind(&request), HVIEW_POPUP_KIND_PANEL_WINDOW);
 }
 
 int main(void)

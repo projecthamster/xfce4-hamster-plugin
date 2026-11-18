@@ -16,15 +16,17 @@ libxfce4panel-2.0. Older libxfce4panel versions still build and use the
 legacy popup path. Also seen running on Alpine and void (musl).
 
 ### Wayland
-On Wayland the default (`auto`) and `popover` popup modes always use a
-GtkPopover anchored to the panel button; pointer positioning is ignored
-because Wayland clients cannot place popups. The explicit `window` mode uses
-`xfce_panel_plugin_popup_window()` with layer-shell when built against
-libxfce4panel 4.19 or newer, and keeps the legacy behaviour otherwise.
-Wayland support on Xfce 4.22 is experimental. The explicit `window` mode
-needs a compositor with layer-shell, such as labwc or sway. The default and
-`popover` modes work on Wayland generally, on any compositor that supports
-GTK popovers. X11 remains the fully supported default,
+On Wayland the default (`auto`) mode uses the panel-managed window via
+`xfce_panel_plugin_popup_window()` when built against libxfce4panel 4.19 or
+newer. This keeps the popup within the monitor on layer-shell compositors
+such as labwc and sway. Older builds fall back to a GtkPopover. The explicit
+`popover` mode always uses a GtkPopover anchored to the panel button, but GTK3
+popovers can extend offscreen because they are subsurfaces rather than
+compositor-positioned menu popups. Use Auto or Window mode on sway to avoid
+this. The explicit `window` mode uses the panel-managed window on newer builds
+and keeps the legacy behaviour otherwise. Pointer positioning is ignored on
+Wayland. Wayland support on Xfce 4.22 is experimental; the panel-managed window
+needs layer-shell support. X11 remains the fully supported default,
 and its behaviour, including pointer popups (`-p`), is unchanged.
 
 The popup mode is the xfconf property `/popup-mode` (`auto`, `popover`,
@@ -84,8 +86,8 @@ while the window is open is deferred. In popover and auto mode it only asserts
 that no mapped utility toplevel is created, i.e. that the popover route was
 chosen; its visibility is not asserted.
 
-On Wayland the auto/popover routing is asserted by clicking the button and
-checking that no new layer surface appears. The explicit window mode is
+On Wayland the explicit popover routing is asserted by clicking the button and
+checking that no new layer surface appears. The auto and window modes are
 asserted end to end: a new `new layer surface` line in the `sway -d` log and
 popup pixels in a grim screenshot below the panel, with its top at the panel
 edge and its left edge over the button area, closed by the next click and
